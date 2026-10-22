@@ -4152,7 +4152,7 @@ async function supaAuthStart(){
   id.innerHTML=urlErr?`<div class="auth-x">!</div><div><b>Sign-in didn’t complete</b><span class="muted"></span></div>`:''; id.hidden=!urlErr; if(urlErr) id.querySelector('span').textContent=urlErr;
   if(urlErr) history.replaceState(null,'',supaRedirect());
   document.getElementById('authOpts').hidden=false;
-  const msb=document.getElementById('authMs'); if(msb) msb.onclick=async()=>{ msb.disabled=true; const {error}=await sb.auth.signInWithOAuth({provider:'azure',options:{scopes:'openid profile email',redirectTo:supaRedirect()}}); if(error){ msb.disabled=false; authMsg('Microsoft sign-in failed',error.message); } };
+  const msb=document.getElementById('authMs'); if(msb) msb.onclick=async()=>{ msb.disabled=true; const {error}=await sb.auth.signInWithOAuth({provider:'azure',options:{scopes:'openid profile email',redirectTo:supaRedirect(),queryParams:{prompt:'select_account'}}}); if(error){ msb.disabled=false; authMsg('Microsoft sign-in failed',error.message); } };
   const f=document.getElementById('authMail'); if(f) f.onsubmit=async e=>{ e.preventDefault(); const email=document.getElementById('authEmail').value.trim(), btn=document.getElementById('authSend'); if(!email) return; btn.disabled=true; btn.textContent='Sending…';
     const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:supaRedirect()}});
     btn.disabled=false; btn.textContent='Email me a sign-in link';
