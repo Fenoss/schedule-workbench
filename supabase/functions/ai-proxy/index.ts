@@ -2,7 +2,8 @@
 // Keeps your Anthropic API key on the server: the web page sends the conversation here,
 // this function checks the person is signed in and approved, then streams Claude's reply back.
 //
-// Deploy:   supabase functions deploy ai-proxy
+// Deploy:   supabase functions deploy ai-proxy --no-verify-jwt
+//           (this function checks the caller's sign-in itself, which works with the new publishable keys)
 // Secret:   supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 // Optional: MODEL_QUICK, MODEL_DEFAULT, MODEL_COMPLEX to choose models; MAX_TOKENS_CAP (default 32000).
 
@@ -21,6 +22,17 @@ const MODELS: Record<string, string> = {
 };
 const CAP = Number(Deno.env.get("MAX_TOKENS_CAP") ?? 32000);
 
+// The project's public key: the new publishable key if present, otherwise the legacy anon key.
+function publicKey(): string {
+  try {
+    const keys = JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}");
+    if (keys && typeof keys.default === "string") return keys.default;
+    const first = keys && Object.values(keys).find((v) => typeof v === "string");
+    if (first) return first as string;
+  } catch { /* fall through */ }
+  return Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+}
+
 function fail(code: string, message: string, status: number) {
   return new Response(JSON.stringify({ error: { code, message } }), {
     status,
@@ -36,7 +48,7 @@ Deno.serve(async (req) => {
   if (!key) return fail("sampling_disabled", "AI is not set up: add the ANTHROPIC_API_KEY secret to this function.", 503);
 
   // Who is calling? Uses the caller's own sign-in token, so the database's access rules apply.
-  const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
+  const sb = createClient(Deno.env.get("SUPABASE_URL")!, publicKey(), {
     global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
   });
   const { data: { user } } = await sb.auth.getUser();

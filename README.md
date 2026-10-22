@@ -30,7 +30,7 @@ The first person to sign in becomes the admin. Everyone after that starts as **P
 2. Open **SQL Editor → New query**, paste the whole of `supabase/schema.sql` and click **Run**. It is safe to run again later.
 
 ### 2. Point the app at it
-1. In Supabase, open **Project Settings → API**. Copy the **Project URL** and the **anon public** key.
+1. In Supabase, copy the **Project URL** (the **Connect** button at the top) and the **publishable** key (**Project Settings → API Keys**, starts `sb_publishable_`). The older "anon" key also works.
 2. Put them in `site/config.js` and commit. These two values are meant to be public. **Never** put the `service_role` key or your Anthropic key in this repo.
 
 ### 3. Turn on GitHub Pages
@@ -75,10 +75,10 @@ The AI Analyst and AI schedule build call Claude through `supabase/functions/ai-
    ```bash
    supabase login
    supabase link --project-ref <your-project-ref>
-   supabase functions deploy ai-proxy
+   supabase functions deploy ai-proxy --no-verify-jwt
    supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
    ```
-   You can also create a function named `ai-proxy` in the dashboard under **Edge Functions**, paste in `index.ts`, and add the secret under **Edge Functions → Secrets**.
+   Deploy with `supabase functions deploy ai-proxy --no-verify-jwt` (the function checks sign-in itself). You can also create it in the dashboard under **Edge Functions**: paste in `index.ts`, turn **Verify JWT** off, and add the secret under **Edge Functions → Secrets**.
 3. Optional secrets:
    - `MODEL_QUICK`, `MODEL_DEFAULT` and `MODEL_COMPLEX` choose the models (defaults: Haiku, Sonnet and Opus 5.5).
    - `MAX_TOKENS_CAP` limits answer length.

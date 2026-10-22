@@ -4026,7 +4026,7 @@ async function authStart(){
 function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('Could not load '+src)); document.head.appendChild(s); }); }
 async function supaClient(){
   if(PER.sb) return PER.sb;
-  if(!window.supabase) await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js');
+  if(!window.supabase) await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js');
   PER.sb=window.supabase.createClient(SWC.supabaseUrl,SWC.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}});
   PER.sb.auth.onAuthStateChange((ev,session)=>{
     if(ev==='SIGNED_OUT'&&PER.mode==='supa'){ perReset(); supaAuthStart(); }
