@@ -25,7 +25,23 @@ create table if not exists public.app_settings (
   auto_approve_role   text not null default 'viewer' check (auto_approve_role in ('viewer', 'contributor'))
 );
 
+-- Programmes group projects on the Portfolio page. 'team' ones are visible to every approved user.
+create table if not exists public.programmes (
+  id          uuid primary key default gen_random_uuid(),
+  name        text not null check (length(name) between 1 and 120),
+  code        text not null default '',
+  client      text not null default '',
+  description text not null default '',
+  colour      text not null default '',
+  space       text not null default 'team' check (space in ('team', 'private')),
+  owner       uuid not null default auth.uid() references public.profiles (id) on delete restrict,
+  sort        int not null default 0,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
 -- 'team' projects are visible to every approved user; 'private' projects only to their owner.
+-- A project with no periods yet is a 'slot' on the Portfolio page.
 create table if not exists public.projects (
   id          uuid primary key default gen_random_uuid(),
   name        text not null check (length(name) between 1 and 120),
@@ -35,6 +51,17 @@ create table if not exists public.projects (
   updated_at  timestamptz not null default now(),
   last_dd     bigint
 );
+
+alter table public.projects add column if not exists programme_id uuid references public.programmes (id) on delete set null;
+alter table public.projects add column if not exists code        text not null default '';
+alter table public.projects add column if not exists status      text not null default 'active';
+alter table public.projects add column if not exists manager     text not null default '';
+alter table public.projects add column if not exists description text not null default '';
+alter table public.projects add column if not exists summary     jsonb;  -- headline figures from the latest period, kept current by a trigger
+do $$ begin
+  alter table public.projects add constraint projects_status_check check (status in ('planned', 'active', 'on_hold', 'complete'));
+exception when duplicate_object then null; end $$;
+create index if not exists projects_programme_idx on public.projects (programme_id);
 
 -- One row per saved schedule update. dd = data date in milliseconds since 1970 (UTC).
 -- stats holds the period's headline figures; files lists the XER files (by content hash) and their roles.
@@ -139,7 +166,8 @@ create trigger on_auth_user_created after insert on auth.users
 create or replace function private.guard_profile_update() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  if new.role is distinct from old.role then
+  -- auth.uid() is null for direct database sessions (SQL editor, service key), which are trusted.
+  if new.role is distinct from old.role and auth.uid() is not null then
     if private.my_role() <> 'admin' then raise exception 'Only admins can change access'; end if;
     if old.id = auth.uid() then raise exception 'You cannot change your own access'; end if;
   end if;
@@ -150,22 +178,48 @@ drop trigger if exists guard_profile_update on public.profiles;
 create trigger guard_profile_update before update on public.profiles
   for each row execute function private.guard_profile_update();
 
--- Keep the project's 'last updated' stamp current when periods are added.
+-- Keep each project's summary (latest period's headline figures) current as periods are added or removed.
+create or replace function private.refresh_project_summary(pid uuid) returns void
+language plpgsql security definer set search_path = public as $$
+declare
+  a public.periods;
+  prev_finish jsonb;
+  n int;
+begin
+  select * into a from public.periods where project_id = pid order by dd desc nulls last, saved_at desc limit 1;
+  if not found then
+    update public.projects set summary = null, last_dd = null where id = pid;
+    return;
+  end if;
+  select p.stats -> 'finish' into prev_finish from public.periods p
+   where p.project_id = pid and p.id <> a.id and coalesce(p.dd, 0) <= coalesce(a.dd, 0)
+   order by p.dd desc nulls last, p.saved_at desc limit 1;
+  select count(*) into n from public.periods where project_id = pid;
+  update public.projects set last_dd = a.dd, summary = jsonb_build_object(
+      'periodId', a.id, 'label', a.label, 'dd', a.dd,
+      'finish', a.stats -> 'finish', 'blFinish', a.stats -> 'blFinish', 'bei', a.stats -> 'bei',
+      'crit', a.stats -> 'crit', 'neg', a.stats -> 'neg', 'pctA', a.stats -> 'pctA', 'pctP', a.stats -> 'pctP',
+      'rel', a.stats -> 'rel', 'n', a.stats -> 'n', 'prevFinish', prev_finish, 'count', n)
+   where id = pid;
+end $$;
+
 create or replace function private.touch_project() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  update public.projects set updated_at = now(), last_dd = greatest(coalesce(last_dd, 0), coalesce(new.dd, 0))
-  where id = new.project_id;
-  return new;
+  perform private.refresh_project_summary(coalesce(new.project_id, old.project_id));
+  return null;
 end $$;
 drop trigger if exists touch_project on public.periods;
-create trigger touch_project after insert on public.periods
+create trigger touch_project after insert or update or delete on public.periods
   for each row execute function private.touch_project();
 
 create or replace function private.stamp_updated() returns trigger language plpgsql set search_path = '' as $$
 begin new.updated_at := now(); return new; end $$;
 drop trigger if exists stamp_updated on public.projects;
 create trigger stamp_updated before update on public.projects
+  for each row execute function private.stamp_updated();
+drop trigger if exists stamp_updated on public.programmes;
+create trigger stamp_updated before update on public.programmes
   for each row execute function private.stamp_updated();
 
 -- ---------------------------------------------------------------------------
@@ -174,6 +228,7 @@ create trigger stamp_updated before update on public.projects
 
 alter table public.profiles     enable row level security;
 alter table public.app_settings enable row level security;
+alter table public.programmes   enable row level security;
 alter table public.projects     enable row level security;
 alter table public.periods      enable row level security;
 alter table public.xer_files    enable row level security;
@@ -193,6 +248,23 @@ create policy profiles_admin_delete on public.profiles for delete to authenticat
 drop policy if exists settings_admin on public.app_settings;
 create policy settings_admin on public.app_settings for all to authenticated
   using (private.my_role() = 'admin') with check (private.my_role() = 'admin');
+
+-- programmes
+drop policy if exists programmes_read on public.programmes;
+create policy programmes_read on public.programmes for select to authenticated
+  using (private.my_role() <> 'pending' and (space = 'team' or owner = auth.uid()));
+drop policy if exists programmes_insert on public.programmes;
+create policy programmes_insert on public.programmes for insert to authenticated
+  with check (owner = auth.uid() and (
+    (space = 'team' and private.my_role() in ('contributor', 'admin'))
+    or (space = 'private' and private.my_role() <> 'pending')));
+drop policy if exists programmes_update on public.programmes;
+create policy programmes_update on public.programmes for update to authenticated
+  using (private.my_role() = 'admin' or owner = auth.uid())
+  with check (private.my_role() = 'admin' or owner = auth.uid());
+drop policy if exists programmes_delete on public.programmes;
+create policy programmes_delete on public.programmes for delete to authenticated
+  using (private.my_role() = 'admin' or owner = auth.uid());
 
 -- projects
 drop policy if exists projects_read on public.projects;
@@ -273,6 +345,7 @@ begin
   if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
     begin alter publication supabase_realtime add table public.projects; exception when duplicate_object then null; end;
     begin alter publication supabase_realtime add table public.periods;  exception when duplicate_object then null; end;
+    begin alter publication supabase_realtime add table public.programmes; exception when duplicate_object then null; end;
   end if;
 end $$;
 
@@ -300,4 +373,7 @@ drop function if exists public.handle_new_user();
 drop function if exists public.guard_profile_update();
 drop function if exists public.touch_project();
 drop function if exists public.stamp_updated();
-grant select, insert, update, delete on public.profiles, public.projects, public.periods, public.xer_files, public.app_settings to authenticated;
+grant select, insert, update, delete on public.profiles, public.programmes, public.projects, public.periods, public.xer_files, public.app_settings to authenticated;
+
+-- Fill in summaries for projects that already have periods.
+select private.refresh_project_summary(id) from public.projects;

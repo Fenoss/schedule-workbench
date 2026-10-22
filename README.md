@@ -27,7 +27,7 @@ The first person to sign in becomes the admin. Everyone after that starts as **P
 
 ### 1. Create the Supabase project
 1. Sign up at [supabase.com](https://supabase.com) and create a new project. Choose a region near your team and save the database password somewhere safe.
-2. Open **SQL Editor → New query**, paste the whole of `supabase/schema.sql` and click **Run**. It is safe to run again later.
+2. Open **SQL Editor → New query**, paste the whole of `supabase/schema.sql` and click **Run**. It is safe to run again, and re-running it is how you apply database updates when this file changes.
 
 ### 2. Point the app at it
 1. In Supabase, copy the **Project URL** (the **Connect** button at the top) and the **publishable** key (**Project Settings → API Keys**, starts `sb_publishable_`). The older "anon" key also works.
@@ -87,6 +87,10 @@ The AI Analyst and AI schedule build call Claude through `supabase/functions/ai-
 Only signed-in, approved users can call the function. Edge functions have a time limit per request, so very long "Deep" generations can time out; use Standard depth if that happens. Set `ai: false` in `config.js` to hide AI features entirely.
 
 ## Using it
+- **Portfolio** (the landing page after sign-in): every programme with its projects.
+  - Each project shows its latest update, forecast finish, variance against baseline, movement since the last period, progress against plan, and BEI.
+  - **Add programme** creates a group. **Add project** creates a *slot*: a named placeholder with programme, status, code and manager, which fills in when you add its first schedule update.
+  - **Add first update** / **Update** reads a period's XER files and saves them as a period of that project. **Open** loads the latest period into the workbench.
 - **Periods tab:**
   - Create a project, load the period's XER files, then choose **Save current as period**.
   - **Import past updates** turns a batch of monthly XERs into periods against the loaded baseline.

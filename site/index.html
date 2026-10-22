@@ -695,6 +695,83 @@ select.bin{padding:0 2px}
 .ucb{min-width:18px;height:18px;border-radius:999px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:inline-grid;place-items:center;padding:0 5px}
 .um-b .ucb{margin-left:6px}
 .pdlg .ptab select{height:30px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:0 6px}
+
+/* ---- portfolio ---- */
+.amber{color:#B97800!important}
+:root[data-theme="dark"] .amber{color:#F2B33D!important}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .amber{color:#F2B33D!important} }
+.btn.ghost{background:none}
+.port{display:flex;flex-direction:column;gap:12px}
+.porthead{display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap;padding:12px 16px}
+.ph-t{display:flex;align-items:baseline;gap:10px}
+.ph-t h2{font-family:var(--fDisplay);font-weight:800;font-size:28px;text-transform:uppercase;margin:0;line-height:1}
+.ph-c{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto}
+#portQ{height:32px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:0 10px;font-size:14px;width:260px;max-width:100%}
+.portold{margin:0}.portold code{font-size:12px}
+.portstats{grid-template-columns:repeat(6,minmax(0,1fr))}.portstats .sv{font-size:28px}.portstats .ss{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.portlist{display:flex;flex-direction:column;gap:12px}
+.prog{overflow:hidden;border-left:4px solid var(--pc)}
+.prog-h{display:flex;align-items:center;gap:12px 16px;padding:14px 16px;flex-wrap:wrap}
+.prog-tg{width:28px;height:28px;border-radius:6px;border:1px solid var(--line);background:none;display:grid;place-items:center;color:var(--ink2);flex:none;transition:transform .15s}
+.prog.closed .prog-tg{transform:rotate(-90deg)}
+.prog-t{min-width:200px;flex:1}
+.prog-n{font-family:var(--fDisplay);font-weight:700;font-size:22px;line-height:1.1;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pcode{font-family:var(--fBody);font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--pc);border:1px solid var(--pc);border-radius:4px;padding:1px 6px}
+.prog-m{font-size:13px;color:var(--ink2);margin-top:2px}
+.prog-k{display:flex;align-items:center;gap:18px}
+.prog-k>div{display:flex;flex-direction:column}.prog-k b{font-variant-numeric:tabular-nums}
+.pl{font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3)}
+.prog-a{display:flex;gap:6px}
+.prog.closed .prog-b{display:none}
+.prog-b{border-top:1px solid var(--line)}
+.rag{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none;background:var(--line)}
+.rag.g{background:var(--early)}.rag.a{background:#E5A100}.rag.r{background:var(--late)}
+.prow2{display:grid;grid-template-columns:minmax(180px,2.2fr) 96px minmax(0,1.1fr) minmax(0,1.1fr) minmax(0,1fr) minmax(0,1.3fr) minmax(0,.6fr) 296px;gap:12px;align-items:center;padding:10px 16px;border-top:1px solid var(--grid);font-size:14px}
+.prow2:first-child{border-top:0}
+.prow2.hd{font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);padding-block:8px;background:var(--surface2)}
+.prow2 .pl{display:none}
+.prow2>div{min-width:0;display:flex;flex-direction:column;gap:1px}
+.prow2 b{font-variant-numeric:tabular-nums}
+.prow2 span{font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-name{flex-direction:row!important;flex-wrap:wrap;align-items:center;column-gap:8px!important}
+.pc-name b{font-size:15px}.pc-name span{flex-basis:100%;padding-left:18px;color:var(--ink2)}
+.prow2.slot .pc-name span{padding-left:0}
+.prow2.slot{background:repeating-linear-gradient(135deg,transparent 0 10px,var(--surface2) 10px 20px)}
+.pc-empty{grid-column:3 / 8;flex-direction:row!important;align-items:center;gap:8px!important;color:var(--ink2);font-size:13px}
+.slotlab{font-size:10.5px!important;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border:1px dashed var(--ink3);border-radius:4px;padding:1px 6px;color:var(--ink2)}
+.pc-act{flex-direction:row!important;gap:6px!important;justify-content:flex-end;flex-wrap:wrap}
+.stc{font-size:11px!important;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border-radius:999px;padding:3px 9px;width:max-content;background:var(--band);color:var(--ink2)}
+.stc.active{background:var(--accentSoft);color:var(--accent)}.stc.complete{color:var(--early)}.stc.on_hold{color:#B97800}
+.pbar{position:relative;display:block;height:8px;border-radius:4px;background:var(--band);overflow:visible!important;margin:4px 0 2px;max-width:160px}
+.pbar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--accent)}
+.pbar b{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);border-radius:1px}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.swatch{position:relative;cursor:pointer}
+.swatch input{position:absolute;opacity:0;width:0;height:0}
+.swatch i{display:block;width:28px;height:28px;border-radius:50%;background:var(--c);border:3px solid var(--surface);box-shadow:0 0 0 1px var(--line)}
+.swatch input:checked+i{box-shadow:0 0 0 2px var(--ink)}
+.swatch input:focus-visible+i{outline:2px solid var(--accent);outline-offset:2px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.pdb select{height:40px;border:1px solid var(--line);border-radius:6px;padding:0 8px;font-size:15px;font-weight:400;color:var(--ink);background:var(--surface)}
+.pdb .plink{align-self:flex-start;margin-top:4px}
+@media (max-width:1180px){
+  .prow2{grid-template-columns:1fr 1fr 1fr;row-gap:10px}
+  .prow2.hd{display:none}
+  .prow2 .pl{display:block}
+  .pc-name{grid-column:1 / -1}
+  .pc-st{grid-column:1 / -1}
+  .pc-act{grid-column:1 / -1;justify-content:flex-start}
+  .pc-empty{grid-column:1 / -1}
+  .portstats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .portstats .stat:nth-child(4){border-left:0}.portstats .stat:nth-child(n+4){border-top:1px solid var(--line)}
+}
+@media (max-width:560px){
+  .prow2{grid-template-columns:1fr 1fr}
+  .portstats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .portstats .stat{border-left:1px solid var(--line)!important;border-top:1px solid var(--line)}
+  .portstats .stat:nth-child(odd){border-left:0!important}.portstats .stat:nth-child(-n+2){border-top:0}
+  .prog-k{width:100%}.ph-c{margin-left:0}#portQ{width:100%}
+}
 /* ---- periods ---- */
 .per{display:flex;flex-direction:column;gap:12px}
 .perbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px}
@@ -799,6 +876,7 @@ select.bin{padding:0 2px}
   <section class="stage">
     <div class="stage-bar">
       <div class="tabs" role="tablist">
+        <button class="tab" role="tab" id="tabPort" aria-selected="false">Portfolio</button>
         <button class="tab" role="tab" id="tabDash" aria-selected="false">Dashboard</button>
         <button class="tab" role="tab" id="tabPer" aria-selected="false">Periods</button>
         <button class="tab" role="tab" id="tabGantt" aria-selected="true">Gantt</button>
@@ -874,6 +952,7 @@ select.bin{padding:0 2px}
       <div class="card expage" id="exPage"></div>
       <div class="note" id="exMsg"></div>
     </div>
+    <div class="port" id="portWrap" hidden></div>
     <div class="per" id="perWrap" hidden></div>
     <div class="dash" id="dashWrap" hidden>
       <div class="card stats" id="stats"></div>
@@ -3616,7 +3695,7 @@ function renderAvail(q){
 }
 
 /* ---------------- orchestration ---------------- */
-function redraw(){ if(S.tab==='gantt') drawGantt(); else if(S.tab==='tld') drawTLD(); else if(S.tab==='dq') renderDQ(); else if(S.tab==='exec') renderExec(); else if(S.tab==='ifc') renderIfc(); else if(S.tab==='ai') renderAi(); else if(S.tab==='build') renderBuild(); else if(S.tab==='per') renderPer(); else renderDash(); }
+function redraw(){ if(S.tab==='gantt') drawGantt(); else if(S.tab==='tld') drawTLD(); else if(S.tab==='dq') renderDQ(); else if(S.tab==='exec') renderExec(); else if(S.tab==='ifc') renderIfc(); else if(S.tab==='ai') renderAi(); else if(S.tab==='build') renderBuild(); else if(S.tab==='per') renderPer(); else if(S.tab==='port') renderPort(); else renderDash(); }
 function applyFilters(){ S.rows=filtered(); buildItems(); renderLegend(); updateBadge(); if(S.tab==='tld') T.view=null; redraw(); }
 function pickTldDefaults(){
   const u=M.udfs; const sU=u.find(x=>/chain|km|mile|station|loc|ch\b/i.test(x)&&/start|from|begin/i.test(x))||u.find(x=>/start|from/i.test(x));
@@ -3660,10 +3739,10 @@ function rebuild(fitView){
   if(fitView) fitGantt(); else redraw();
 }
 function setTab(t){
-  S.tab=t; const TABS={dash:'tabDash',per:'tabPer',gantt:'tabGantt',tld:'tabTld',dq:'tabDq',ifc:'tabIfc',exec:'tabExec',build:'tabBuild',ai:'tabAi'}; Object.entries(TABS).forEach(([x,id])=>document.getElementById(id).setAttribute('aria-selected',t===x));
-  gWrap.hidden=t!=='gantt'; tWrap.hidden=t!=='tld'; document.getElementById('dqWrap').hidden=t!=='dq'; document.getElementById('dashWrap').hidden=t!=='dash'; document.getElementById('execWrap').hidden=t!=='exec'; document.getElementById('ifcWrap').hidden=t!=='ifc'; document.getElementById('aiWrap').hidden=t!=='ai'; document.getElementById('buildWrap').hidden=t!=='build'; document.getElementById('perWrap').hidden=t!=='per'; if(t!=='build') document.getElementById('bAi').hidden=true; if(t!=='exec'){ const pk=document.getElementById('exPick'); if(pk) pk.hidden=true; }
-  document.getElementById('legend').hidden=['dq','dash','exec','ifc','ai','build','per'].includes(t); document.getElementById('controls').hidden=['dash','exec','ifc','ai','build','per'].includes(t);
-  document.querySelector('.main').classList.toggle('wide',t==='build'||t==='per'); setNote(''); tip.hidden=true;
+  S.tab=t; const TABS={port:'tabPort',dash:'tabDash',per:'tabPer',gantt:'tabGantt',tld:'tabTld',dq:'tabDq',ifc:'tabIfc',exec:'tabExec',build:'tabBuild',ai:'tabAi'}; Object.entries(TABS).forEach(([x,id])=>document.getElementById(id).setAttribute('aria-selected',t===x));
+  gWrap.hidden=t!=='gantt'; tWrap.hidden=t!=='tld'; document.getElementById('dqWrap').hidden=t!=='dq'; document.getElementById('dashWrap').hidden=t!=='dash'; document.getElementById('execWrap').hidden=t!=='exec'; document.getElementById('ifcWrap').hidden=t!=='ifc'; document.getElementById('aiWrap').hidden=t!=='ai'; document.getElementById('buildWrap').hidden=t!=='build'; document.getElementById('perWrap').hidden=t!=='per'; document.getElementById('portWrap').hidden=t!=='port'; if(t!=='build') document.getElementById('bAi').hidden=true; if(t!=='exec'){ const pk=document.getElementById('exPick'); if(pk) pk.hidden=true; }
+  document.getElementById('legend').hidden=['dq','dash','exec','ifc','ai','build','per','port'].includes(t); document.getElementById('controls').hidden=['dash','exec','ifc','ai','build','per','port'].includes(t);
+  document.querySelector('.main').classList.toggle('wide',t==='build'||t==='per'||t==='port'); setNote(''); tip.hidden=true;
   if(t!=='gantt'&&typeof closeCols==='function') closeCols();
   if(t==='gantt'){ hideDrawer(); if(G.needFit) requestAnimationFrame(fitGantt); } renderDock(); POPS.forEach(p=>document.getElementById(p).hidden=true); if(t!=='tld') document.getElementById('clashList').hidden=true;
   renderControls(); renderLegend(); try{ localStorage.setItem('pacer.tab',t); }catch(_){}
@@ -3683,7 +3762,7 @@ function wire(){
   document.getElementById('tabIfc').onclick=()=>setTab('ifc');
   document.getElementById('tabAi').onclick=()=>setTab('ai');
   document.getElementById('tabBuild').onclick=()=>setTab('build');
-  document.getElementById('tabPer').onclick=()=>setTab('per'); wirePer();
+  document.getElementById('tabPer').onclick=()=>setTab('per'); document.getElementById('tabPort').onclick=()=>setTab('port'); wirePer();
   wireBuild(); wireBa();
   wireAi();
   wireIfc();
@@ -3919,14 +3998,22 @@ const CHUNK=180000;
 /* ---- paths ---- */
 /* ---- store interface: docStore (Claude db or this browser) and supaStore (hosted) share these methods ---- */
 function docStore(db){
-  const root=()=>PER.space==='private'&&PER.uid&&!db.local?db.doc('data/users/'+PER.uid+'/space').collection('projects'):db.collection('projects');
+  const base=name=>PER.space==='private'&&PER.uid&&!db.local?db.doc('data/users/'+PER.uid+'/space').collection(name):db.collection(name);
+  const root=()=>base('projects'), progs=()=>base('programmes');
   const proj=pid=>root().doc(pid), files=pid=>proj(pid).collection('files');
   const rows=s=>s.docs.map(d=>({id:d.id,...d.data()}));
   return {
     watchProjects:(cb,err)=>root().onSnapshot(s=>cb(rows(s)),err),
     watchPeriods:(pid,cb,err)=>proj(pid).collection('periods').onSnapshot(s=>cb(rows(s)),err),
-    async createProject(name){ const ref=root().doc(); await ref.set({name,createdBy:PER.uid||'local',createdAt:Date.now(),updatedAt:Date.now()}); return ref.id; },
+    async createProject(name,x){ x=x||{}; const ref=root().doc(); await ref.set({name,programmeId:x.programmeId||null,code:x.code||'',status:x.status||'active',manager:x.manager||'',description:x.description||'',createdBy:PER.uid||'local',createdAt:Date.now(),updatedAt:Date.now()}); return ref.id; },
     renameProject:(pid,name)=>proj(pid).update({name,updatedAt:Date.now()}),
+    updateProject:(pid,f)=>proj(pid).update(Object.assign({},f,{updatedAt:Date.now()})),
+    async listPeriods(pid){ return rows(await proj(pid).collection('periods').get()); },
+    async refreshSummary(pid){ const sm=perSummary(rows(await proj(pid).collection('periods').get())); await proj(pid).update({summary:sm,lastDD:sm?sm.dd:null,updatedAt:Date.now()}); },
+    watchProgrammes:(cb,err)=>progs().onSnapshot(s=>cb(rows(s)),err),
+    async createProgramme(f){ const ref=progs().doc(); await ref.set(Object.assign({sort:0},f,{createdBy:PER.uid||'local',createdAt:Date.now(),updatedAt:Date.now()})); return ref.id; },
+    updateProgramme:(id,f)=>progs().doc(id).update(Object.assign({},f,{updatedAt:Date.now()})),
+    async deleteProgramme(id){ const ps=rows(await root().get()).filter(p=>p.programmeId===id); for(const p of ps) await proj(p.id).update({programmeId:null}); await progs().doc(id).delete(); },
     async hasFile(pid,h){ const ex=await files(pid).doc(h).get(); return ex.exists&&!!ex.data().done; },
     async putFile(pid,h,name,text){ const fr=files(pid).doc(h), pk=await perPack(text), parts=[]; for(let i=0;i<pk.data.length;i+=CHUNK) parts.push(pk.data.slice(i,i+CHUNK)); if(!parts.length) parts.push('');
       await fr.set({name,size:text.length,n:parts.length,enc:pk.enc,done:false,by:PER.uid||'local',at:Date.now()});
@@ -3937,8 +4024,8 @@ function docStore(db){
       if(parts.length<m.n) throw new Error(`${name} is incomplete in the database (${parts.length} of ${m.n} parts).`);
       return perUnpack(m.enc,parts.map(p=>p.d).join('')); },
     async dropFile(pid,h){ const fr=files(pid).doc(h), ch=await fr.collection('chunks').get(); for(const d of ch.docs) await fr.collection('chunks').doc(d.id).delete(); await fr.delete(); },
-    async addPeriod(pid,doc){ const ref=proj(pid).collection('periods').doc(); await ref.set(doc); await proj(pid).update({updatedAt:Date.now(),lastDD:doc.dd}); return ref.id; },
-    deletePeriod:(pid,id)=>proj(pid).collection('periods').doc(id).delete(),
+    async addPeriod(pid,doc){ const ref=proj(pid).collection('periods').doc(); await ref.set(doc); await this.refreshSummary(pid); return ref.id; },
+    async deletePeriod(pid,id){ await proj(pid).collection('periods').doc(id).delete(); await this.refreshSummary(pid); },
     async deleteProject(pid){ const pr=proj(pid), ps=await pr.collection('periods').get(), fs=await files(pid).get();
       for(const d of ps.docs) await pr.collection('periods').doc(d.id).delete(); for(const d of fs.docs) await this.dropFile(pid,d.id); await pr.delete(); },
     profiles:ids=>PER.mode==='cloud'&&PER.user?PER.user.profiles([...new Set(ids.filter(x=>x&&x!=='local'))]):Promise.resolve({})
@@ -3948,7 +4035,10 @@ async function perGzipBlob(text){ if(typeof CompressionStream==='undefined') ret
 async function perGunzipBlob(b){ const h=new Uint8Array(await b.slice(0,2).arrayBuffer()); if(h[0]!==0x1f||h[1]!==0x8b) return await b.text(); return await new Response(b.stream().pipeThrough(new DecompressionStream('gzip'))).text(); }
 function supaStore(sb){
   const ok=({data,error})=>{ if(error) throw error; return data; };
-  const mapP=r=>({id:r.id,name:r.name,createdBy:r.owner,updatedAt:Date.parse(r.updated_at)||0,space:r.space});
+  const mapP=r=>({id:r.id,name:r.name,createdBy:r.owner,updatedAt:Date.parse(r.updated_at)||0,space:r.space,programmeId:r.programme_id||null,code:r.code||'',status:r.status||'active',manager:r.manager||'',description:r.description||'',summary:r.summary||null});
+  const mapG=r=>({id:r.id,name:r.name,code:r.code||'',client:r.client||'',description:r.description||'',colour:r.colour||'',sort:r.sort||0,createdBy:r.owner,updatedAt:Date.parse(r.updated_at)||0});
+  const pCols=f=>{ const o={}; if('name' in f) o.name=f.name; if('programmeId' in f) o.programme_id=f.programmeId||null; ['code','status','manager','description'].forEach(k=>{ if(k in f) o[k]=f[k]||(k==='status'?'active':''); }); return o; };
+  const gCols=f=>{ const o={}; ['name','code','client','description','colour','sort'].forEach(k=>{ if(k in f) o[k]=f[k]; }); return o; };
   const mapR=r=>({id:r.id,label:r.label,notes:r.notes||'',dd:r.dd==null?null:Number(r.dd),stats:r.stats||{},files:r.files||[],savedBy:r.saved_by,savedAt:Date.parse(r.saved_at)||0});
   let n=0;
   const watch=(table,filter,load,cb,err)=>{ let alive=true, t=null; const run=()=>load().then(x=>{ if(alive) cb(x); }).catch(e=>{ if(alive&&err) err(e); }); run();
@@ -3958,8 +4048,14 @@ function supaStore(sb){
   return {
     watchProjects(cb,err){ const sp=PER.space, me=PER.uid; return watch('projects',null,async()=>{ let q=sb.from('projects').select('*').eq('space',sp); if(sp==='private') q=q.eq('owner',me); return ok(await q).map(mapP); },cb,err); },
     watchPeriods:(pid,cb,err)=>watch('periods','project_id=eq.'+pid,async()=>ok(await sb.from('periods').select('*').eq('project_id',pid)).map(mapR),cb,err),
-    async createProject(name){ return ok(await sb.from('projects').insert({name,space:PER.space}).select('id').single()).id; },
+    async createProject(name,x){ return ok(await sb.from('projects').insert(Object.assign(pCols(x||{}),{name,space:PER.space})).select('id').single()).id; },
     async renameProject(pid,name){ ok(await sb.from('projects').update({name}).eq('id',pid)); },
+    async updateProject(pid,f){ ok(await sb.from('projects').update(pCols(f)).eq('id',pid)); },
+    async listPeriods(pid){ return ok(await sb.from('periods').select('*').eq('project_id',pid)).map(mapR); },
+    watchProgrammes(cb,err){ const sp=PER.space, me=PER.uid; return watch('programmes',null,async()=>{ let q=sb.from('programmes').select('*').eq('space',sp); if(sp==='private') q=q.eq('owner',me); return ok(await q).map(mapG); },cb,err); },
+    async createProgramme(f){ return ok(await sb.from('programmes').insert(Object.assign(gCols(f),{space:PER.space})).select('id').single()).id; },
+    async updateProgramme(id,f){ ok(await sb.from('programmes').update(gCols(f)).eq('id',id)); },
+    async deleteProgramme(id){ ok(await sb.from('programmes').delete().eq('id',id)); },
     async hasFile(pid,h){ return !!(await fileRow(pid,h)); },
     async putFile(pid,h,name,text){ const path=`${pid}/${h}.xer.gz`, blob=await perGzipBlob(text);
       const up=await sb.storage.from('xer').upload(path,blob,{contentType:'application/gzip',upsert:true}); if(up.error) throw up.error;
@@ -4088,14 +4184,13 @@ function authDone(mode){
   else { PER.store=docStore(PER.db); PER.readOnly=PER.canWrite===false; }
   try{ const sp=localStorage.getItem('pacer.space'); if(mode!=='local'&&(sp==='private'||sp==='team')) PER.space=sp; }catch(_){}
   const au=document.getElementById('auth'); if(au){ au.classList.add('out'); setTimeout(()=>au.remove(),260); }
-  renderUserChip(); perSubscribe();
+  renderUserChip(); perSubscribe(); setTab('port');
 }
-function perReset(){ if(PER.unP) PER.unP(); if(PER.unR) PER.unR(); PER.unP=PER.unR=null; PER.projects=[]; PER.periods=[]; PER.pid=null; PER.mode=null; PER.store=null; PER.loaded=null; const m=document.getElementById('userMenu'); if(m) m.hidden=true; renderUserChip(); if(S.tab==='per') renderPer(); }
+function perReset(){ if(PER.unP) PER.unP(); if(PER.unR) PER.unR(); if(PER.unG) PER.unG(); PER.unP=PER.unR=PER.unG=null; PER.projects=[]; PER.programmes=[]; PER.periods=[]; PER.pid=null; PER.mode=null; PER.store=null; PER.loaded=null; const m=document.getElementById('userMenu'); if(m) m.hidden=true; renderUserChip(); perRenderAll(); }
 async function signOut(){
   try{ localStorage.removeItem('pacer.auth'); }catch(_){}
   const wasSupa=PER.mode==='supa'; perReset();
   if(wasSupa&&PER.sb){ try{ await PER.sb.auth.signOut(); }catch(_){} }
-  if(window.claude&&window.claude.hosted) document.querySelectorAll('#aiWrap .note').forEach(n=>{ n.textContent=n.textContent.replace('Uses your own Claude usage.','Uses the workbench’s Anthropic API key.'); });
   authStart();
 }
 function userName(){ return PER.mode==='cloud'?(PER.me&&PER.me.name)||'You':PER.mode==='supa'?(PER.prof&&(PER.prof.name||PER.prof.email))||PER.email||'You':'Offline'; }
@@ -4112,7 +4207,7 @@ function renderUserChip(){
     <p class="muted">${PER.space==='team'?'Projects everyone with access to this workbench can see.':'Projects only you can see.'}</p></div>`:''}
     <div class="um-s"><div class="sl">Your access</div><p class="muted">${esc(roleBlurb())}</p></div>
     ${PER.mode==='supa'&&PER.srole==='admin'?'<button class="um-b" data-um="users">Manage users <span class="ucb" id="umBadge" hidden></span></button>':''}
-    <button class="um-b" data-um="periods">Saved projects &amp; periods</button><button class="um-b" data-um="out">Sign out</button>`;
+    <button class="um-b" data-um="periods">Portfolio</button><button class="um-b" data-um="out">Sign out</button>`;
   m.querySelector('b').textContent=nm;
   if(PER.mode==='supa'&&PER.srole==='admin') PER.sb.from('profiles').select('id',{count:'exact',head:true}).eq('role','pending').then(({count})=>{ ['ucBadge','umBadge'].forEach(i=>{ const b=document.getElementById(i); if(b){ b.hidden=!count; b.textContent=count||''; b.title=count?count+' waiting for approval':''; } }); });
 }
@@ -4134,15 +4229,24 @@ const perCanDel=by=>PER.mode==='local'||PER.isOwner||PER.canEdit||(!perRO()&&by=
 function perRO(){ return PER.mode==='supa'?!(PER.canWrite||(PER.space==='private'&&PER.srole!=='pending')):!!PER.readOnly; }
 
 /* ---- subscriptions ---- */
+// Headline figures from a project's latest period (same shape the database trigger writes).
+function perSummary(list){
+  if(!list||!list.length) return null;
+  const L=list.slice().sort((a,b)=>(a.dd||0)-(b.dd||0)||(a.savedAt||0)-(b.savedAt||0)), a=L[L.length-1], b=L.length>1?L[L.length-2]:null, s=a.stats||{}, v=x=>x===undefined?null:x;
+  return {periodId:a.id,label:a.label,dd:v(a.dd),finish:v(s.finish),blFinish:v(s.blFinish),bei:v(s.bei),crit:v(s.crit),neg:v(s.neg),pctA:v(s.pctA),pctP:v(s.pctP),rel:s.rel||null,n:v(s.n),prevFinish:b&&b.stats?v(b.stats.finish):null,count:L.length};
+}
+function perRenderAll(){ renderPer(); if(typeof renderPort==='function') renderPort(); }
 function perSubscribe(){
-  if(PER.unP) PER.unP(); if(PER.unR) PER.unR(); PER.unR=null; PER.periods=[]; PER.projects=[];
-  if(!PER.store){ renderPer(); return; }
-  PER.unP=PER.store.watchProjects(list=>{ PER.projects=list.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  if(PER.unP) PER.unP(); if(PER.unR) PER.unR(); if(PER.unG) PER.unG(); PER.unR=PER.unG=null; PER.periods=[]; PER.projects=[]; PER.programmes=[]; PER.schemaOld=false;
+  if(!PER.store){ perRenderAll(); return; }
+  PER.unG=PER.store.watchProgrammes(list=>{ PER.programmes=list.sort((a,b)=>(a.sort||0)-(b.sort||0)||String(a.name).localeCompare(b.name)); PER.schemaOld=false; if(typeof renderPort==='function') renderPort(); },
+    e=>{ if(/programmes|schema cache|does not exist|42P01|PGRST20/i.test((e&&(e.message||e.code))||'')){ PER.schemaOld=true; if(typeof renderPort==='function') renderPort(); } else perToast(perErr(e),'err'); });
+  PER.unP=PER.store.watchProjects(list=>{ PER.projects=list.map(p=>Object.assign({programmeId:null,code:'',status:'active',manager:'',description:'',summary:null},p)).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)); if(typeof renderPort==='function') renderPort();
       let want=PER.pid; if(!want){ try{ want=localStorage.getItem('pacer.proj.'+PER.space); }catch(_){} }
       if(!PER.projects.some(p=>p.id===want)) want=PER.projects[0]?PER.projects[0].id:null;
       if(want!==PER.pid||!PER.unR) perPick(want); else renderPer(); },
-    e=>{ perToast(perErr(e),'err'); renderPer(); });
-  renderPer();
+    e=>{ perToast(perErr(e),'err'); perRenderAll(); });
+  perRenderAll();
 }
 function perPick(pid){
   if(PER.unR) PER.unR(); PER.unR=null; PER.pid=pid; PER.periods=[]; PER.cmp={a:null,b:null,tab:PER.cmp.tab,manual:false}; PER.ms=null;
@@ -4244,8 +4348,8 @@ async function perDeletePeriod(pid,per){
 }
 const perDeleteProject=p=>PER.store.deleteProject(p.id);
 const perNewProject=name=>PER.store.createProject(name);
-function perBusy(msg){ PER.busy=msg||''; const b=document.getElementById('perBusy'); if(b){ b.hidden=!msg; b.textContent=msg||''; } if(msg) document.querySelectorAll('#perWrap [data-w],#perWrap [data-pl],#perWrap [data-pd]').forEach(x=>x.disabled=true); }
-async function perRun(msg,fn){ if(PER.busy) return; perBusy(msg); try{ return await fn(); }catch(e){ perToast(perErr(e),'err'); console.warn(e); } finally{ perBusy(''); renderPer(); } }
+function perBusy(msg){ PER.busy=msg||''; ['perBusy','portBusy'].forEach(i=>{ const b=document.getElementById(i); if(b){ b.hidden=!msg; b.textContent=msg||''; } }); if(msg) document.querySelectorAll('#perWrap [data-w],#perWrap [data-pl],#perWrap [data-pd],#portWrap [data-w]').forEach(x=>x.disabled=true); }
+async function perRun(msg,fn){ if(PER.busy) return; perBusy(msg); try{ return await fn(); }catch(e){ perToast(perErr(e),'err'); console.warn(e); } finally{ perBusy(''); perRenderAll(); } }
 
 /* ---- dialogs ---- */
 function perDialog(title,body,ok,onOk){
@@ -4256,11 +4360,7 @@ function perDialog(title,body,ok,onOk){
   d.querySelector('[data-ok]').onclick=async()=>{ const r=await onOk(d); if(r===false) return; close(); };
   setTimeout(()=>{ const i=d.querySelector('input,textarea'); (i||d.querySelector('[data-ok]')).focus(); },30); return d;
 }
-function perAskProject(after){
-  perDialog('New project',`<label class="pfl"><span>Project name</span><input id="pdName" maxlength="80" placeholder="e.g. Northgate Express Rail"></label><p class="muted">${PER.mode!=='local'?(PER.space==='team'?'Saved to the team workspace. Everyone with access to this workbench can see it.':'Saved to your private workspace.'):'Saved in this browser.'}</p>`,'Create project',async d=>{
-    const v=d.querySelector('#pdName').value.trim(); if(!v){ d.querySelector('[data-err]').textContent='Give the project a name.'; return false; }
-    await perRun('Creating project…',async()=>{ const id=await perNewProject(v); perPick(id); if(after) after(id); }); });
-}
+function perAskProject(after){ portProjectDialog(null,{after:id=>{ perPick(id); if(after) after(id); }}); }
 function perAskSave(){
   if(!M||!S.files.some(f=>!f.error&&f.role==='live')){ perToast('Load a live schedule first, then save it as a period.','err'); return; }
   const go=pid=>{ const files=S.files.filter(f=>!f.error&&f.role!=='off'), n=PER.periods.length+1, live=files.filter(f=>f.role==='live'), dupe=PER.periods.find(p=>p.dd===M.dd);
@@ -4288,18 +4388,19 @@ function perAskImport(){
       if(items.length) perToast(`Saved ${items.length} period${items.length===1?'':'s'}${base.length?' against the loaded baseline':''}.`); }); };
   inp.click();
 }
-async function perSampleHistory(){
-  await perRun('Building sample history…',async()=>{
-    const pid=await perNewProject('Northgate Express Rail (sample)'); perPick(pid);
+async function perSampleHistory(){ await perRun('Building sample history…',async()=>{ const pid=await perNewProject('Northgate Express Rail (sample)'); perPick(pid); await perSampleInto(pid); perToast('Sample history saved: six monthly updates.'); }); }
+async function perSampleInto(pid){
+  {
     const DDS=[[2026,4,18,.15,'04'],[2026,5,22,.3,'05'],[2026,6,20,.5,'06'],[2026,7,17,.65,'07'],[2026,8,21,.8,'08'],[2026,9,19,1,'09']];
     let i=0; for(const [y,m,d,k,up] of DDS){ i++; perBusy(`Saving sample period ${i} of ${DDS.length}…`); const dt=Date.UTC(y,m,d);
       const files=sampleFiles({ddt:dt,k,up}).map(f=>({...f,sample:false}));
       await perSavePeriod(pid,files,{label:`Update ${up} · ${fmtL(dt)}`,notes:'Generated sample period'}); await new Promise(r=>setTimeout(r,80)); }
-    perToast('Sample history saved: six monthly updates.'); });
+  }
 }
-async function perLoad(per){
-  await perRun(`Opening ${per.label}…`,async()=>{ const files=await perGetFiles(PER.pid,per); S.files=files; if(typeof B!=='undefined'&&B.st&&B.st.sync){ B.st.sync=false; bSave(); }
-    PER.loaded={pid:PER.pid,id:per.id,label:per.label}; rebuild(true); perToast(`Loaded “${per.label}” into the workbench.`); });
+async function perLoad(per,pid){
+  pid=pid||PER.pid;
+  await perRun(`Opening ${per.label}…`,async()=>{ const files=await perGetFiles(pid,per); S.files=files; if(typeof B!=='undefined'&&B.st&&B.st.sync){ B.st.sync=false; bSave(); }
+    PER.loaded={pid,id:per.id,label:per.label}; rebuild(true); perToast(`Loaded “${per.label}” into the workbench.`); });
 }
 
 /* ---- charts (SVG) ---- */
@@ -4341,7 +4442,7 @@ async function renderPer(){
   const P=PER.periods, proj=PER.projects.find(p=>p.id===PER.pid), ro=perRO();
   const ps=await perProfiles(P.map(p=>p.savedBy).concat(proj?[proj.createdBy]:[]));
   const bar=`<div class="card perbar">
-    <label class="ctl"><span>Project</span><select id="perProjSel" ${PER.projects.length?'':'disabled'}>${PER.projects.length?PER.projects.map(p=>`<option value="${esc(p.id)}" ${p.id===PER.pid?'selected':''}>${esc(p.name)}</option>`).join(''):'<option>No projects yet</option>'}</select></label>
+    <label class="ctl"><span>Project</span><select id="perProjSel" ${PER.projects.length?'':'disabled'}>${PER.projects.length?portProjectOptions(PER.pid):'<option>No projects yet</option>'}</select></label>
     <button class="btn sm" data-w data-pa="new" ${ro?'disabled':''}>New project</button>
     ${proj?`<button class="btn sm" data-w data-pa="ren" ${perCanDel(proj.createdBy)?'':'disabled'}>Rename</button><button class="btn sm ghostd" data-w data-pa="delp" ${perCanDel(proj.createdBy)?'':'disabled'}>Delete</button>`:''}
     <span class="pspace">${PER.mode!=='local'?(PER.space==='team'?'Team workspace':'Private workspace'):'This browser'}</span>
@@ -4465,7 +4566,8 @@ function wirePer(){
   document.addEventListener('click',e=>{ if(!menu.hidden&&!menu.contains(e.target)&&e.target!==chip){ menu.hidden=true; chip.setAttribute('aria-expanded','false'); } });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!menu.hidden){ menu.hidden=true; chip.setAttribute('aria-expanded','false'); chip.focus(); } });
   menu.addEventListener('click',e=>{ const s=e.target.closest('[data-space]'); if(s){ PER.space=s.dataset.space; try{ localStorage.setItem('pacer.space',PER.space); }catch(_){} PER.pid=null; perCmpCache.clear(); renderUserChip(); perSubscribe(); return; }
-    const u=e.target.closest('[data-um]'); if(!u) return; menu.hidden=true; if(u.dataset.um==='out') signOut(); else if(u.dataset.um==='users') supaUsers(); else setTab('per'); });
+    const u=e.target.closest('[data-um]'); if(!u) return; menu.hidden=true; if(u.dataset.um==='out') signOut(); else if(u.dataset.um==='users') supaUsers(); else setTab('port'); });
+  wirePort();
   const w=document.getElementById('perWrap');
   w.addEventListener('change',e=>{ const t=e.target;
     if(t.id==='perProjSel'){ perCmpCache.clear(); perPick(t.value); }
@@ -4485,6 +4587,176 @@ function wirePer(){
     if(e.target.closest('[data-pexp]')){ perCsv(); return; }
     const tr=e.target.closest('tr[data-k]'); if(tr&&M){ const k=tr.dataset.k, code=k.split('|').pop(), rk=M.byKey.has(k)?k:M.byKey.has(code)?code:null;
       if(rk&&PER.loaded&&PER.loaded.id===PER.cmp.b){ setTab('gantt'); selectAct(rk,true); } else perToast(PER.loaded&&PER.loaded.id===PER.cmp.b?'That activity isn’t in the open schedule.':'Open the To period in the workbench to jump to activities.'); }
+  });
+}
+
+/* ================= Portfolio: programmes and project slots ================= */
+const PORT={q:'',status:'all',collapsed:new Set()};
+const PSTAT={planned:'Planned',active:'Active',on_hold:'On hold',complete:'Complete'};
+const PCOL=['#FC4C02','#3B6FE0','#14A37F','#9B5DE5','#D99A00','#E04F8C','#1BA1C4','#6DAA1A'];
+const STALE_DAYS=35;
+try{ const c=JSON.parse(localStorage.getItem('pacer.port.collapsed')||'[]'); if(Array.isArray(c)) c.forEach(x=>PORT.collapsed.add(x)); }catch(_){}
+
+function portProjectOptions(sel){
+  const byP=new Map(); PER.projects.forEach(p=>{ const k=p.programmeId&&PER.programmes.some(g=>g.id===p.programmeId)?p.programmeId:''; if(!byP.has(k)) byP.set(k,[]); byP.get(k).push(p); });
+  const opt=p=>`<option value="${esc(p.id)}" ${p.id===sel?'selected':''}>${esc(p.name)}${p.summary?'':' (no schedule yet)'}</option>`;
+  let h=''; PER.programmes.forEach(g=>{ const ps=byP.get(g.id); if(ps&&ps.length) h+=`<optgroup label="${esc(g.name)}">${ps.map(opt).join('')}</optgroup>`; });
+  const un=byP.get('')||[]; if(un.length) h+=PER.programmes.length?`<optgroup label="Not in a programme">${un.map(opt).join('')}</optgroup>`:un.map(opt).join('');
+  return h;
+}
+// Figures for one project from its summary.
+function portFig(p){
+  const s=p.summary; if(!s) return {slot:true};
+  const day=x=>x==null?null:Math.round(x/DAY);
+  const vb=s.finish!=null&&s.blFinish!=null?day(s.finish-s.blFinish):null, mv=s.finish!=null&&s.prevFinish!=null?day(s.finish-s.prevFinish):null;
+  const age=s.dd!=null?Math.floor((Date.now()-s.dd)/DAY):null;
+  const rag=vb==null?'':vb<=0?'g':vb<=20?'a':'r';
+  return {slot:false,s,vb,mv,age,stale:age!=null&&age>STALE_DAYS&&p.status==='active',rag};
+}
+function portMatch(p){
+  if(PORT.status!=='all'&&p.status!==PORT.status) return false;
+  const q=PORT.q.trim().toLowerCase(); if(!q) return true;
+  const g=PER.programmes.find(x=>x.id===p.programmeId);
+  return [p.name,p.code,p.manager,p.description,g&&g.name,g&&g.code,g&&g.client].some(x=>x&&String(x).toLowerCase().includes(q));
+}
+const portCanEdit=x=>!perRO()&&perCanDel(x&&x.createdBy);
+function renderPort(){
+  const el=document.getElementById('portWrap'); if(!el||el.hidden) return;
+  if(!PER.mode){ el.innerHTML='<div class="card pempty big"><h3>Sign in to see your portfolio</h3><p class="muted">Your programmes, projects and their latest schedule updates appear here once you’re signed in.</p><button class="btn primary" id="portSignIn">Sign in</button></div>'; document.getElementById('portSignIn').onclick=()=>{ if(!document.getElementById('auth')) authStart(); }; return; }
+  const ro=perRO(), G=PER.programmes, P=PER.projects, wsp=PER.mode!=='local'?(PER.space==='team'?'Team workspace':'Private workspace'):'This browser';
+  const head=`<div class="card porthead">
+    <div class="ph-t"><h2>Portfolio</h2><span class="pspace">${wsp}</span></div>
+    <div class="ph-c"><input type="search" id="portQ" placeholder="Search programmes, projects, managers" value="${esc(PORT.q)}" aria-label="Search portfolio">
+      <label class="ctl"><span>Status</span><select id="portStatus"><option value="all">All</option>${Object.entries(PSTAT).map(([k,v])=>`<option value="${k}" ${PORT.status===k?'selected':''}>${v}</option>`).join('')}</select></label>
+      <span class="pbusy" id="portBusy" ${PER.busy?'':'hidden'}>${esc(PER.busy)}</span>
+      ${ro?'':`<button class="btn sm" data-w data-po="addprog" ${PER.schemaOld?'disabled':''}>Add programme</button><button class="btn sm primary" data-w data-po="addproj">Add project</button>`}</div></div>`;
+  const old=PER.schemaOld?`<div class="card pwarn portold"><b>One database step left.</b> Programmes need the latest <code>supabase/schema.sql</code>. Open Supabase → SQL Editor → New query, paste the whole file from the GitHub repo and click Run. Projects work in the meantime.</div>`:'';
+  if(!P.length&&!G.length){ el.innerHTML=head+old+`<div class="card pempty big"><h3>Build your portfolio</h3><p class="muted">Add a programme, then add a slot for each project in it. A slot holds the project’s name, status and manager until its first schedule update is saved, then shows forecast, variance and progress here.</p>
+    <div class="prow">${ro?'':`<button class="btn primary" data-w data-po="addprog" ${PER.schemaOld?'disabled':''}>Add a programme</button><button class="btn" data-w data-po="addproj">Add a project slot</button><button class="btn" data-w data-po="sample" ${PER.schemaOld?'disabled':''}>Load sample portfolio</button>`}</div>${ro?'<p class="muted">You have view-only access, so ask an editor to set up programmes.</p>':''}</div>`; perBusy(PER.busy); return; }
+  // KPIs over everything (unfiltered)
+  const F=P.map(p=>({p,f:portFig(p)})), withS=F.filter(x=>!x.f.slot), slots=F.length-withS.length;
+  const behind=withS.filter(x=>x.f.vb!=null&&x.f.vb>0), slipped=withS.filter(x=>x.f.mv!=null&&x.f.mv>0), stale=F.filter(x=>x.p.status==='active'&&(x.f.slot||x.f.stale));
+  const worst=behind.slice().sort((a,b)=>b.f.vb-a.f.vb)[0];
+  const tiles=`<div class="card stats portstats">
+    <div class="stat"><div class="sl">Programmes</div><div class="sv">${G.length}</div><div class="ss">${P.filter(p=>!p.programmeId||!G.some(g=>g.id===p.programmeId)).length} project${P.filter(p=>!p.programmeId||!G.some(g=>g.id===p.programmeId)).length===1?'':'s'} not in one</div></div>
+    <div class="stat"><div class="sl">Projects</div><div class="sv">${P.length}</div><div class="ss">${withS.length} with schedules · ${slots} slot${slots===1?'':'s'}</div></div>
+    <div class="stat"><div class="sl">Behind baseline</div><div class="sv ${behind.length?'late':''}">${behind.length}</div><div class="ss">of ${withS.filter(x=>x.f.vb!=null).length} with a baseline</div></div>
+    <div class="stat"><div class="sl">Worst variance</div><div class="sv ${worst?'late':''}">${worst?dS(worst.f.vb):'—'}</div><div class="ss">${worst?esc(worst.p.name):'nothing behind'}</div></div>
+    <div class="stat"><div class="sl">Slipped last period</div><div class="sv ${slipped.length?'late':''}">${slipped.length}</div><div class="ss">forecast finish moved later</div></div>
+    <div class="stat"><div class="sl">Updates due</div><div class="sv ${stale.length?'amber':''}">${stale.length}</div><div class="ss">active, none in ${STALE_DAYS} days</div></div></div>`;
+  const row=p=>{ const f=portFig(p), s=f.s, can=portCanEdit(p);
+    const who=[p.code,p.manager].filter(Boolean).map(esc).join(' · ');
+    if(f.slot) return `<div class="prow2 slot" data-pid="${esc(p.id)}">
+      <div class="pc-name"><b>${esc(p.name)}</b>${who?`<span>${who}</span>`:''}</div>
+      <div class="pc-st"><span class="stc ${p.status}">${PSTAT[p.status]||p.status}</span></div>
+      <div class="pc-empty"><span class="slotlab">Slot</span> No schedule yet${p.description?` · <span class="muted">${esc(p.description)}</span>`:''}</div>
+      <div class="pc-act">${!ro?`<button class="btn sm primary" data-w data-po="upload" data-id="${esc(p.id)}">Add first update</button>`:''}${can?`<button class="btn sm ghost" data-w data-po="editproj" data-id="${esc(p.id)}" aria-label="Edit ${esc(p.name)}">Edit</button>`:''}</div></div>`;
+    const pa=s.pctA, pp=s.pctP;
+    return `<div class="prow2" data-pid="${esc(p.id)}">
+      <div class="pc-name"><i class="rag ${f.rag}" title="${f.rag==='g'?'On or ahead of baseline':f.rag==='a'?'Up to 20 days behind baseline':f.rag==='r'?'More than 20 days behind baseline':'No baseline'}"></i><b>${esc(p.name)}</b>${who?`<span>${who}</span>`:''}</div>
+      <div class="pc-st"><span class="stc ${p.status}">${PSTAT[p.status]||p.status}</span></div>
+      <div class="pc-up"><span class="pl">Latest update</span><b>${fmtD(s.dd)}</b><span class="${f.stale?'amber':'muted'}">${f.stale?f.age+' days ago':esc(s.label||'')}</span></div>
+      <div class="pc-fin"><span class="pl">Forecast finish</span><b>${fmtD(s.finish)}</b><span class="muted">BL ${fmtD(s.blFinish)}</span></div>
+      <div class="pc-var"><span class="pl">Vs baseline</span><b class="${dCls(f.vb)}">${dS(f.vb)}</b><span class="${dCls(f.mv)}">${f.mv!=null?dS(f.mv)+' this period':'first period'}</span></div>
+      <div class="pc-prog"><span class="pl">Progress</span><span class="pbar" title="Actual ${pctS(pa)} · planned ${pctS(pp)}"><i style="width:${Math.max(0,Math.min(100,(pa||0)*100)).toFixed(1)}%"></i>${pp!=null?`<b style="left:${Math.max(0,Math.min(100,pp*100)).toFixed(1)}%"></b>`:''}</span><span class="muted">${pctS(pa)} of ${pctS(pp)} planned</span></div>
+      <div class="pc-bei"><span class="pl">BEI</span><b class="${s.bei!=null&&s.bei<.95?'late':''}">${s.bei!=null?(+s.bei).toFixed(2):'—'}</b><span class="muted">${s.count||1} period${(s.count||1)===1?'':'s'}</span></div>
+      <div class="pc-act"><button class="btn sm primary" data-w data-po="open" data-id="${esc(p.id)}">Open</button><button class="btn sm" data-po="periods" data-id="${esc(p.id)}">Periods</button>${!ro?`<button class="btn sm ghost" data-w data-po="upload" data-id="${esc(p.id)}" title="Upload this period’s XER files">Update</button>`:''}${can?`<button class="btn sm ghost" data-w data-po="editproj" data-id="${esc(p.id)}" aria-label="Edit ${esc(p.name)}">Edit</button>`:''}</div></div>`; };
+  const ord=(a,b)=>({active:0,planned:1,on_hold:2,complete:3}[a.status]-{active:0,planned:1,on_hold:2,complete:3}[b.status])||String(a.name).localeCompare(b.name);
+  const sect=(g,list,i)=>{ const shown=list.filter(portMatch).sort(ord), F2=list.map(portFig).filter(f=>!f.slot);
+    const fin=F2.map(f=>f.s.finish).filter(x=>x!=null), vbs=F2.map(f=>f.vb).filter(x=>x!=null), worstV=vbs.length?Math.max(...vbs):null, rag=worstV==null?'':worstV<=0?'g':worstV<=20?'a':'r';
+    const col=g?(g.colour||PCOL[i%PCOL.length]):'var(--ink3)', key=g?g.id:'_none', closed=PORT.collapsed.has(key), can=g&&portCanEdit(g);
+    if(PORT.q&&!shown.length&&!(g&&[g.name,g.code,g.client].some(x=>x&&x.toLowerCase().includes(PORT.q.trim().toLowerCase())))) return '';
+    return `<section class="card prog${closed?' closed':''}" style="--pc:${col}" data-gid="${esc(key)}">
+      <header class="prog-h">
+        <button class="prog-tg" data-po="toggle" data-id="${esc(key)}" aria-expanded="${!closed}" aria-label="${closed?'Expand':'Collapse'} ${esc(g?g.name:'Not in a programme')}"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
+        <div class="prog-t"><div class="prog-n">${g?esc(g.name):'Not in a programme'}${g&&g.code?`<span class="pcode">${esc(g.code)}</span>`:''}</div>
+          <div class="prog-m">${g&&g.client?esc(g.client)+' · ':''}${list.length} project${list.length===1?'':'s'}${list.length-F2.length?` (${list.length-F2.length} slot${list.length-F2.length===1?'':'s'})`:''}${g&&g.description?` · ${esc(g.description)}`:''}</div></div>
+        <div class="prog-k"><div><span class="pl">Programme finish</span><b>${fin.length?fmtD(Math.max(...fin)):'—'}</b></div><div><span class="pl">Worst variance</span><b class="${dCls(worstV)}">${dS(worstV)}</b></div><i class="rag ${rag}" aria-hidden="true"></i></div>
+        <div class="prog-a">${!ro&&g?`<button class="btn sm" data-w data-po="addproj" data-g="${esc(g.id)}">Add project</button>`:''}${can?`<button class="btn sm ghost" data-w data-po="editprog" data-id="${esc(g.id)}">Edit</button>`:''}</div>
+      </header>
+      <div class="prog-b">${shown.length?`<div class="prow2 hd" aria-hidden="true"><div>Project</div><div>Status</div><div>Latest update</div><div>Forecast finish</div><div>Vs baseline</div><div>Progress</div><div>BEI</div><div></div></div>${shown.map(row).join('')}`:`<div class="pempty sm">${list.length?'No projects match the filters.':`No projects yet.${!ro&&g?' Add a project slot to start.':''}`}</div>`}</div></section>`; };
+  const un=P.filter(p=>!p.programmeId||!G.some(g=>g.id===p.programmeId));
+  const body=G.map((g,i)=>sect(g,P.filter(p=>p.programmeId===g.id),i)).join('')+(un.length?sect(null,un,0):'');
+  el.innerHTML=head+old+tiles+`<div class="portlist">${body||'<div class="card pempty">Nothing matches your search.</div>'}</div>
+    <div class="note">Rows are coloured by forecast finish against baseline: green on or ahead, amber up to 20 days late, red beyond that. “Updates due” counts active projects with no update in the last ${STALE_DAYS} days.</div>`;
+  perBusy(PER.busy);
+}
+
+/* ---- dialogs ---- */
+function portProgDialog(g){
+  const cur=g||{}, cols=PCOL.map(c=>`<label class="swatch" style="--c:${c}"><input type="radio" name="pgCol" value="${c}" ${(cur.colour||PCOL[PER.programmes.length%PCOL.length])===c?'checked':''}><i></i><span class="vh">${c}</span></label>`).join('');
+  const d=perDialog(g?'Edit programme':'New programme',`
+    <label class="pfl"><span>Programme name</span><input id="pgName" maxlength="120" value="${esc(cur.name||'')}" placeholder="e.g. Northgate Express Rail"></label>
+    <div class="pdg"><label class="pfl"><span>Code</span><input id="pgCode" maxlength="20" value="${esc(cur.code||'')}" placeholder="e.g. NXR"></label><label class="pfl"><span>Client</span><input id="pgClient" maxlength="80" value="${esc(cur.client||'')}" placeholder="e.g. Northgate Transit"></label></div>
+    <label class="pfl"><span>Description (optional)</span><textarea id="pgDesc" rows="2" maxlength="300">${esc(cur.description||'')}</textarea></label>
+    <div class="pfl"><span>Colour</span><div class="swatches">${cols}</div></div>
+    ${g&&portCanEdit(g)?`<button class="plink danger" data-del-prog type="button">Delete programme</button>`:''}`,g?'Save':'Create programme',async d=>{
+      const name=d.querySelector('#pgName').value.trim(); if(!name){ d.querySelector('[data-err]').textContent='Give the programme a name.'; return false; }
+      const f={name,code:d.querySelector('#pgCode').value.trim(),client:d.querySelector('#pgClient').value.trim(),description:d.querySelector('#pgDesc').value.trim(),colour:(d.querySelector('input[name=pgCol]:checked')||{}).value||''};
+      await perRun(g?'Saving programme…':'Creating programme…',async()=>{ if(g) await PER.store.updateProgramme(g.id,f); else await PER.store.createProgramme(f); perToast(g?'Programme saved.':`Created “${name}”.`); }); });
+  const del=d.querySelector('[data-del-prog]'); if(del) del.onclick=()=>{ const n=PER.projects.filter(p=>p.programmeId===g.id).length; d.remove();
+    perDialog('Delete programme?',`<p>This deletes the programme <b>${esc(g.name)}</b>. Its ${n} project${n===1?'':'s'} and their periods are kept and move to “Not in a programme”.</p>`,'Delete programme',async()=>{ await perRun('Deleting programme…',async()=>{ await PER.store.deleteProgramme(g.id); perToast('Programme deleted.'); }); }); };
+}
+function portProjectDialog(p,o){
+  o=o||{}; const cur=p||{status:'active',programmeId:o.programmeId||null}, G=PER.programmes;
+  const d=perDialog(p?'Edit project':'New project slot',`
+    <label class="pfl"><span>Project name</span><input id="pjName" maxlength="120" value="${esc(cur.name||'')}" placeholder="e.g. Depot & Stabling – Phase 2"></label>
+    <div class="pdg"><label class="pfl"><span>Programme</span><select id="pjProg" ${PER.schemaOld?'disabled':''}><option value="">Not in a programme</option>${G.map(g=>`<option value="${esc(g.id)}" ${cur.programmeId===g.id?'selected':''}>${esc(g.name)}</option>`).join('')}</select></label>
+      <label class="pfl"><span>Status</span><select id="pjStatus" ${PER.schemaOld?'disabled':''}>${Object.entries(PSTAT).map(([k,v])=>`<option value="${k}" ${cur.status===k?'selected':''}>${v}</option>`).join('')}</select></label></div>
+    <div class="pdg"><label class="pfl"><span>Project code</span><input id="pjCode" maxlength="30" value="${esc(cur.code||'')}" placeholder="e.g. NXR-CIV" ${PER.schemaOld?'disabled':''}></label><label class="pfl"><span>Project manager</span><input id="pjMgr" maxlength="80" value="${esc(cur.manager||'')}" ${PER.schemaOld?'disabled':''}></label></div>
+    <label class="pfl"><span>Description (optional)</span><textarea id="pjDesc" rows="2" maxlength="300" ${PER.schemaOld?'disabled':''}>${esc(cur.description||'')}</textarea></label>
+    ${p?'':`<p class="muted">${PER.mode!=='local'?(PER.space==='team'?'Saved to the team workspace.':'Saved to your private workspace.'):'Saved in this browser.'} The slot fills in once you add its first schedule update.</p>`}
+    ${p&&portCanEdit(p)?`<button class="plink danger" data-del-proj type="button">Delete project</button>`:''}`,p?'Save':'Create slot',async d=>{
+      const name=d.querySelector('#pjName').value.trim(); if(!name){ d.querySelector('[data-err]').textContent='Give the project a name.'; return false; }
+      const f=PER.schemaOld?{name}:{name,programmeId:d.querySelector('#pjProg').value||null,status:d.querySelector('#pjStatus').value,code:d.querySelector('#pjCode').value.trim(),manager:d.querySelector('#pjMgr').value.trim(),description:d.querySelector('#pjDesc').value.trim()};
+      await perRun(p?'Saving project…':'Creating slot…',async()=>{ if(p){ await PER.store.updateProject(p.id,f); perToast('Project saved.'); } else { const id=await PER.store.createProject(name,f); perToast(`Added “${name}”.`); if(o.after) o.after(id); } }); });
+  const del=d.querySelector('[data-del-proj]'); if(del) del.onclick=()=>{ d.remove(); const n=p.summary?p.summary.count||0:0;
+    perDialog('Delete project?',`<p>This permanently deletes <b>${esc(p.name)}</b>${n?` and its ${n} saved period${n===1?'':'s'}`:''} for everyone. This can’t be undone.</p>`,'Delete project',async()=>{ await perRun('Deleting project…',async()=>{ await perDeleteProject(p); if(PER.pid===p.id) PER.pid=null; perToast('Project deleted.'); }); }); };
+}
+
+/* ---- actions ---- */
+async function portOpen(pid){
+  const p=PER.projects.find(x=>x.id===pid); if(!p) return;
+  let list; try{ list=await PER.store.listPeriods(pid); }catch(e){ perToast(perErr(e),'err'); return; }
+  const sm=perSummary(list); if(!sm){ perToast('This project has no saved periods yet.','err'); return; }
+  const per=list.find(x=>x.id===sm.periodId); perPick(pid); await perLoad(per,pid); setTab('dash');
+}
+function portUpload(pid){
+  const inp=document.createElement('input'); inp.type='file'; inp.multiple=true; inp.accept='.xer,.XER';
+  inp.onchange=async()=>{ const list=[...inp.files]; if(!list.length) return;
+    S.files=[]; PER.loaded=null; await addFiles(list); perPick(pid);
+    const ok=S.files.filter(f=>!f.error);
+    if(!ok.some(f=>f.role==='live')){ perToast('None of those files could be read as a live schedule.','err'); return; }
+    perToast(ok.some(f=>f.role==='baseline')?'Files loaded. Check the roles, then save the period.':'Loaded with no baseline. Name a file “baseline” or set its role in Files to compare against one.');
+    setTimeout(perAskSave,150); };
+  inp.click();
+}
+async function portSample(){
+  await perRun('Building sample portfolio…',async()=>{
+    const g1=await PER.store.createProgramme({name:'Northgate Express Rail',code:'NXR',client:'Northgate Transit Authority',description:'12 km light rail extension',colour:PCOL[0]});
+    const g2=await PER.store.createProgramme({name:'Westfield Station Quarter',code:'WSQ',client:'Westfield Development Corporation',description:'Mixed-use regeneration around the new station',colour:PCOL[1]});
+    const pid=await PER.store.createProject('Civils & Systems',{programmeId:g1,code:'NXR-CS',status:'active',manager:'A. Patel',description:'Main works contract'});
+    await PER.store.createProject('Depot & Stabling – Phase 2',{programmeId:g1,code:'NXR-DP2',status:'planned',manager:'',description:'Awaiting contract award'});
+    await PER.store.createProject('Public realm & highways',{programmeId:g2,code:'WSQ-PR',status:'active',manager:'R. Okafor'});
+    await PER.store.createProject('Residential block A',{programmeId:g2,code:'WSQ-A',status:'planned'});
+    perPick(pid); await perSampleInto(pid);
+    perToast('Sample portfolio ready: two programmes, four projects, one with six monthly updates.'); });
+}
+function wirePort(){
+  const w=document.getElementById('portWrap');
+  w.addEventListener('input',e=>{ if(e.target.id==='portQ'){ PORT.q=e.target.value; const pos=e.target.selectionStart; renderPort(); const q=document.getElementById('portQ'); if(q){ q.focus(); try{ q.setSelectionRange(pos,pos); }catch(_){} } } });
+  w.addEventListener('change',e=>{ if(e.target.id==='portStatus'){ PORT.status=e.target.value; renderPort(); } });
+  w.addEventListener('click',e=>{
+    const b=e.target.closest('[data-po]'); if(!b) return; const v=b.dataset.po, id=b.dataset.id;
+    if(v==='addprog') portProgDialog(null);
+    else if(v==='addproj') portProjectDialog(null,{programmeId:b.dataset.g||null});
+    else if(v==='editprog') portProgDialog(PER.programmes.find(g=>g.id===id));
+    else if(v==='editproj') portProjectDialog(PER.projects.find(p=>p.id===id));
+    else if(v==='open') portOpen(id);
+    else if(v==='periods'){ perPick(id); setTab('per'); }
+    else if(v==='upload') portUpload(id);
+    else if(v==='sample') portSample();
+    else if(v==='toggle'){ PORT.collapsed.has(id)?PORT.collapsed.delete(id):PORT.collapsed.add(id); try{ localStorage.setItem('pacer.port.collapsed',JSON.stringify([...PORT.collapsed])); }catch(_){} renderPort(); }
   });
 }
 
@@ -4550,6 +4822,7 @@ function init(){
   rebuild(true);
   if(tab!=='gantt') setTab(tab);
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ drawProfile(); redraw(); });
+  if(window.claude&&window.claude.hosted) document.querySelectorAll('#aiWrap .note').forEach(n=>{ n.textContent=n.textContent.replace('Uses your own Claude usage.','Uses the workbench’s Anthropic API key.'); });
   authStart();
 }
 if(typeof document!=='undefined'&&document.getElementById('ganttWrap')) init();
