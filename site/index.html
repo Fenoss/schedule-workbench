@@ -766,6 +766,14 @@ select.bin{padding:0 2px}
 @media (min-width:1240px){ body.ai-open .navs .wrap,body.ai-open .main{padding-right:calc(440px + 16px)} }
 @media (max-width:560px){ .aipanel{padding-left:12px;padding-right:12px} }
 /* ---- portfolio ---- */
+.psel{width:16px;height:16px;accent-color:var(--accent);margin:0 2px 0 0;flex:none;cursor:pointer}
+.prow2.slot .pc-name{padding-left:24px}
+.selbar{position:sticky;bottom:12px;z-index:5;display:flex;align-items:center;gap:12px;padding:10px 14px;box-shadow:var(--shadow);border-color:var(--accent)}
+.selbar .muted{flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cxm-g{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cxm-all{border:0;background:none;color:var(--accent);font-weight:700;font-size:11px;text-transform:none;letter-spacing:0;padding:2px 4px;border-radius:4px}
+.cxm-all:hover{background:var(--accentSoft)}
+
 .amber{color:#B97800!important}
 :root[data-theme="dark"] .amber{color:#F2B33D!important}
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .amber{color:#F2B33D!important} }
@@ -803,7 +811,7 @@ select.bin{padding:0 2px}
 .prow2 b{font-variant-numeric:tabular-nums}
 .prow2 span{font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pc-name{flex-direction:row!important;flex-wrap:wrap;align-items:center;column-gap:8px!important}
-.pc-name b{font-size:15px}.pc-name span{flex-basis:100%;padding-left:18px;color:var(--ink2)}
+.pc-name{flex-wrap:nowrap!important}.pc-name b{font-size:15px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pc-name{display:grid!important;grid-template-columns:auto auto minmax(0,1fr);align-items:center}.prow2.slot .pc-name{grid-template-columns:minmax(0,1fr)}.pc-name span{grid-column:1 / -1}.pc-name span{flex-basis:100%;padding-left:18px;color:var(--ink2)}
 .prow2.slot .pc-name span{padding-left:0}
 .prow2.slot{background:repeating-linear-gradient(135deg,transparent 0 10px,var(--surface2) 10px 20px)}
 .pc-empty{grid-column:3 / 8;flex-direction:row!important;align-items:center;gap:8px!important;color:var(--ink2);font-size:13px}
@@ -3333,7 +3341,7 @@ function aiPanel(open){
   requestAnimationFrame(()=>{ if(typeof drawProfile==='function') drawProfile(); redraw(); });
 }
 function aiCtxLabel(){ const el=document.getElementById('aiCtx'); if(!el) return; const c=typeof ctxInfo==='function'?ctxInfo():null;
-  el.textContent=!c||!c.ok.length?'No schedule open':c.L?`${c.proj?c.proj.name:'Saved project'} · ${c.L.label}`:c.sample?'Sample schedule':'Unsaved schedule'; }
+  el.textContent=!c||!c.ok.length?'No schedule open':c.L&&c.L.multi?`${c.prog?c.prog.name+' · ':''}${c.L.items.length} projects combined`:c.L?`${c.proj?c.proj.name:'Saved project'} · ${c.L.label}`:c.sample?'Sample schedule':'Unsaved schedule'; }
 function renderAi(){
   const q=document.getElementById('aiQuick');
   if(!q.childElementCount) q.innerHTML=AI_QUICK.map(([l],i)=>`<button class="aiq" data-aiq="${i}">${esc(l)}</button>`).join('');
@@ -3804,8 +3812,11 @@ function pickTldDefaults(){
 // Header: which schedule is open (programme / project / period), with a switcher.
 function ctxInfo(){
   const ok=S.files.filter(f=>!f.error&&f.role!=='off'), hasP=typeof PER!=='undefined';
-  const pf=ok.find(f=>f.period), L=hasP&&pf&&PER.loaded&&PER.loaded.id===pf.period?PER.loaded:null;
-  const proj=L&&PER.projects.find(p=>p.id===L.pid), prog=proj&&PER.programmes.find(g=>g.id===proj.programmeId);
+  const pf=ok.find(f=>f.period), LD=hasP?PER.loaded:null;
+  const L=LD&&pf?(LD.multi?(ok.every(f=>!f.period||LD.ids.includes(f.period))?LD:null):(LD.id===pf.period?LD:null)):null;
+  let proj=null, prog=null;
+  if(L&&L.multi){ const gs=[...new Set(L.items.map(i=>(PER.projects.find(p=>p.id===i.pid)||{}).programmeId))]; prog=gs.length===1&&gs[0]?PER.programmes.find(g=>g.id===gs[0])||null:null; }
+  else if(L){ proj=PER.projects.find(p=>p.id===L.pid)||null; prog=proj&&PER.programmes.find(g=>g.id===proj.programmeId); }
   return {ok,L,proj,prog,sample:ok.some(f=>f.sample),built:ok.some(f=>f.builder)};
 }
 function renderMeta(){
@@ -3814,17 +3825,19 @@ function renderMeta(){
   let t1, t2=[];
   if(!ok.length){ t1='<b>No schedule open</b>'; t2.push('Pick a project or add XER files'); }
   else {
-    if(L) t1=(prog?`<span class="cx-g">${esc(prog.name)}</span><span class="cx-s" aria-hidden="true">/</span>`:'')+`<b>${esc(proj?proj.name:'Saved project')}</b>`;
+    if(L&&L.multi) t1=(prog?`<span class="cx-g">${esc(prog.name)}</span><span class="cx-s" aria-hidden="true">/</span>`:'')+`<b>${L.all&&prog?'All projects':L.items.length+' projects'}</b><span class="pill">Combined</span>`;
+    else if(L) t1=(prog?`<span class="cx-g">${esc(prog.name)}</span><span class="cx-s" aria-hidden="true">/</span>`:'')+`<b>${esc(proj?proj.name:'Saved project')}</b>`;
     else t1=`<b>${sample?'Sample schedule':built?'Schedule built here':'Unsaved schedule'}</b>`;
     const dd=M&&M.dd!=null?fmtL(M.dd):null;
-    if(L) t2.push(esc(L.label)); else t2.push(`${ok.length} file${ok.length===1?'':'s'}${sample||built?'':' · not saved'}`);
-    if(dd&&!(L&&String(L.label).includes(dd))) t2.push('Data date '+(M?fmtD(M.dd):''));
+    if(L&&L.multi){ const ds=L.items.map(i=>i.dd).filter(x=>x!=null), lo=Math.min(...ds), hi=Math.max(...ds); t2.push(esc(L.items.map(i=>(PER.projects.find(p=>p.id===i.pid)||{}).name||'').join(', '))); if(ds.length&&lo!==hi) t2.push(`Data dates ${fmtD(lo)}–${fmtD(hi)}`); }
+    else if(L) t2.push(esc(L.label)); else t2.push(`${ok.length} file${ok.length===1?'':'s'}${sample||built?'':' · not saved'}`);
+    if(dd&&!(L&&!L.multi&&String(L.label).includes(dd))&&!(L&&L.multi&&L.items.some(i=>i.dd!==L.items[0].dd))) t2.push('Data date '+(M?fmtD(M.dd):''));
     if(M&&M.base&&M.base.acts.size&&M.bdd!=null) t2.push('Baseline '+fmtD(M.bdd));
   }
   el.innerHTML=`<span class="cx-t"><span class="cx-1">${t1}</span><span class="cx-2">${t2.join(' · ')}</span></span><svg class="cx-c" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>`;
   el.setAttribute('aria-label','Open schedule: '+el.textContent.replace(/\s+/g,' ').trim()+'. Switch project');
   el.title='Switch project';
-  const np=document.getElementById('navProjName'); if(np){ const c=ctxInfo(); np.textContent=!c.ok.length?'':c.L?(c.proj?c.proj.name:c.L.label):c.sample?'Sample':'Unsaved'; }
+  const np=document.getElementById('navProjName'); if(np){ const c=ctxInfo(); np.textContent=!c.ok.length||!c.L?'':c.L.multi?(c.prog?c.prog.name:c.L.items.length+' projects'):(c.proj?c.proj.name:c.L.label); }
   if(typeof aiCtxLabel==='function') aiCtxLabel();
   const m=document.getElementById('ctxMenu'); if(m&&!m.hidden) renderCtxMenu();
 }
@@ -3835,11 +3848,11 @@ function renderCtxMenu(){
   if(!signed) list='<div class="cxm-e">Sign in to open your saved projects.</div>';
   else if(!PER.projects.length) list='<div class="cxm-e">No saved projects yet. Add one on the Portfolio page.</div>';
   else {
-    const item=p=>{ const s=p.summary, cur=L&&L.pid===p.id; return `<button class="cxm-i${cur?' cur':''}" data-cx="${esc(p.id)}" ${s?'':'disabled'}><span class="cxm-n">${esc(p.name)}${cur?' <em>Open</em>':''}</span><span class="cxm-d">${s?esc(s.label||'')+(s.dd!=null&&!String(s.label||'').includes(fmtL(s.dd))?' · '+fmtD(s.dd):''):'No schedule yet'}</span></button>`; };
+    const item=p=>{ const s=p.summary, cur=L&&(L.multi?L.items.some(i=>i.pid===p.id):L.pid===p.id); return `<button class="cxm-i${cur?' cur':''}" data-cx="${esc(p.id)}" ${s?'':'disabled'}><span class="cxm-n">${esc(p.name)}${cur?' <em>Open</em>':''}</span><span class="cxm-d">${s?esc(s.label||'')+(s.dd!=null&&!String(s.label||'').includes(fmtL(s.dd))?' · '+fmtD(s.dd):''):'No schedule yet'}</span></button>`; };
     const match=p=>!q||[p.name,p.code,(PER.programmes.find(g=>g.id===p.programmeId)||{}).name].some(x=>x&&String(x).toLowerCase().includes(q));
-    const groups=PER.programmes.map(g=>[g.name,PER.projects.filter(p=>p.programmeId===g.id&&match(p))]);
+    const groups=PER.programmes.map(g=>[g.name,PER.projects.filter(p=>p.programmeId===g.id&&match(p)),g.id]);
     groups.push(['Not in a programme',PER.projects.filter(p=>(!p.programmeId||!PER.programmes.some(g=>g.id===p.programmeId))&&match(p))]);
-    list=groups.filter(([,ps])=>ps.length).map(([n,ps])=>`<div class="cxm-g">${esc(n)}</div>${ps.sort((a,b)=>String(a.name).localeCompare(b.name)).map(item).join('')}`).join('')||'<div class="cxm-e">No projects match.</div>';
+    list=groups.filter(([,ps])=>ps.length).map(([n,ps,gid])=>`<div class="cxm-g"><span>${esc(n)}</span>${gid&&PER.projects.filter(p=>p.programmeId===gid&&p.summary).length>1?`<button class="cxm-all" data-cxg="${esc(gid)}">Open all</button>`:''}</div>${ps.sort((a,b)=>String(a.name).localeCompare(b.name)).map(item).join('')}`).join('')||'<div class="cxm-e">No projects match.</div>';
   }
   const search=signed&&PER.projects.length>6?`<input type="search" class="cxm-q" id="ctxQ" placeholder="Find a project" value="${esc(m.dataset.q||'')}" aria-label="Find a project">`:'';
   m.innerHTML=`<div class="cxm-h">Open a project</div>${search}<div class="cxm-l">${list}</div>
@@ -3854,6 +3867,7 @@ function wireCtx(){
   m.addEventListener('input',e=>{ if(e.target.id==='ctxQ'){ m.dataset.q=e.target.value; const pos=e.target.selectionStart; renderCtxMenu(); const q=document.getElementById('ctxQ'); if(q){ q.focus(); try{ q.setSelectionRange(pos,pos); }catch(_){} } } });
   m.addEventListener('click',e=>{
     const it=e.target.closest('[data-cx]'); if(it){ close(); portOpen(it.dataset.cx,true); return; }
+    const gg=e.target.closest('[data-cxg]'); if(gg){ close(); portOpenProgramme(gg.dataset.cxg,true); return; }
     const a=e.target.closest('[data-cxa]'); if(!a) return; close();
     if(a.dataset.cxa==='port') setTab('port'); else if(a.dataset.cxa==='save') perAskSave(); else if(a.dataset.cxa==='files') openFilesModal(); else if(a.dataset.cxa==='signin'&&!document.getElementById('auth')) authStart(); });
 }
@@ -4737,7 +4751,7 @@ function wirePer(){
 }
 
 /* ================= Portfolio: programmes and project slots ================= */
-const PORT={q:'',status:'all',collapsed:new Set()};
+const PORT={q:'',status:'all',collapsed:new Set(),sel:new Set()};
 const PSTAT={planned:'Planned',active:'Active',on_hold:'On hold',complete:'Complete'};
 const PCOL=['#FC4C02','#3B6FE0','#14A37F','#9B5DE5','#D99A00','#E04F8C','#1BA1C4','#6DAA1A'];
 const STALE_DAYS=35;
@@ -4769,6 +4783,7 @@ const portCanEdit=x=>!perRO()&&perCanDel(x&&x.createdBy);
 function renderPort(){
   const el=document.getElementById('portWrap'); if(!el||el.hidden) return;
   if(!PER.mode){ el.innerHTML='<div class="card pempty big"><h3>Sign in to see your portfolio</h3><p class="muted">Your programmes, projects and their latest schedule updates appear here once you’re signed in.</p><button class="btn primary" id="portSignIn">Sign in</button></div>'; document.getElementById('portSignIn').onclick=()=>{ if(!document.getElementById('auth')) authStart(); }; return; }
+  [...PORT.sel].forEach(id=>{ const p=PER.projects.find(x=>x.id===id); if(!p||!p.summary) PORT.sel.delete(id); });
   const ro=perRO(), G=PER.programmes, P=PER.projects, wsp=PER.mode!=='local'?(PER.space==='team'?'Team workspace':'Private workspace'):'This browser';
   const head=`<div class="card porthead">
     <div class="ph-t"><h2>${esc(wsp)}</h2><span class="pspace">${PER.programmes.length} programme${PER.programmes.length===1?'':'s'} · ${PER.projects.length} project${PER.projects.length===1?'':'s'}</span></div>
@@ -4793,13 +4808,13 @@ function renderPort(){
   const row=p=>{ const f=portFig(p), s=f.s, can=portCanEdit(p);
     const who=[p.code,p.manager].filter(Boolean).map(esc).join(' · ');
     if(f.slot) return `<div class="prow2 slot" data-pid="${esc(p.id)}">
-      <div class="pc-name"><b>${esc(p.name)}</b>${who?`<span>${who}</span>`:''}</div>
+      <div class="pc-name"><b title="${esc(p.name)}">${esc(p.name)}</b>${who?`<span>${who}</span>`:''}</div>
       <div class="pc-st"><span class="stc ${p.status}">${PSTAT[p.status]||p.status}</span></div>
       <div class="pc-empty"><span class="slotlab">Slot</span> No schedule yet${p.description?` · <span class="muted">${esc(p.description)}</span>`:''}</div>
       <div class="pc-act">${!ro?`<button class="btn sm primary" data-w data-po="upload" data-id="${esc(p.id)}">Add first update</button>`:''}${can?`<button class="btn sm ghost" data-w data-po="editproj" data-id="${esc(p.id)}" aria-label="Edit ${esc(p.name)}">Edit</button>`:''}</div></div>`;
     const pa=s.pctA, pp=s.pctP;
     return `<div class="prow2" data-pid="${esc(p.id)}">
-      <div class="pc-name"><i class="rag ${f.rag}" title="${f.rag==='g'?'On or ahead of baseline':f.rag==='a'?'Up to 20 days behind baseline':f.rag==='r'?'More than 20 days behind baseline':'No baseline'}"></i><b>${esc(p.name)}</b>${who?`<span>${who}</span>`:''}</div>
+      <div class="pc-name"><input type="checkbox" class="psel" data-sel="${esc(p.id)}" ${PORT.sel.has(p.id)?'checked':''} aria-label="Select ${esc(p.name)} to open with others"><i class="rag ${f.rag}" title="${f.rag==='g'?'On or ahead of baseline':f.rag==='a'?'Up to 20 days behind baseline':f.rag==='r'?'More than 20 days behind baseline':'No baseline'}"></i><b title="${esc(p.name)}">${esc(p.name)}</b>${who?`<span>${who}</span>`:''}</div>
       <div class="pc-st"><span class="stc ${p.status}">${PSTAT[p.status]||p.status}</span></div>
       <div class="pc-up"><span class="pl">Latest update</span><b>${fmtD(s.dd)}</b><span class="${f.stale?'amber':'muted'}">${f.stale?f.age+' days ago':esc(s.label||'')}</span></div>
       <div class="pc-fin"><span class="pl">Forecast finish</span><b>${fmtD(s.finish)}</b><span class="muted">BL ${fmtD(s.blFinish)}</span></div>
@@ -4818,13 +4833,14 @@ function renderPort(){
         <div class="prog-t"><div class="prog-n">${g?esc(g.name):'Not in a programme'}${g&&g.code?`<span class="pcode">${esc(g.code)}</span>`:''}</div>
           <div class="prog-m">${g&&g.client?esc(g.client)+' · ':''}${list.length} project${list.length===1?'':'s'}${list.length-F2.length?` (${list.length-F2.length} slot${list.length-F2.length===1?'':'s'})`:''}${g&&g.description?` · ${esc(g.description)}`:''}</div></div>
         <div class="prog-k"><div><span class="pl">Programme finish</span><b>${fin.length?fmtD(Math.max(...fin)):'—'}</b></div><div><span class="pl">Worst variance</span><b class="${dCls(worstV)}">${dS(worstV)}</b></div><i class="rag ${rag}" aria-hidden="true"></i></div>
-        <div class="prog-a">${!ro&&g?`<button class="btn sm" data-w data-po="addproj" data-g="${esc(g.id)}">Add project</button>`:''}${can?`<button class="btn sm ghost" data-w data-po="editprog" data-id="${esc(g.id)}">Edit</button>`:''}</div>
+        <div class="prog-a">${g&&F2.length>1?`<button class="btn sm primary" data-w data-po="openprog" data-id="${esc(g.id)}" title="Open the latest update of every project in this programme together">Open programme</button>`:''}${!ro&&g?`<button class="btn sm" data-w data-po="addproj" data-g="${esc(g.id)}">Add project</button>`:''}${can?`<button class="btn sm ghost" data-w data-po="editprog" data-id="${esc(g.id)}">Edit</button>`:''}</div>
       </header>
       <div class="prog-b">${shown.length?`<div class="prow2 hd" aria-hidden="true"><div>Project</div><div>Status</div><div>Latest update</div><div>Forecast finish</div><div>Vs baseline</div><div>Progress</div><div>BEI</div><div></div></div>${shown.map(row).join('')}`:`<div class="pempty sm">${list.length?'No projects match the filters.':`No projects yet.${!ro&&g?' Add a project slot to start.':''}`}</div>`}</div></section>`; };
   const un=P.filter(p=>!p.programmeId||!G.some(g=>g.id===p.programmeId));
   const body=G.map((g,i)=>sect(g,P.filter(p=>p.programmeId===g.id),i)).join('')+(un.length?sect(null,un,0):'');
   el.innerHTML=head+old+tiles+`<div class="portlist">${body||'<div class="card pempty">Nothing matches your search.</div>'}</div>
-    <div class="note">Rows are coloured by forecast finish against baseline: green on or ahead, amber up to 20 days late, red beyond that. “Updates due” counts active projects with no update in the last ${STALE_DAYS} days.</div>`;
+    ${PORT.sel.size?`<div class="selbar card" role="region" aria-label="Selected projects"><b>${PORT.sel.size} project${PORT.sel.size===1?'':'s'} selected</b><span class="muted">${esc([...PORT.sel].map(id=>(PER.projects.find(p=>p.id===id)||{}).name).filter(Boolean).join(', '))}</span><button class="btn sm primary" data-w data-po="opensel">${PORT.sel.size>1?'Open together':'Open'}</button><button class="btn sm" data-po="clearsel">Clear</button></div>`:''}
+    <div class="note">Tick projects to open several together, or use Open programme. Rows are coloured by forecast finish against baseline: green on or ahead, amber up to 20 days late, red beyond that. “Updates due” counts active projects with no update in the last ${STALE_DAYS} days.</div>`;
   perBusy(PER.busy);
 }
 
@@ -4867,6 +4883,24 @@ async function portOpen(pid,keep){
   const sm=perSummary(list); if(!sm){ perToast('This project has no saved periods yet.','err'); return; }
   const per=list.find(x=>x.id===sm.periodId); perPick(pid); await perLoad(per,pid); if(!keep||S.tab==='port'||S.tab==='per') setTab('dash'); else renderMeta();
 }
+// Open the latest update of several projects together, e.g. a whole programme.
+async function portOpenMany(pids,o){
+  o=o||{}; pids=[...new Set(pids)].filter(id=>{ const p=PER.projects.find(x=>x.id===id); return p&&p.summary; });
+  if(!pids.length){ perToast('None of those projects has a saved update yet.','err'); return; }
+  if(pids.length===1&&!o.all){ await portOpen(pids[0],o.keep); return; }
+  await perRun(`Opening ${pids.length} projects…`,async()=>{
+    const files=[], items=[]; let i=0;
+    for(const pid of pids){ i++; const p=PER.projects.find(x=>x.id===pid); perBusy(`Opening ${p.name} (${i} of ${pids.length})…`);
+      const list=await PER.store.listPeriods(pid), sm=perSummary(list); if(!sm) continue;
+      const per=list.find(x=>x.id===sm.periodId); files.push(...await perGetFiles(pid,per)); items.push({pid,id:per.id,label:per.label,dd:per.dd}); }
+    S.files=files; S.match='proj'; if(typeof B!=='undefined'&&B.st&&B.st.sync){ B.st.sync=false; bSave(); }
+    const nxr=files.some(f=>/^NXR-(CIV|SYS)/.test(f.name)); if(S.site.sample&&!nxr) S.site={marks:[],profile:[]}; else if(nxr&&!S.site.marks.length&&!S.site.profile.length) S.site=sampleSite();
+    PER.loaded={multi:true,all:!!o.all,pid:items[0].pid,ids:items.map(x=>x.id),items,label:`${items.length} projects`};
+    PER.pid=items[0].pid; perPick(items[0].pid);
+    rebuild(true); perToast(`Opened ${items.length} projects together.`); });
+  PORT.sel.clear(); if(!o.keep||S.tab==='port'||S.tab==='per') setTab('dash'); else renderMeta();
+}
+function portOpenProgramme(gid,keep){ const ids=PER.projects.filter(p=>p.programmeId===gid&&p.summary).map(p=>p.id); portOpenMany(ids,{all:true,keep}); }
 function portUpload(pid){
   const inp=document.createElement('input'); inp.type='file'; inp.multiple=true; inp.accept='.xer,.XER';
   inp.onchange=async()=>{ const list=[...inp.files]; if(!list.length) return;
@@ -4889,7 +4923,8 @@ function wirePort(){
   addEventListener('beforeunload',e=>{ if(PER.busy){ e.preventDefault(); e.returnValue='Saving is still in progress. Leave anyway?'; return e.returnValue; } });
   const w=document.getElementById('portWrap');
   w.addEventListener('input',e=>{ if(e.target.id==='portQ'){ PORT.q=e.target.value; const pos=e.target.selectionStart; renderPort(); const q=document.getElementById('portQ'); if(q){ q.focus(); try{ q.setSelectionRange(pos,pos); }catch(_){} } } });
-  w.addEventListener('change',e=>{ if(e.target.id==='portStatus'){ PORT.status=e.target.value; renderPort(); } });
+  w.addEventListener('change',e=>{ if(e.target.id==='portStatus'){ PORT.status=e.target.value; renderPort(); }
+    else if(e.target.dataset.sel){ const id=e.target.dataset.sel; e.target.checked?PORT.sel.add(id):PORT.sel.delete(id); const y=scrollY; renderPort(); scrollTo(0,y); } });
   w.addEventListener('click',e=>{
     const b=e.target.closest('[data-po]'); if(!b) return; const v=b.dataset.po, id=b.dataset.id;
     if(v==='addprog') portProgDialog(null);
@@ -4901,6 +4936,9 @@ function wirePort(){
     else if(v==='upload') portUpload(id);
     else if(v==='sample') portSample();
     else if(v==='samplemore') portSampleMore();
+    else if(v==='openprog') portOpenProgramme(id);
+    else if(v==='opensel') portOpenMany([...PORT.sel]);
+    else if(v==='clearsel'){ PORT.sel.clear(); renderPort(); }
     else if(v==='toggle'){ PORT.collapsed.has(id)?PORT.collapsed.delete(id):PORT.collapsed.add(id); try{ localStorage.setItem('pacer.port.collapsed',JSON.stringify([...PORT.collapsed])); }catch(_){} renderPort(); }
   });
 }
