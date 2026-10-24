@@ -109,7 +109,7 @@ function aiPanel(open){
   requestAnimationFrame(()=>{ if(typeof drawProfile==='function') drawProfile(); redraw(); });
 }
 function aiCtxLabel(){ const el=document.getElementById('aiCtx'); if(!el) return; const c=typeof ctxInfo==='function'?ctxInfo():null;
-  el.textContent=!c||!c.ok.length?'No schedule open':c.L&&c.L.multi?`${c.prog?c.prog.name+' · ':''}${c.L.items.length} projects combined`:c.L?`${c.proj?c.proj.name:'Saved project'} · ${c.L.label}`:c.sample?'Sample schedule':'Unsaved schedule'; }
+  el.textContent=!c||!c.ok.length?'No schedule open':c.L&&c.L.multi?`${c.prog?c.prog.name+' · ':''}${c.L.items.length} projects combined`:c.L?`${c.proj?c.proj.name:'Saved project'} · ${c.L.label}`:(schedTitle(c.ok).title||'Unsaved schedule')+(c.sample?' (demo)':''); }
 function renderAi(){
   const q=document.getElementById('aiQuick');
   if(!q.childElementCount) q.innerHTML=AI_QUICK.map(([l],i)=>`<button class="aiq" data-aiq="${i}">${esc(l)}</button>`).join('');

@@ -45,6 +45,17 @@ function ctxInfo(){
   else if(L){ proj=PER.projects.find(p=>p.id===L.pid)||null; prog=proj&&PER.programmes.find(g=>g.id===proj.programmeId); }
   return {ok,L,proj,prog,sample:ok.some(f=>f.sample),built:ok.some(f=>f.builder)};
 }
+/* Name an unsaved schedule from its own XER: the project (root WBS) names, with a shared programme name pulled out. */
+function schedTitle(ok){
+  const live=ok.filter(f=>f.role!=='baseline'), src=live.length?live:ok, names=[];
+  src.forEach(f=>{ const T=f.tables||{}, roots=(T.PROJWBS||[]).filter(w=>w.proj_node_flag==='Y');
+    (roots.length?roots.map(w=>w.wbs_name||w.wbs_short_name):(T.PROJECT||[]).map(p=>p.proj_short_name)).forEach(n=>{ n=String(n||'').trim(); if(n&&!names.includes(n)) names.push(n); }); });
+  if(!names.length) return {title:null,parts:[]};
+  if(names.length===1) return {title:names[0],parts:[]};
+  const sp=names.map(n=>n.split(/\s+[–—-]\s+/)), head=sp[0][0];
+  if(sp.every(x=>x.length>1&&x[0]===head)) return {title:head,parts:sp.map(x=>x.slice(1).join(' – '))};
+  return {title:names[0],parts:names.slice(1),more:names.length-1};
+}
 function renderMeta(){
   const el=document.getElementById('meta'); if(!el) return;
   const {ok,L,proj,prog,sample,built}=ctxInfo();
@@ -53,10 +64,10 @@ function renderMeta(){
   else {
     if(L&&L.multi) t1=(prog?`<span class="cx-g">${esc(prog.name)}</span><span class="cx-s" aria-hidden="true">/</span>`:'')+`<b>${L.all&&prog?'All projects':L.items.length+' projects'}</b><span class="pill">Combined</span>`;
     else if(L) t1=(prog?`<span class="cx-g">${esc(prog.name)}</span><span class="cx-s" aria-hidden="true">/</span>`:'')+`<b>${esc(proj?proj.name:'Saved project')}</b>`;
-    else t1=`<b>${sample?'Sample schedule':built?'Schedule built here':'Unsaved schedule'}</b>`;
+    else { const st=schedTitle(ok); var stP=st.parts; t1=`<b>${esc(st.title||(built?'Schedule built here':'Untitled schedule'))}</b>${st.more?`<span class="cx-g">+${st.more} more</span>`:''}${sample?'<span class="pill">Demo</span>':built?'':'<span class="pill pill-q">Not saved</span>'}`; }
     const dd=M&&M.dd!=null?fmtL(M.dd):null;
     if(L&&L.multi){ const ds=L.items.map(i=>i.dd).filter(x=>x!=null), lo=Math.min(...ds), hi=Math.max(...ds); t2.push(esc(L.items.map(i=>(PER.projects.find(p=>p.id===i.pid)||{}).name||'').join(', '))); if(ds.length&&lo!==hi) t2.push(`Data dates ${fmtD(lo)}–${fmtD(hi)}`); }
-    else if(L) t2.push(esc(L.label)); else t2.push(`${ok.length} file${ok.length===1?'':'s'}${sample||built?'':' · not saved'}`);
+    else if(L) t2.push(esc(L.label)); else t2.push(stP&&stP.length&&!(ok.length&&stP.length>3)?esc(stP.join(' & ')):`${ok.length} file${ok.length===1?'':'s'}`);
     if(dd&&!(L&&!L.multi&&String(L.label).includes(dd))&&!(L&&L.multi&&L.items.some(i=>i.dd!==L.items[0].dd))) t2.push('Data date '+(M?fmtD(M.dd):''));
     if(M&&M.base&&M.base.acts.size&&M.bdd!=null) t2.push('Baseline '+fmtD(M.bdd));
   }

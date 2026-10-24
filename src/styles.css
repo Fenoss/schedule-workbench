@@ -48,7 +48,8 @@ button{cursor:pointer}
 .cx-t{display:flex;flex-direction:column;min-width:0;line-height:1.2}
 .cx-1{display:flex;align-items:center;gap:6px;min-width:0;font-size:15px;white-space:nowrap;overflow:hidden}
 .cx-1 b{font-weight:700;overflow:hidden;text-overflow:ellipsis}
-.cx-1 .pill{height:18px;font-size:10px}
+.cx-1 .pill{height:18px;font-size:10px;flex:none}
+.pill.pill-q{background:var(--line);color:var(--ink2,var(--ink3))}
 .cx-g{color:var(--ink2);overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;min-width:40px}
 .cx-s{color:var(--ink3)}
 .cx-2{font-size:12px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
