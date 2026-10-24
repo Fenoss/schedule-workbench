@@ -1,0 +1,61 @@
+# Nightly encrypted backup of the database and the XER file store.
+# Needs three repository secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_DB_URL       the database connection string (Supabase → Connect → Session pooler), with your DB password
+#   SUPABASE_SECRET_KEY   a secret API key (Supabase → Project Settings → API Keys → Secret keys) to read the file store
+#   BACKUP_PASSPHRASE     a long passphrase; backups are encrypted with it because this repository is public
+# The encrypted backup is kept as a workflow artifact for 30 days. To restore, see README → Backups.
+name: Nightly backup
+on:
+  schedule:
+    - cron: "23 8 * * *"   # 08:23 UTC, 01:23 in Denver
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    env:
+      DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+    steps:
+      - name: Check secrets
+        id: chk
+        run: |
+          if [ -z "$DB_URL" ] || [ -z "$SECRET_KEY" ] || [ -z "$PASSPHRASE" ]; then
+            echo "::warning::Backup skipped: add the SUPABASE_DB_URL, SUPABASE_SECRET_KEY and BACKUP_PASSPHRASE secrets."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else echo "ok=true" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/checkout@v4
+        if: steps.chk.outputs.ok == 'true'
+      - name: Install PostgreSQL 17 client
+        if: steps.chk.outputs.ok == 'true'
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
+      - name: Dump the database
+        if: steps.chk.outputs.ok == 'true'
+        run: |
+          mkdir -p backup
+          /usr/lib/postgresql/17/bin/pg_dump "$DB_URL" --no-owner --no-privileges -n public -n private -F c -f backup/workbench.dump
+          /usr/lib/postgresql/17/bin/pg_dump "$DB_URL" --no-owner --no-privileges --data-only -t auth.users -t auth.identities -F c -f backup/auth-users.dump
+      - name: Copy the XER file store
+        if: steps.chk.outputs.ok == 'true'
+        run: |
+          cd scripts && npm install --no-save --silent @supabase/supabase-js@2.45.4 && cd ..
+          SUPABASE_URL="$(grep -o "https://[a-z0-9]*\.supabase\.co" site/config.js | head -1)" node scripts/backup-storage.mjs backup/xer
+      - name: Encrypt
+        if: steps.chk.outputs.ok == 'true'
+        run: |
+          stamp=$(date -u +%Y%m%d-%H%M)
+          tar -czf - -C backup . | gpg --batch --yes --pinentry-mode loopback --passphrase "$PASSPHRASE" --symmetric --cipher-algo AES256 -o "workbench-backup-$stamp.tar.gz.gpg"
+          rm -rf backup
+          echo "FILE=workbench-backup-$stamp.tar.gz.gpg" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        if: steps.chk.outputs.ok == 'true'
+        with:
+          name: ${{ env.FILE }}
+          path: ${{ env.FILE }}
+          retention-days: 30

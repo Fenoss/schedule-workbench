@@ -115,6 +115,24 @@ cd site && python3 -m http.server 8000
 # open http://localhost:8000/ (add it to Supabase redirect URLs to sign in locally)
 ```
 
+## Backups
+`.github/workflows/backup.yml` makes a nightly, encrypted backup of the database and the XER file store and keeps each one for 30 days under **Actions → Nightly backup → Artifacts**. It is encrypted because this repository is public. Turn it on by adding three repository secrets (**Settings → Secrets and variables → Actions**):
+
+| Secret | Where to get it |
+|---|---|
+| `SUPABASE_DB_URL` | Supabase → **Connect** → *Session pooler* connection string, with your database password filled in |
+| `SUPABASE_SECRET_KEY` | Supabase → **Project Settings → API Keys** → *Secret keys* (create one) |
+| `BACKUP_PASSPHRASE` | Any long passphrase. Keep a copy somewhere safe: without it the backups can't be opened. |
+
+Run it once from the Actions tab to check it works. To restore: download the artifact, then
+```bash
+gpg -d workbench-backup-*.tar.gz.gpg | tar -xz        # asks for the passphrase
+pg_restore --clean --if-exists --no-owner -d "$SUPABASE_DB_URL" workbench.dump
+pg_restore --data-only --no-owner -d "$SUPABASE_DB_URL" auth-users.dump   # only into an empty project
+# xer/ holds the stored files: upload them back to the 'xer' bucket with the same paths
+```
+Supabase **Pro** also adds daily backups and point-in-time recovery, and stops the project pausing after a week of inactivity.
+
 ## Free-tier limits worth knowing
 - **Supabase free plan:** about 500 MB of database and 1 GB of file storage, and projects pause after about a week without activity. XER files are stored compressed, typically a tenth of their size. Upgrade to Pro to stop pausing.
 - **Upload size:** the `xer` storage bucket accepts files up to 50 MB each.

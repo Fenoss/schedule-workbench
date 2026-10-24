@@ -16,14 +16,6 @@ create table if not exists public.profiles (
   created_at  timestamptz not null default now()
 );
 
--- Optional: anyone signing in with an email on this domain is approved straight away with this role.
--- Example: insert into public.app_settings (id, auto_approve_domain, auto_approve_role) values (1, 'yourcompany.com', 'viewer')
---          on conflict (id) do update set auto_approve_domain = excluded.auto_approve_domain, auto_approve_role = excluded.auto_approve_role;
-create table if not exists public.app_settings (
-  id                  int primary key default 1 check (id = 1),
-  auto_approve_domain text,
-  auto_approve_role   text not null default 'viewer' check (auto_approve_role in ('viewer', 'contributor'))
-);
 
 -- Programmes group projects on the Portfolio page. 'team' ones are visible to every approved user.
 create table if not exists public.programmes (
@@ -141,16 +133,11 @@ create or replace function private.handle_new_user() returns trigger
 language plpgsql security definer set search_path = public as $$
 declare
   first_user boolean;
-  s public.app_settings;
   r text := 'pending';
 begin
   select not exists (select 1 from public.profiles) into first_user;
-  select * into s from public.app_settings where id = 1;
-  if first_user then
-    r := 'admin';
-  elsif s.auto_approve_domain is not null and lower(split_part(new.email, '@', 2)) = lower(s.auto_approve_domain) then
-    r := s.auto_approve_role;
-  end if;
+  -- Replaced further down by the company-aware version.
+  if first_user then r := 'admin'; end if;
   insert into public.profiles (id, email, name, role)
   values (new.id, new.email,
           coalesce(new.raw_user_meta_data ->> 'full_name', new.raw_user_meta_data ->> 'name', split_part(new.email, '@', 1)),
@@ -227,7 +214,6 @@ create trigger stamp_updated before update on public.programmes
 -- ---------------------------------------------------------------------------
 
 alter table public.profiles     enable row level security;
-alter table public.app_settings enable row level security;
 alter table public.programmes   enable row level security;
 alter table public.projects     enable row level security;
 alter table public.periods      enable row level security;
@@ -244,10 +230,7 @@ drop policy if exists profiles_admin_delete on public.profiles;
 create policy profiles_admin_delete on public.profiles for delete to authenticated
   using (private.my_role() = 'admin' and id <> auth.uid());
 
--- app_settings: admins only.
-drop policy if exists settings_admin on public.app_settings;
-create policy settings_admin on public.app_settings for all to authenticated
-  using (private.my_role() = 'admin') with check (private.my_role() = 'admin');
+
 
 -- programmes
 drop policy if exists programmes_read on public.programmes;
@@ -373,26 +356,12 @@ drop function if exists public.handle_new_user();
 drop function if exists public.guard_profile_update();
 drop function if exists public.touch_project();
 drop function if exists public.stamp_updated();
-grant select, insert, update, delete on public.profiles, public.programmes, public.projects, public.periods, public.xer_files, public.app_settings to authenticated;
+grant select, insert, update, delete on public.profiles, public.programmes, public.projects, public.periods, public.xer_files to authenticated;
 
 -- Fill in summaries for projects that already have periods.
 select private.refresh_project_summary(id) from public.projects;
 
--- Quality check settings (one row): DCMA / AACE / bespoke frameworks and their limits. Everyone approved reads; admins write.
-create table if not exists public.quality_settings (
-  id smallint primary key default 1 check (id = 1),
-  config jsonb not null default '{}'::jsonb,
-  updated_at timestamptz not null default now(),
-  updated_by uuid references auth.users(id) on delete set null
-);
-alter table public.quality_settings enable row level security;
-drop policy if exists quality_read on public.quality_settings;
-create policy quality_read on public.quality_settings for select to authenticated using (private.my_role() <> 'pending');
-drop policy if exists quality_admin_insert on public.quality_settings;
-create policy quality_admin_insert on public.quality_settings for insert to authenticated with check (private.my_role() = 'admin');
-drop policy if exists quality_admin_update on public.quality_settings;
-create policy quality_admin_update on public.quality_settings for update to authenticated using (private.my_role() = 'admin') with check (private.my_role() = 'admin');
-grant select, insert, update on public.quality_settings to authenticated;
+
 
 -- ---------------------------------------------------------------------------
 -- Companies (multi-tenant). Must run after everything above.
@@ -480,17 +449,17 @@ declare cid uuid;
 begin
   select id into cid from public.companies order by created_at limit 1;
   if cid is null then
-    insert into public.companies (name, auto_approve_domain, auto_approve_role)
-    select 'My company', s.auto_approve_domain, coalesce(s.auto_approve_role, 'viewer')
-    from (select 1) x left join public.app_settings s on s.id = 1
-    returning id into cid;
+    insert into public.companies (name) values ('My company') returning id into cid;
+    if to_regclass('public.app_settings') is not null then
+      execute 'update public.companies c set auto_approve_domain = s.auto_approve_domain, auto_approve_role = coalesce(s.auto_approve_role, ''viewer'') from public.app_settings s where s.id = 1 and c.id = $1' using cid;
+    end if;
   end if;
   update public.profiles   set company_id = cid where company_id is null;
   update public.programmes set company_id = cid where company_id is null;
   update public.projects   set company_id = cid where company_id is null;
-  insert into public.company_settings (company_id, quality)
-    select cid, q.config from public.quality_settings q where q.id = 1
-    on conflict (company_id) do nothing;
+  if to_regclass('public.quality_settings') is not null then
+    execute 'insert into public.company_settings (company_id, quality) select $1, q.config from public.quality_settings q where q.id = 1 on conflict (company_id) do nothing' using cid;
+  end if;
 end $$;
 -- If no one is the workbench owner yet, the earliest admin becomes it. Add more owners in the SQL editor:
 --   update public.profiles set is_owner = true where email = 'you@example.com';
@@ -719,3 +688,126 @@ end $$;
 -- Company branding (title, accent colour, logo) and site features (AI, Build tab, sample buttons).
 alter table public.companies add column if not exists branding jsonb not null default '{}'::jsonb;
 alter table public.company_settings add column if not exists site jsonb not null default '{}'::jsonb;
+
+-- Earlier versions kept settings in these tables; companies and company_settings replace them.
+drop table if exists public.quality_settings;
+drop table if exists public.app_settings;
+
+-- Audit log: who changed access, companies, invitations, settings, and who saved or deleted schedule data.
+create table if not exists public.audit_log (
+  id          bigserial primary key,
+  at          timestamptz not null default now(),
+  actor       uuid,
+  actor_email text,
+  company_id  uuid references public.companies (id) on delete set null,
+  action      text not null,
+  target      text not null default '',
+  detail      jsonb not null default '{}'::jsonb
+);
+create index if not exists audit_log_company_idx on public.audit_log (company_id, at desc);
+create index if not exists audit_log_at_idx on public.audit_log (at desc);
+alter table public.audit_log enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'audit_log' and policyname = 'audit_read') then
+    create policy audit_read on public.audit_log for select to authenticated
+      using (private.is_owner() or (private.my_role() = 'admin' and company_id = private.my_company()));
+  end if;
+end $$;
+grant select on public.audit_log to authenticated;
+
+create or replace function private.audit(act text, cid uuid, tgt text, det jsonb) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  insert into public.audit_log (actor, actor_email, company_id, action, target, detail)
+  values (auth.uid(), (select email from public.profiles where id = auth.uid()), cid, act, coalesce(tgt, ''), coalesce(det, '{}'::jsonb));
+end $$;
+
+create or replace function private.audit_profiles() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'UPDATE' then
+    if new.role is distinct from old.role then perform private.audit('access.changed', coalesce(new.company_id, old.company_id), new.email, jsonb_build_object('from', old.role, 'to', new.role)); end if;
+    if new.company_id is distinct from old.company_id then
+      perform private.audit('person.moved', coalesce(old.company_id, new.company_id), new.email, jsonb_build_object('from', (select name from public.companies where id = old.company_id), 'to', (select name from public.companies where id = new.company_id)));
+      if new.company_id is not null and old.company_id is not null then perform private.audit('person.moved', new.company_id, new.email, jsonb_build_object('from', (select name from public.companies where id = old.company_id), 'to', (select name from public.companies where id = new.company_id))); end if;
+    end if;
+    if new.is_owner is distinct from old.is_owner then perform private.audit(case when new.is_owner then 'owner.added' else 'owner.removed' end, null, new.email, '{}'); end if;
+    return new;
+  elsif tg_op = 'INSERT' then
+    perform private.audit('person.signed_up', new.company_id, new.email, jsonb_build_object('role', new.role));
+    return new;
+  else
+    perform private.audit('person.deleted', old.company_id, old.email, '{}');
+    return old;
+  end if;
+end $$;
+create or replace trigger audit_profiles after insert or update or delete on public.profiles
+  for each row execute function private.audit_profiles();
+
+create or replace function private.audit_companies() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then perform private.audit('company.created', new.id, new.name, '{}'); return new;
+  elsif tg_op = 'DELETE' then perform private.audit('company.deleted', null, old.name, '{}'); return old;
+  else
+    if new.status is distinct from old.status then perform private.audit(case when new.status = 'active' then 'company.reactivated' else 'company.suspended' end, new.id, new.name, '{}'); end if;
+    if new.name is distinct from old.name then perform private.audit('company.renamed', new.id, new.name, jsonb_build_object('from', old.name)); end if;
+    if new.auto_approve_domain is distinct from old.auto_approve_domain or new.auto_approve_role is distinct from old.auto_approve_role then
+      perform private.audit('company.signin_changed', new.id, new.name, jsonb_build_object('domain', new.auto_approve_domain, 'role', new.auto_approve_role)); end if;
+    if new.branding is distinct from old.branding then perform private.audit('company.branding_changed', new.id, new.name, jsonb_build_object('title', new.branding ->> 'title', 'accent', new.branding ->> 'accent', 'logo', (new.branding ? 'logo'))); end if;
+    return new;
+  end if;
+end $$;
+create or replace trigger audit_companies after insert or update or delete on public.companies
+  for each row execute function private.audit_companies();
+
+create or replace function private.audit_invitations() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then perform private.audit('invite.sent', new.company_id, new.email, jsonb_build_object('role', new.role, 'joined_now', new.accepted_at is not null)); return new;
+  elsif tg_op = 'DELETE' then if old.accepted_at is null then perform private.audit('invite.cancelled', old.company_id, old.email, '{}'); end if; return old;
+  else return new; end if;
+end $$;
+create or replace trigger audit_invitations after insert or delete on public.invitations
+  for each row execute function private.audit_invitations();
+
+create or replace function private.audit_settings() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' or new.quality is distinct from old.quality then perform private.audit('settings.quality_changed', new.company_id, 'Quality checks', jsonb_build_object('default', new.quality ->> 'def')); end if;
+  if tg_op = 'INSERT' or new.site is distinct from old.site then if new.site <> '{}'::jsonb then perform private.audit('settings.features_changed', new.company_id, 'Features', new.site); end if; end if;
+  return new;
+end $$;
+create or replace trigger audit_settings after insert or update on public.company_settings
+  for each row execute function private.audit_settings();
+
+create or replace function private.audit_projects() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then perform private.audit('project.created', new.company_id, new.name, jsonb_build_object('space', new.space)); return new;
+  else perform private.audit('project.deleted', old.company_id, old.name, jsonb_build_object('space', old.space)); return old; end if;
+end $$;
+create or replace trigger audit_projects after insert or delete on public.projects
+  for each row execute function private.audit_projects();
+
+create or replace function private.audit_programmes() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then perform private.audit('programme.created', new.company_id, new.name, '{}'); return new;
+  else perform private.audit('programme.deleted', old.company_id, old.name, '{}'); return old; end if;
+end $$;
+create or replace trigger audit_programmes after insert or delete on public.programmes
+  for each row execute function private.audit_programmes();
+
+create or replace function private.audit_periods() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare pr public.projects;
+begin
+  select * into pr from public.projects where id = coalesce(new.project_id, old.project_id);
+  if tg_op = 'INSERT' then perform private.audit('update.saved', pr.company_id, coalesce(pr.name, '') || ' · ' || new.label, jsonb_build_object('notes', left(new.notes, 200))); return new;
+  else perform private.audit('update.deleted', pr.company_id, coalesce(pr.name, '') || ' · ' || old.label, '{}'); return old; end if;
+end $$;
+create or replace trigger audit_periods after insert or delete on public.periods
+  for each row execute function private.audit_periods();
+
+revoke execute on function private.audit(text, uuid, text, jsonb), private.audit_profiles(), private.audit_companies(), private.audit_invitations(), private.audit_settings(), private.audit_projects(), private.audit_programmes(), private.audit_periods() from public, anon, authenticated;

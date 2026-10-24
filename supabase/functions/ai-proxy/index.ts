@@ -53,8 +53,16 @@ Deno.serve(async (req) => {
   });
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return fail("session_expired", "Sign in again to use AI.", 401);
-  const { data: prof } = await sb.from("profiles").select("role").eq("id", user.id).maybeSingle();
-  if (!prof || prof.role === "pending") return fail("not_granted", "Your account is waiting for an admin to approve it.", 403);
+  const { data: prof } = await sb.from("profiles").select("role, is_owner, company_id, active_company_id").eq("id", user.id).maybeSingle();
+  if (!prof || (!prof.is_owner && (prof.role === "pending" || !prof.company_id))) return fail("not_granted", "Your account is waiting for an admin to approve it.", 403);
+  // Respect the company's settings: a suspended company, or one that has switched AI off.
+  const cid = prof.is_owner ? (prof.active_company_id ?? prof.company_id) : prof.company_id;
+  if (cid) {
+    const { data: co } = await sb.from("companies").select("status").eq("id", cid).maybeSingle();
+    if (co && co.status !== "active" && !prof.is_owner) return fail("not_granted", "Your company's workbench is suspended.", 403);
+    const { data: cs } = await sb.from("company_settings").select("site").eq("company_id", cid).maybeSingle();
+    if (cs && cs.site && cs.site.ai === false) return fail("sampling_disabled", "Your company admin has switched AI features off.", 403);
+  }
 
   let body: any;
   try { body = await req.json(); } catch { return fail("bad_request", "Body must be JSON.", 400); }
