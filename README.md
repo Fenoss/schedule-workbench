@@ -91,6 +91,10 @@ Only signed-in, approved users can call the function. Edge functions have a time
   - Each project shows its latest update, forecast finish, variance against baseline, movement since the last period, progress against plan, and BEI.
   - **Add programme** creates a group. **Add project** creates a *slot*: a named placeholder with programme, status, code and manager, which fills in when you add its first schedule update.
   - **Add first update** / **Update** reads a period's XER files and saves them as a period of that project. **Open** loads the latest period into the workbench.
+- **Updating a live schedule in the app:** choose **Update** on a project, then **Update it here** (also on the Periods tab and the header menu).
+  - Set the new data date, then enter actual start and finish, % complete and remaining durations. **Due this period** lists the activities that need statusing. **Status the rest as planned** progresses anything untouched as the last update forecast.
+  - You can also change durations, logic and constraints, and add or delete activities. The CPM engine reschedules as you go, and the bar shows the finish movement against the last update and the baseline.
+  - **Save as Update NN** writes new live XERs, keeps the project's baseline, and saves them straight away as the next period. Resources, costs and other P6 data the editor doesn't show aren't carried into the new file.
 - **Periods tab:**
   - Create a project, load the period's XER files, then choose **Save current as period**.
   - **Import past updates** turns a batch of monthly XERs into periods against the loaded baseline.

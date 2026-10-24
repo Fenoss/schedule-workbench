@@ -223,6 +223,12 @@ details.fsec[open]>summary .fh::after{content:"−"}
 .bname{height:34px;border:1px solid transparent;border-radius:6px;background:transparent;font-family:var(--fDisplay);font-weight:700;font-size:20px;text-transform:uppercase;letter-spacing:.02em;padding:0 8px;min-width:200px;max-width:340px}
 .bname:hover,.bname:focus{border-color:var(--line);background:var(--surface2)}
 .btool input[type=date],#bMenu{height:32px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:0 8px;font-size:13px}
+.bupd{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:10px 12px;margin-bottom:10px;border-left:4px solid var(--accent)}
+.bu-h{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;font-size:13.5px} .bu-h>b{font-size:15px}
+.bu-s{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--ink2)} .bu-s b{color:var(--ink)} .bu-s em{font-style:normal;font-weight:600}
+.brow.uneed .bn{box-shadow:inset 3px 0 0 #E0A21B}
+.uopt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:8px;cursor:pointer;font-size:13px;color:var(--ink2);line-height:1.4}
+.uopt b{display:block;color:var(--ink);font-size:14px;margin-bottom:2px} .uopt input{margin-top:3px} .uopt:has(input:checked){border-color:var(--accent);background:var(--accentSoft)}
 .bstat{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--ink2);padding:0 4px;align-items:center}
 .bstat b{color:var(--ink)} .bstat em{font-style:normal;font-weight:600}
 .bwrap{position:relative;display:flex;height:max(520px,calc(100vh - 290px));overflow:hidden}
@@ -2581,7 +2587,7 @@ function bToXer(st,res,mode,snap){
   const types=st.codeTypes.map((t,i)=>({id:801+i,name:t.name,values:t.values}));
   const codeIdFor=(ti,short)=>{ const j=types[ti].values.findIndex(v=>v.short===short); return j<0?null:types[ti].id*1000+j+1; };
   const projId=new Map(st.projects.map((p,i)=>[p.id,(isB?2001:1001)+i])), actNum=new Map(st.acts.map((a,i)=>[a.id,off+200000+i])), wbsNum=new Map(st.wbs.map((w,i)=>[w.id,off+100000+i]));
-  const byId=new Map(st.acts.map(a=>[a.id,a])), H=8*HR, E=17*HR, T=d=>d==null?'':fx(d*DAY+H), TE=d=>d==null?'':fx(d*DAY+E);
+  const byId=new Map(st.acts.map(a=>[a.id,a])), H=8*HR, E=17*HR, T=d=>d==null?'':fx(d*DAY+H), TE=d=>d==null?'':fx(d*DAY+E), FE=d=>d==null?'':st.finMsAm?T(d+1):TE(d);
   const tbl=(name,fields,rows)=>`%T\t${name}\n%F\t${fields.join('\t')}\n`+rows.map(r=>'%R\t'+fields.map(f=>String(r[f]??'').replace(/[\t\r\n]/g,' ')).join('\t')).join('\n')+(rows.length?'\n':'');
   const ddate=isB&&snap&&snap.dd!=null?snap.dd:st.dd;
   st.projects.forEach(p=>{ const pid=projId.get(p.id), root=off+90000+pid;
@@ -2589,12 +2595,12 @@ function bToXer(st,res,mode,snap){
     const tasks=[], preds=[], tav=[], udf=[]; let pid2=off+1;
     st.acts.filter(a=>a.proj===p.id).forEach(a=>{ const r=isB?snap.R[a.id]:res.R.get(a.id); if(!r) return; const hrs=calHrs.get(a.cal)||8, tt=a.type==='start'?'TT_Mile':a.type==='finish'?'TT_FinMile':'TT_Task', s=isB?'ns':bStatus(a);
       const fin=a.type==='finish', ms=a.type!=='task'||r.dur===0;
-      const es=ms?(fin?TE(r.ef):T(r.es)):T(r.rs!=null&&s==='ip'?r.rs:r.es), ef=ms?(fin?TE(r.ef):T(r.es)):TE(r.ef);
-      const ls=ms?(fin?TE(r.lf):T(r.ls)):T(r.ls), lf=ms?(fin?TE(r.lf):T(r.ls)):TE(r.lf);
+      const es=ms?(fin?FE(r.ef):T(r.es)):T(r.rs!=null&&s==='ip'?r.rs:r.es), ef=ms?(fin?FE(r.ef):T(r.es)):TE(r.ef);
+      const ls=ms?(fin?FE(r.lf):T(r.ls)):T(r.ls), lf=ms?(fin?FE(r.lf):T(r.ls)):TE(r.lf);
       const t={task_id:actNum.get(a.id),proj_id:pid,wbs_id:a.wbs&&wbsNum.has(a.wbs)?wbsNum.get(a.wbs):root,clndr_id:calId.get(a.cal)||1,phys_complete_pct:0,task_code:a.code,task_name:a.name,task_type:tt,status_code:'TK_NotStart',duration_type:'DT_FixedDUR2',
         total_float_hr_cnt:r.tf==null?'':r.tf*hrs,free_float_hr_cnt:r.ff==null?'':r.ff*hrs,target_drtn_hr_cnt:r.dur*hrs,remain_drtn_hr_cnt:r.dur*hrs,act_start_date:'',act_end_date:'',early_start_date:es,early_end_date:ef,late_start_date:ls,late_end_date:lf,
         target_start_date:es,target_end_date:ef,cstr_type:CSTR_P6[a.cstr]||'',cstr_date:a.cstr&&a.cdate!=null?T(a.cdate):'',driving_path_flag:r.tf!=null&&r.tf<=0?'Y':'N'};
-      if(s==='cp') Object.assign(t,{status_code:'TK_Complete',phys_complete_pct:100,act_start_date:T(a.as),act_end_date:ms&&fin?TE(a.af):TE(a.af),early_start_date:'',early_end_date:'',late_start_date:'',late_end_date:'',remain_drtn_hr_cnt:0,total_float_hr_cnt:'',free_float_hr_cnt:''});
+      if(s==='cp') Object.assign(t,{status_code:'TK_Complete',phys_complete_pct:100,act_start_date:T(a.as),act_end_date:ms&&fin?FE(a.af):TE(a.af),early_start_date:'',early_end_date:'',late_start_date:'',late_end_date:'',remain_drtn_hr_cnt:0,total_float_hr_cnt:'',free_float_hr_cnt:''});
       else if(s==='ip') Object.assign(t,{status_code:'TK_Active',phys_complete_pct:a.pct!=null&&a.pct!==''?+a.pct:Math.round((1-(r.rem/(r.dur||1)))*100),act_start_date:T(a.as),remain_drtn_hr_cnt:r.rem*hrs,late_start_date:''});
       tasks.push(t);
       (res.preds.get(a.id)||[]).forEach(rel=>{ if(isB&&!snap.R[rel.p]) return; preds.push({task_pred_id:pid2++,task_id:actNum.get(a.id),pred_task_id:actNum.get(rel.p),proj_id:pid,pred_proj_id:projId.get(byId.get(rel.p).proj),pred_type:'PR_'+(rel.t||'FS'),lag_hr_cnt:(Math.round(+rel.lag||0))*hrs}); });
@@ -2670,6 +2676,9 @@ function bRowsBuild(){
     st.acts.filter(a=>a.proj===p.id&&!st.wbs.some(w=>w.id===a.wbs)).sort((x,y)=>x.seq-y.seq).forEach(a=>rows.push({t:'a',a,depth:1}));
     const walk=(parent,depth)=>{ st.wbs.filter(w=>w.proj===p.id&&(w.parent||null)===parent).sort((x,y)=>x.seq-y.seq).forEach(w=>{ rows.push({t:'w',w,depth}); if(!B.collapsed.has(w.id)){ st.acts.filter(a=>a.wbs===w.id).sort((x,y)=>x.seq-y.seq).forEach(a=>rows.push({t:'a',a,depth:depth+1})); walk(w.id,depth+1); } }); };
     walk(null,1); });
+  if(st.upd&&st.upd.view==='due'){ const keep=[]; for(let i=0;i<rows.length;i++){ const r=rows[i]; if(r.t==='a'){ if(updDue(st.upd,r.a,st.dd)||!st.upd.p0[r.a.id]) keep.push(r); continue; }
+      let has=false; for(let j=i+1;j<rows.length&&rows[j].depth>r.depth;j++){ const q=rows[j]; if(q.t==='a'&&(updDue(st.upd,q.a,st.dd)||!st.upd.p0[q.a.id])){ has=true; break; } } if(has) keep.push(r); }
+    rows.length=0; rows.push(...keep); }
   B.rows=rows;
   // summaries
   const kids=new Map(); st.wbs.forEach(w=>kids.set(w.id,[])); st.wbs.forEach(w=>{ if(w.parent&&kids.has(w.parent)) kids.get(w.parent).push(w.id); });
@@ -2688,6 +2697,7 @@ function bCols(){
     {k:'cal',l:'Calendar',w:120,opts:cals},{k:'cstr',l:'Constraint',w:130,opts:CSTR},{k:'cdate',l:'Constraint date',w:100,r:1,date:1},
     {k:'as',l:'Actual start',w:96,r:1,date:1},{k:'af',l:'Actual finish',w:96,r:1,date:1},{k:'rem',l:'Remaining (d)',w:86,r:1,num:1},{k:'pct',l:'% complete',w:76,r:1,num:1},
     {k:'ch0',l:'Chainage from',w:90,r:1,num:1},{k:'ch1',l:'Chainage to',w:86,r:1,num:1}];
+  if(B.st.upd){ const pk=['as','af','rem','pct','dur','type'], pc=pk.map(k=>cols.find(c=>c.k===k)); pk.forEach(k=>cols.splice(cols.findIndex(c=>c.k===k),1)); cols.splice(cols.findIndex(c=>c.k==='finish')+1,0,...pc); }
   B.st.codeTypes.forEach(t=>cols.push({k:'code:'+t.name,l:t.name,w:120,opts:[['','—']].concat(t.values.map(v=>[v.short,v.name&&v.name!==v.short?`${v.short} · ${v.name}`:v.short]))}));
   return cols;
 }
@@ -2754,7 +2764,7 @@ function renderBuild(){
 }
 function bShell(){
   const host=document.getElementById('buildWrap');
-  host.innerHTML=`<div class="card btool">
+  host.innerHTML=`<div class="card bupd" id="bUpd" hidden></div><div class="card btool">
       <div class="btr"><input id="bName" class="bname" aria-label="Schedule name"><label class="ctl"><span>Data date</span><input type="date" id="bDD"></label><label class="ctl"><span>Must finish by</span><input type="date" id="bMF"></label>
         <span class="bsp"></span><div class="sg"><button data-ba="undo" title="Undo (Ctrl+Z)">↶ Undo</button><button data-ba="redo" title="Redo (Ctrl+Y)">↷ Redo</button></div>
         <select id="bMenu" aria-label="File"><option value="">File…</option><option value="new">New blank schedule</option><option value="model">Replace with the loaded schedule</option><option value="open">Open builder file (.json)</option><option value="save">Save builder file (.json)</option><option value="xer">Export XER</option><option value="xercopy">Copy XER to clipboard</option><option value="csv">Export activities (.csv)</option><option value="close">Close builder</option></select>
@@ -2777,7 +2787,7 @@ function bShell(){
     <div class="btoast" id="bToast" hidden></div>
     <div class="colpanel card bdlg" id="bDlg" hidden></div>
     <div class="note">Type predecessors as <code>A1010</code>, <code>A1010SS+5</code>, <code>A1020FF-2</code> or <code>PRJ-02:B2000</code> for another project. Typing a start date on an unstarted activity adds a "Start on or after" constraint. On the Gantt, drag a bar to move it, drag its right end to change duration, and drag from the dot to another bar to link them. Enter edits, Tab moves right, Ctrl+Z undoes.</div>`;
-  bWireShell();
+  bWireShell(); updWireBar();
 }
 function bRenderAll(){
   if(!B.st||document.getElementById('buildWrap').hidden||!document.getElementById('bGrid')) return;
@@ -2795,7 +2805,7 @@ function bRenderAll(){
     ${res.openEnds.length?`<span title="${esc(res.openEnds.map(o=>o.code+' '+o.why).join('\n'))}"><b>${res.openEnds.length}</b> open ends</span>`:''}
     <span>${st.baseline?`Baseline captured ${fmtL(st.baseline.at)}`:'No baseline yet'}</span>
     <span>${st.sync?'<span class="pill">Live in Workbench</span>':''}</span>`;
-  bRenderGrid(); bDrawGantt();
+  updRenderBar(); bRenderGrid(); bDrawGantt();
 }
 function bRenderGrid(){
   const cols=bCols(), head=document.getElementById('bGHead'), body=document.getElementById('bGBody'), rowsEl=document.getElementById('bGRows'), sp=document.getElementById('bGSp');
@@ -2806,7 +2816,7 @@ function bRenderGrid(){
   const top=body.scrollTop, h=body.clientHeight||400, i0=Math.max(0,Math.floor(top/BRH)-4), i1=Math.min(B.rows.length-1,Math.ceil((top+h)/BRH)+4);
   let html=''; const selA=B.rows[B.sel.r];
   for(let i=i0;i<=i1;i++){ const row=B.rows[i], isSel=i===B.sel.r, r=row.t==='a'?B.res.R.get(row.a.id):null;
-    const cls=row.t==='p'?'bp':row.t==='w'?'bw':(r&&r.crit?'crit':'')+(r&&r.status==='cp'?' done':'');
+    const cls=row.t==='p'?'bp':row.t==='w'?'bw':(r&&r.crit?'crit':'')+(r&&r.status==='cp'?' done':'')+(B.st.upd&&updNeeds(row.a)?' uneed':'');
     html+=`<div class="brow ${cls}${isSel?' sel':''}" data-r="${i}" style="top:${i*BRH}px;width:${W}px"><div class="bc bn">${row.t==='a'?i+1:''}</div>`;
     cols.forEach(c=>{ const editing=B.edit&&B.edit.r===i&&B.edit.c===c.k, cs=isSel&&B.sel.c===c.k;
       let inner;
@@ -2910,7 +2920,7 @@ function bLinkUp(){ const row=bSelRow(); if(!row||row.t!=='a') return; for(let i
 function bUndo(){ if(!B.undo.length) return; B.redo.push(JSON.stringify(B.st)); B.st=JSON.parse(B.undo.pop()); B.edit=null; bChanged(); }
 function bRedo(){ if(!B.redo.length) return; B.undo.push(JSON.stringify(B.st)); B.st=JSON.parse(B.redo.pop()); B.edit=null; bChanged(); }
 function bCapture(){ const st=B.st; bPush(); st.baseline={at:Date.now(),dd:st.dd,R:bSnapshot(st,B.res),acts:JSON.parse(JSON.stringify(st.acts)),rels:JSON.parse(JSON.stringify(st.rels)),projects:JSON.parse(JSON.stringify(st.projects)),wbs:JSON.parse(JSON.stringify(st.wbs)),cals:JSON.parse(JSON.stringify(st.cals))}; bChanged(); bToastMsg('Baseline captured. Grey bars now show it, and variance appears across the Workbench once you use the schedule there.'); }
-function bUse(){ const st=B.st; if(B.res.loops.length) return bToastMsg('Fix the loop in the logic first.'); st.sync=true; bSave(); S.files=S.files.filter(f=>!f.builder&&!f.sample).map(f=>({...f,role:f.error?f.role:'off'})).concat(bToFiles()); rebuild(true); bRenderAll(); bToastMsg('This schedule now drives every tab. Edits here update the Workbench automatically.'); }
+function bUse(){ const st=B.st; if(B.res.loops.length) return bToastMsg('Fix the loop in the logic first.'); st.sync=true; bSave(); S.files=S.files.filter(f=>!f.builder&&!f.sample).map(f=>({...f,role:f.error?f.role:'off'})).concat(bToFiles()); rebuild(true); bRenderAll(); bToastMsg(st.upd?'Previewing the update in every tab. Nothing is saved until you choose Save as Update.':'This schedule now drives every tab. Edits here update the Workbench automatically.'); }
 function bStartEdit(selectAll,initial){ const row=bSelRow(); if(!row) return; const c=bCols().find(x=>x.k===B.sel.c); if(!c||c.ro) return; if(row.t!=='a'&&!['code','name'].includes(c.k)) return; if(row.t==='a'&&B.res.R.get(row.a.id)&&false) return;
   B.edit={r:B.sel.r,c:c.k,val:initial!=null?initial:bEditValue(row,c),fresh:true,sel:!!selectAll&&initial==null}; bRenderGrid(); }
 function bFinishEdit(save,move){ const e=B.edit; if(!e) return; B.edit=null; const row=B.rows[e.r], c=bCols().find(x=>x.k===e.c); if(save&&row&&c&&String(e.val)!==String(bEditValue(row,c))) bCommit(row,c,e.val); else bRenderGrid();
@@ -2939,7 +2949,7 @@ function bWireShell(){
   const host=document.getElementById('buildWrap'), body=document.getElementById('bGBody'), head=document.getElementById('bGHead'), cv=document.getElementById('bCv');
   body.addEventListener('scroll',()=>{ head.scrollLeft=body.scrollLeft; requestAnimationFrame(()=>{ bRenderGrid(); bDrawGantt(); }); },{passive:true});
   document.getElementById('bName').addEventListener('change',e=>{ bPush(); B.st.name=e.target.value.trim()||'Untitled schedule'; bChanged(); });
-  document.getElementById('bDD').addEventListener('change',e=>{ const d=parseDay(e.target.value); if(d==null) return; bPush(); B.st.dd=d; bChanged(); });
+  document.getElementById('bDD').addEventListener('change',e=>{ const d=parseDay(e.target.value); if(d==null) return; if(B.st.upd&&d<=B.st.upd.prevDD){ e.target.value=isoD(B.st.dd); return bToastMsg(`The new data date must be after the last update’s, ${fmtL(B.st.upd.prevDD*DAY)}.`); } bPush(); B.st.dd=d; bChanged(); });
   document.getElementById('bMF').addEventListener('change',e=>{ bPush(); B.st.mf=e.target.value?parseDay(e.target.value):null; bChanged(); });
   document.getElementById('bLinks').addEventListener('change',e=>{ B.links=e.target.checked; bDrawGantt(); });
   host.querySelector('.btool').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const a=b.dataset.ba, z=b.dataset.bz;
@@ -3012,12 +3022,14 @@ function bWireShell(){
   dl.addEventListener('change',e=>{ const t=e.target, st=B.st;
     if(t.dataset.cal&&t.dataset.calf){ const c=st.cals.find(x=>x.id===t.dataset.cal); bPush(); if(t.dataset.calf==='name') c.name=t.value; if(t.dataset.calf==='hrs') c.hrs=Math.max(1,Math.min(24,+t.value||8)); if(t.dataset.calf==='hol') c.hol=t.value.split(/\n|,/).map(x=>x.trim()).filter(x=>parseDay(x)!=null).map(x=>isoD(parseDay(x))); bChanged(); bRenderDialog(); }
     if(t.dataset.code!=null){ const ty=st.codeTypes[+t.dataset.code]; bPush(); if(t.dataset.codef==='name'){ const old=ty.name; ty.name=t.value.trim()||old; st.acts.forEach(a=>{ if(a.codes&&a.codes[old]!=null){ a.codes[ty.name]=a.codes[old]; if(old!==ty.name) delete a.codes[old]; } }); } else ty.values=t.value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{ const [s,...rest]=l.split(','); return {short:s.trim(),name:rest.join(',').trim()||s.trim()}; }); bChanged(); } });
-  new ResizeObserver(()=>requestAnimationFrame(()=>{ bRenderGrid(); bDrawGantt(); })).observe(document.getElementById('bWrapIn'));
+  new ResizeObserver(()=>requestAnimationFrame(()=>{ if(!B.st||!document.getElementById('bGrid')) return; bRenderGrid(); bDrawGantt(); })).observe(document.getElementById('bWrapIn'));
 }
-function bImportModel(){ B.st=bFromSet(M.live,M.dd); B.res=bCompute(B.st);
-  if(M.base.acts.size){ const bs=bFromSet(M.base,M.bdd), bres=bCompute(bs), psh=new Map(B.st.projects.map(p=>[p.id,p.short])), byCode=new Map(B.st.acts.map(a=>[psh.get(a.proj)+'|'+a.code,a.id])), R={};
+function bModelState(){ const st=bFromSet(M.live,M.dd);
+  if(M.base.acts.size){ const bs=bFromSet(M.base,M.bdd), bres=bCompute(bs), psh=new Map(st.projects.map(p=>[p.id,p.short])), byCode=new Map(st.acts.map(a=>[psh.get(a.proj)+'|'+a.code,a.id])), R={};
     bs.acts.forEach(a=>{ const id=byCode.get((bs.projects.find(p=>p.id===a.proj)||{}).short+'|'+a.code); const r=bres.R.get(a.id); if(id&&r) R[id]={es:r.es,ef:r.ef,ls:r.ls,lf:r.lf,tf:r.tf,ff:r.ff,dur:r.dur}; });
-    const keep=new Set(Object.keys(R)); B.st.baseline={at:M.bdd||Date.now(),dd:dayOf(M.bdd||Date.now()),R,acts:B.st.acts.filter(a=>keep.has(a.id)).map(a=>({...a,as:null,af:null,rem:null,pct:null})),rels:B.st.rels.filter(r=>keep.has(r.p)&&keep.has(r.s)),projects:B.st.projects,wbs:B.st.wbs,cals:B.st.cals}; }
+    const keep=new Set(Object.keys(R)); st.baseline={at:M.bdd||Date.now(),dd:dayOf(M.bdd||Date.now()),R,acts:st.acts.filter(a=>keep.has(a.id)).map(a=>({...a,as:null,af:null,rem:null,pct:null})),rels:st.rels.filter(r=>keep.has(r.p)&&keep.has(r.s)),projects:st.projects,wbs:st.wbs,cals:st.cals}; }
+  return st; }
+function bImportModel(){ B.st=bModelState(); B.res=bCompute(B.st);
   B.t0=0; B.sel={r:0,c:'name'}; bChanged(); bToastMsg(`Imported ${B.st.acts.length} activities and recalculated. Calendars were set from their names (5-day unless the name says 6 or 7 day), so check them under Calendars.`); }
 function bOpenFile(file){ if(!file) return; file.text().then(t=>{ const st=JSON.parse(t); if(!st||!Array.isArray(st.acts)||!Array.isArray(st.cals)) throw new Error('not a builder file'); if(B.st) bPush(); B.st=st; B.t0=0; if(!document.getElementById('bGrid')) bShell(); bChanged(); bToastMsg(`Opened ${file.name}.`); }).catch(()=>bToastMsg('That file is not a Schedule Workbench builder file.')); }
 function wireBuild(){
@@ -3856,7 +3868,7 @@ function renderCtxMenu(){
   }
   const search=signed&&PER.projects.length>6?`<input type="search" class="cxm-q" id="ctxQ" placeholder="Find a project" value="${esc(m.dataset.q||'')}" aria-label="Find a project">`:'';
   m.innerHTML=`<div class="cxm-h">Open a project</div>${search}<div class="cxm-l">${list}</div>
-    <div class="cxm-f">${signed?'<button data-cxa="port">Portfolio</button>':'<button data-cxa="signin">Sign in</button>'}${signed&&ok.length&&!L&&!perRO()?'<button data-cxa="save">Save as period…</button>':''}<button data-cxa="files">Schedule files${ok.length?` (${ok.length})`:''}…</button></div>`;
+    <div class="cxm-f">${signed?'<button data-cxa="port">Portfolio</button>':'<button data-cxa="signin">Sign in</button>'}${signed&&ok.length&&!L&&!perRO()?'<button data-cxa="save">Save as period…</button>':''}${signed&&L&&!L.multi&&!perRO()?'<button data-cxa="upd">Update schedule…</button>':''}<button data-cxa="files">Schedule files${ok.length?` (${ok.length})`:''}…</button></div>`;
 }
 function wireCtx(){
   const b=document.getElementById('meta'), m=document.getElementById('ctxMenu');
@@ -3869,7 +3881,7 @@ function wireCtx(){
     const it=e.target.closest('[data-cx]'); if(it){ close(); portOpen(it.dataset.cx,true); return; }
     const gg=e.target.closest('[data-cxg]'); if(gg){ close(); portOpenProgramme(gg.dataset.cxg,true); return; }
     const a=e.target.closest('[data-cxa]'); if(!a) return; close();
-    if(a.dataset.cxa==='port') setTab('port'); else if(a.dataset.cxa==='save') perAskSave(); else if(a.dataset.cxa==='files') openFilesModal(); else if(a.dataset.cxa==='signin'&&!document.getElementById('auth')) authStart(); });
+    if(a.dataset.cxa==='port') setTab('port'); else if(a.dataset.cxa==='save') perAskSave(); else if(a.dataset.cxa==='upd') updStart(PER.loaded.pid); else if(a.dataset.cxa==='files') openFilesModal(); else if(a.dataset.cxa==='signin'&&!document.getElementById('auth')) authStart(); });
 }
 function rebuild(fitView){
   M=buildModel(); colCache=new Map();
@@ -4608,7 +4620,7 @@ async function renderPer(){
     <span class="pspace">${PER.mode!=='local'?(PER.space==='team'?'Team workspace':'Private workspace'):'This browser'}</span>
     <span class="sp"></span><span class="pbusy" id="perBusy" ${PER.busy?'':'hidden'}>${esc(PER.busy)}</span>
     <button class="btn sm" data-pa="files" title="Load XER files and set which is live and which is baseline">Schedule files</button><button class="btn sm" data-w data-pa="imp" ${ro?'disabled':''} title="Turn several past XER updates into periods in one go">Import past updates</button>
-    <button class="btn sm primary" data-w data-pa="save" ${ro?'disabled':''}>Save current as period</button></div>`;
+    ${proj&&P.length&&!ro?'<button class="btn sm" data-w data-pa="upd" title="Enter progress for a new data date and edit the programme, then save it as the next period">Update schedule</button>':''}<button class="btn sm primary" data-w data-pa="save" ${ro?'disabled':''}>Save current as period</button></div>`;
   if(!proj){ el.innerHTML=bar+`<div class="card pempty big"><h3>${PER.projects.length?'Pick a project':'Start your period history'}</h3><p class="muted">Create a project, then save each schedule update as a period. The workbench tracks the forecast, progress and changes from one period to the next.</p>
       <div class="prow">${ro?'':'<button class="btn primary" data-w data-pa="new">Create a project</button><button class="btn" data-w data-pa="sample">Load sample history</button>'}</div>${ro?'<p class="muted">You have view-only access, so ask an editor to create a project.</p>':''}</div>`; perBusy(PER.busy); return; }
   const prevOf=i=>i>0?P[i-1]:null;
@@ -4735,7 +4747,7 @@ function wirePer(){
     else if(t.id==='perMsAdd'&&t.value){ PER.ms.add(t.value); renderPerMain(); } });
   w.addEventListener('click',e=>{
     const a=e.target.closest('[data-pa]'); if(a){ const v=a.dataset.pa, proj=PER.projects.find(p=>p.id===PER.pid);
-      if(v==='new') perAskProject(); else if(v==='files') openFilesModal(); else if(v==='save') perAskSave(); else if(v==='imp') perAskImport(); else if(v==='sample') perSampleHistory();
+      if(v==='new') perAskProject(); else if(v==='files') openFilesModal(); else if(v==='save') perAskSave(); else if(v==='imp') perAskImport(); else if(v==='sample') perSampleHistory(); else if(v==='upd') updStart(PER.pid);
       else if(v==='ren'&&proj) perDialog('Rename project',`<label class="pfl"><span>Project name</span><input id="pdName" maxlength="80" value="${esc(proj.name)}"></label>`,'Rename',async d=>{ const n=d.querySelector('#pdName').value.trim(); if(!n) return false; await perRun('Renaming…',()=>PER.store.renameProject(proj.id,n)); });
       else if(v==='delp'&&proj) perDialog('Delete project?',`<p>This permanently deletes <b>${esc(proj.name)}</b> and its ${PER.periods.length} saved period${PER.periods.length===1?'':'s'} for everyone. This can’t be undone.</p>`,'Delete project',async()=>{ await perRun('Deleting project…',async()=>{ await perDeleteProject(proj); PER.pid=null; perToast('Project deleted.'); }); });
       return; }
@@ -4821,7 +4833,7 @@ function renderPort(){
       <div class="pc-var"><span class="pl">Vs baseline</span><b class="${dCls(f.vb)}">${dS(f.vb)}</b><span class="${dCls(f.mv)}">${f.mv!=null?dS(f.mv)+' this period':'first period'}</span></div>
       <div class="pc-prog"><span class="pl">Progress</span><span class="pbar" title="Actual ${pctS(pa)} · planned ${pctS(pp)}"><i style="width:${Math.max(0,Math.min(100,(pa||0)*100)).toFixed(1)}%"></i>${pp!=null?`<b style="left:${Math.max(0,Math.min(100,pp*100)).toFixed(1)}%"></b>`:''}</span><span class="muted">${pctS(pa)} of ${pctS(pp)} planned</span></div>
       <div class="pc-bei"><span class="pl">BEI</span><b class="${s.bei!=null&&s.bei<.95?'late':''}">${s.bei!=null?(+s.bei).toFixed(2):'—'}</b><span class="muted">${s.count||1} period${(s.count||1)===1?'':'s'}</span></div>
-      <div class="pc-act"><button class="btn sm primary" data-w data-po="open" data-id="${esc(p.id)}">Open</button><button class="btn sm" data-po="periods" data-id="${esc(p.id)}">Periods</button>${!ro?`<button class="btn sm ghost" data-w data-po="upload" data-id="${esc(p.id)}" title="Upload this period’s XER files">Update</button>`:''}${can?`<button class="btn sm ghost" data-w data-po="editproj" data-id="${esc(p.id)}" aria-label="Edit ${esc(p.name)}">Edit</button>`:''}</div></div>`; };
+      <div class="pc-act"><button class="btn sm primary" data-w data-po="open" data-id="${esc(p.id)}">Open</button><button class="btn sm" data-po="periods" data-id="${esc(p.id)}">Periods</button>${!ro?`<button class="btn sm ghost" data-w data-po="update" data-id="${esc(p.id)}" title="Update progress and the programme here, or upload this period’s XER files">Update</button>`:''}${can?`<button class="btn sm ghost" data-w data-po="editproj" data-id="${esc(p.id)}" aria-label="Edit ${esc(p.name)}">Edit</button>`:''}</div></div>`; };
   const ord=(a,b)=>({active:0,planned:1,on_hold:2,complete:3}[a.status]-{active:0,planned:1,on_hold:2,complete:3}[b.status])||String(a.name).localeCompare(b.name);
   const sect=(g,list,i)=>{ const shown=list.filter(portMatch).sort(ord), F2=list.map(portFig).filter(f=>!f.slot);
     const fin=F2.map(f=>f.s.finish).filter(x=>x!=null), vbs=F2.map(f=>f.vb).filter(x=>x!=null), worstV=vbs.length?Math.max(...vbs):null, rag=worstV==null?'':worstV<=0?'g':worstV<=20?'a':'r';
@@ -4934,6 +4946,7 @@ function wirePort(){
     else if(v==='open') portOpen(id);
     else if(v==='periods'){ perPick(id); setTab('per'); }
     else if(v==='upload') portUpload(id);
+    else if(v==='update') portUpdateChoice(id);
     else if(v==='sample') portSample();
     else if(v==='samplemore') portSampleMore();
     else if(v==='openprog') portOpenProgramme(id);
@@ -5320,6 +5333,147 @@ function makeHostedSample(C){
   const sample=C.ai!==false&&supaOn()?makeHostedSample(C):null;
   window.claude={use:async n=>n==='downloads'?downloads:n==='sample'?sample:null,hosted:true};
 })();
+
+/* ================= Live schedule update (statusing + programme edits, saved as the next period) ================= */
+// The update session lives on the builder state as st.upd, so it survives a page reload with the rest of the Build tab.
+const updPad=n=>String(n).padStart(2,'0');
+function updNextNo(list,per){ const m=/update\s*0*(\d+)/i.exec(per&&per.label||''); return m?+m[1]+1:list.length+1; }
+function updDdTag(d){ const x=new Date(d*DAY); return updPad(x.getUTCDate())+MON[x.getUTCMonth()]+String(x.getUTCFullYear()).slice(2); }
+const updProg=a=>[a.as,a.af,a.rem,a.pct];
+function updTouched(u,a){ const p=u.p0[a.id]; if(!p) return true; const q=updProg(a); return q.some((v,i)=>(v??null)!==(p[i]??null)); }
+// Due this period: not complete at the last update and forecast (at that update) to start before the new data date.
+function updDue(u,a,dd){ const f=u.f0[a.id]; return !!f&&f[2]!=='cp'&&f[0]<dd; }
+function updNeeds(a){ const st=B.st, u=st&&st.upd; return !!u&&updDue(u,a,st.dd)&&!updTouched(u,a); }
+function updStats(){
+  const st=B.st, u=st.upd, dd=st.dd, ids=new Set(st.acts.map(a=>a.id)); let due=0, done=0, needs=0, comp=0, started=0, added=0;
+  st.acts.forEach(a=>{ const p=u.p0[a.id]; if(!p){ added++; return; }
+    if(updDue(u,a,dd)){ due++; if(updTouched(u,a)) done++; else needs++; }
+    if(a.af!=null&&p[1]==null) comp++; if(a.as!=null&&p[0]==null) started++; });
+  const deleted=Object.keys(u.p0).filter(id=>!ids.has(id)).length;
+  const fin=B.res.finish, mv=fin!=null&&u.prevFinish!=null?fin-u.prevFinish:null;
+  const bl=st.baseline?Object.values(st.baseline.R).reduce((m,x)=>Math.max(m,x.ef),-Infinity):null, vb=fin!=null&&bl!=null&&isFinite(bl)?fin-bl:null;
+  return {due,done,needs,comp,started,added,deleted,fin,mv,vb,crit:B.res.crit,loops:B.res.loops.length};
+}
+
+async function updStart(pid){
+  if(!PER.mode) return perToast('Sign in to update a saved schedule.','err');
+  if(perRO()) return perToast('You have view-only access. Ask an editor or admin to update this schedule.','err');
+  const p=PER.projects.find(x=>x.id===pid); if(!p) return;
+  let list; try{ list=await PER.store.listPeriods(pid); }catch(e){ return perToast(perErr(e),'err'); }
+  const sm=perSummary(list); if(!sm) return perToast('This project has no saved update yet. Add its first update from P6 XER files.','err');
+  const per=list.find(x=>x.id===sm.periodId), u0=B.st&&B.st.upd;
+  if(u0&&u0.pid===pid&&u0.perId===per.id){ setTab('build'); perToast('Carrying on with the update you started.'); return; }
+  const prevDD=per.dd!=null?dayOf(per.dd):dayOf(Date.now()), n=updNextNo(list,per);
+  const warn=u0?`<p class="pwarn">You have an unsaved update of ${esc(u0.projName)} open. Starting this one discards it.</p>`:B.st?'<p class="pwarn">This replaces the schedule open in the Build tab. Save it as a builder file first if you need it.</p>':'';
+  perDialog(`Update ${p.name}`,`<div class="pdg"><div><div class="sl">Last update</div><b>${esc(per.label)}</b></div><div><div class="sl">Its data date</div><b>${fmtL(per.dd)}</b></div></div>
+    <label class="pfl" style="margin-top:12px"><span>New data date</span><input type="date" id="udDD" value="${isoD(prevDD+28)}" min="${isoD(prevDD+1)}"></label>
+    <div class="sl" style="margin-top:14px">Progress</div>
+    <label class="uopt"><input type="radio" name="udP" value="none" checked><span><b>I’ll enter progress</b> Activities due this period are listed for you to enter actual dates, % complete and remaining durations. Anything left unstatused moves to the new data date.</span></label>
+    <label class="uopt"><input type="radio" name="udP" value="plan"><span><b>Start from planned progress</b> Progress every activity as the last update forecast, up to the new data date. Then correct the ones that didn’t go to plan.</span></label>
+    <p class="muted" style="margin:10px 0 0">You can also change durations, logic and constraints, and add or delete activities. Saving makes this the project’s next update, with the same baseline.</p>${warn}`,'Start update',async d=>{
+    const v=parseDay(d.querySelector('#udDD').value);
+    if(v==null||v<=prevDD){ d.querySelector('[data-err]').textContent=`Pick a date after ${fmtL(per.dd)}.`; return false; }
+    const plan=d.querySelector('[name=udP]:checked').value==='plan';
+    setTimeout(async()=>{ perPick(pid); await perLoad(per,pid); if(!PER.loaded||PER.loaded.id!==per.id) return; updBegin(p,per,n,v,plan); },0); });
+}
+function updBegin(p,per,n,newDD,plan){
+  const st=bModelState(), res0=bCompute(st), f0={}, p0={};
+  st.acts.forEach(a=>{ const r=res0.R.get(a.id); if(r) f0[a.id]=[r.status==='ip'?r.rs:r.es,a.type==='start'?r.es:r.ef,r.status,r.es]; p0[a.id]=updProg(a); });
+  st.upd={pid:p.id,perId:per.id,perLabel:per.label,projName:p.name,prevDD:st.dd,n,baseRefs:(per.files||[]).filter(f=>f.role==='baseline').map(f=>({h:f.h,name:f.name,role:f.role})),
+    liveNames:(per.files||[]).filter(f=>f.role==='live').map(f=>f.name),f0,p0,prevFinish:res0.finish,view:'due',startedAt:Date.now()};
+  st.name=`${p.name} · Update ${updPad(n)}`; st.dd=newDD; st.sync=false;
+  st.finMsAm=[...M.live.acts.values()].some(a=>a.type==='TT_FinMile'&&a.f!=null&&(a.f%DAY)<=8*HR); // keep the source files' finish-milestone time convention
+  const k=plan?updPlanned(st):0;
+  B.st=st; B.undo=[]; B.redo=[]; B.t0=0; B.sel={r:0,c:'as'}; B.collapsed=new Set(); B.res=bCompute(st);
+  setTab('build'); if(!document.getElementById('bGrid')) bShell(); bChanged();
+  const pt=document.getElementById('perToast'); if(pt) pt.className='ptoast';
+  bToastMsg(plan?`Progressed ${k} activit${k===1?'y':'ies'} as planned to ${fmtL(newDD*DAY)}. Correct any that didn’t go to plan.`:`Enter progress up to ${fmtL(newDD*DAY)}. Activities due this period are listed; use All activities to edit the rest of the programme.`);
+}
+// Progress untouched activities exactly as the last update forecast them, up to the data date.
+function updPlanned(st){
+  const u=st.upd, dd=st.dd, res=bCompute(st); let n=0;
+  st.acts.forEach(a=>{ const f=u.f0[a.id]; if(!f||f[2]==='cp'||bStatus(a)==='cp'||updTouched(u,a)) return; const [es,ef]=f;
+    if(a.type==='start'){ if(es<dd){ a.as=a.af=es; a.rem=null; a.pct=null; n++; } return; }
+    if(a.type==='finish'){ if(ef<dd){ a.af=ef; a.as=ef+1; a.rem=null; a.pct=null; n++; } return; }
+    const s=a.as!=null?a.as:es; if(s>=dd) return; a.as=s;
+    if(ef<dd){ a.af=Math.max(ef,s); a.rem=null; a.pct=100; }
+    else { const c=res.calOf(a), rem=Math.max(1,c.count(dd,ef)), D=bDur(a)||1; a.af=null; a.rem=rem; a.pct=Math.max(0,Math.min(99,Math.round((1-rem/D)*100))); }
+    n++; });
+  return n;
+}
+function updRenderBar(){
+  const el=document.getElementById('bUpd'); if(!el) return; const st=B.st, u=st&&st.upd;
+  const useB=document.getElementById('bUse'), capB=document.querySelector('[data-ba="base"]');
+  if(useB) useB.textContent=u?'Preview in Workbench':'Use in Workbench'; if(capB) capB.hidden=!!u;
+  if(!u){ el.hidden=true; el.innerHTML=''; return; }
+  const s=updStats(), fin=s.fin!=null?fmtL(s.fin*DAY):'—';
+  el.hidden=false;
+  el.innerHTML=`<div class="bu-h"><span class="sl">Updating</span><b>${esc(u.projName)}</b><span class="muted">from ${esc(u.perLabel)} · data date ${fmtL(u.prevDD*DAY)} → <b>${fmtL(st.dd*DAY)}</b></span></div>
+    <div class="sg" role="group" aria-label="Show"><button data-uv="due" class="${u.view==='due'?'on':''}" aria-pressed="${u.view==='due'}">Due this period · ${s.due}</button><button data-uv="all" class="${u.view==='all'?'on':''}" aria-pressed="${u.view==='all'}">All activities</button></div>
+    <button class="btn sm" data-ua="plan" title="Progress every activity you haven’t touched as the last update forecast, up to the data date" ${s.needs?'':'disabled'}>Status the rest as planned</button>
+    <span class="bu-s"><span><b>${s.done}</b> of ${s.due} statused${s.needs?` · <span class="amber">${s.needs} to do</span>`:''}</span><span><b>${s.comp}</b> finished · <b>${s.started}</b> started</span>
+      <span>Finish <b>${fin}</b>${s.mv!=null?` <em class="${dCls(s.mv)}">${s.mv===0?'no change':dS(s.mv)+' vs last update'}</em>`:''}${s.vb!=null?` <em class="${dCls(s.vb)}">${dS(s.vb)} vs baseline</em>`:''}</span>
+      ${s.added||s.deleted?`<span>${s.added?`<b>${s.added}</b> added`:''}${s.added&&s.deleted?' · ':''}${s.deleted?`<b>${s.deleted}</b> deleted`:''}</span>`:''}</span>
+    <span class="bsp"></span><button class="btn sm ghost" data-ua="discard">Discard</button><button class="btn sm primary" data-ua="save">Save as Update ${updPad(u.n)}</button>`;
+}
+function updWireBar(){
+  const el=document.getElementById('bUpd'); if(!el) return;
+  el.addEventListener('click',e=>{ const v=e.target.closest('[data-uv]'), a=e.target.closest('[data-ua]'); const u=B.st&&B.st.upd; if(!u) return;
+    if(v){ u.view=v.dataset.uv; B.sel={r:0,c:B.sel.c}; bSave(); bRenderAll(); return; }
+    if(!a) return;
+    if(a.dataset.ua==='plan'){ bPush(); const k=updPlanned(B.st); bChanged(); bToastMsg(k?`Progressed ${k} activit${k===1?'y':'ies'} as planned. Ctrl+Z undoes it.`:'Nothing left to progress as planned.'); }
+    else if(a.dataset.ua==='save') updSave();
+    else if(a.dataset.ua==='discard') updDiscard(); });
+}
+function updDiscard(){
+  const u=B.st.upd;
+  perDialog('Discard this update?',`<p>Your progress and edits to ${esc(u.projName)} haven’t been saved. Discarding them leaves ${esc(u.perLabel)} as the latest update.</p>`,'Discard update',async()=>{
+    const preview=S.files.some(f=>f.builder); B.st=null; B.undo=[]; B.redo=[]; try{ localStorage.removeItem('pacer.builder'); }catch(_){} document.getElementById('buildWrap').innerHTML=''; renderBuild();
+    if(preview&&PER.store){ try{ const per=(await PER.store.listPeriods(u.pid)).find(x=>x.id===u.perId); if(per){ perPick(u.pid); await perLoad(per,u.pid); } }catch(_){} }
+    perToast('Update discarded.'); });
+}
+function updSave(){
+  const st=B.st, u=st.upd;
+  if(!PER.mode||!PER.store) return bToastMsg('Sign in to save this update.');
+  if(perRO()) return bToastMsg('You have view-only access, so this update can’t be saved.');
+  if(!PER.projects.some(p=>p.id===u.pid)) return bToastMsg(`${u.projName} isn’t in this workspace. Switch workspace from the account menu, then save.`);
+  if(B.res.loops.length) return bToastMsg('Fix the loop in the logic first.');
+  if(st.dd<=u.prevDD) return bToastMsg(`Set a data date after ${fmtL(u.prevDD*DAY)} first.`);
+  const s=updStats(), dd=st.dd*DAY, later=PER.pid===u.pid?PER.periods.filter(p=>p.dd!=null&&p.dd>=dd):[], newer=PER.pid===u.pid?PER.periods.filter(p=>p.dd!=null&&dayOf(p.dd)>u.prevDD&&p.id!==u.perId):[];
+  const bad=st.acts.filter(a=>(a.as!=null&&a.as>st.dd)||(a.af!=null&&a.af>st.dd)).map(a=>a.code);
+  if(bad.length) return bToastMsg(`Actual dates must be on or before the data date: ${bad.slice(0,6).join(', ')}${bad.length>6?'…':''}.`);
+  perDialog(`Save Update ${updPad(u.n)}`,`<label class="pfl"><span>Period name</span><input id="udLab" maxlength="80" value="${esc(`Update ${updPad(u.n)} · ${fmtL(dd)}`)}"></label>
+    <div class="pdg"><div><div class="sl">Data date</div><b>${fmtL(dd)}</b></div><div><div class="sl">Forecast finish</div><b>${s.fin!=null?fmtL(s.fin*DAY):'—'}</b> ${s.mv!=null?`<span class="${dCls(s.mv)}">${s.mv===0?'no change':dS(s.mv)}</span>`:''}</div>
+      <div><div class="sl">This period</div><b>${s.comp}</b> finished · <b>${s.started}</b> started</div><div><div class="sl">Programme changes</div>${s.added||s.deleted?`<b>${s.added}</b> added · <b>${s.deleted}</b> deleted`:'none added or deleted'}</div></div>
+    ${s.needs?`<p class="pwarn">${s.needs} activit${s.needs===1?'y was':'ies were'} due this period with no progress entered. ${s.needs===1?'It moves':'They move'} to the new data date.</p>`:''}
+    ${newer.length?`<p class="pwarn">${esc(newer[newer.length-1].label)} was saved after the update you started from. Saving still adds this as a new period.</p>`:''}
+    ${later.length&&!newer.length?`<p class="pwarn">A period with this data date or later already exists.</p>`:''}
+    <label class="pfl" style="margin-top:12px"><span>Notes (optional)</span><textarea id="udNotes" rows="2" maxlength="600" placeholder="e.g. Piling restarted after the utility diversion"></textarea></label>
+    <p class="muted" style="margin:10px 0 0">The workbench writes the new live XER${st.projects.length>1?'s':''} and keeps this project’s baseline as it is. Resources, costs and other P6 data the editor doesn’t show aren’t carried into the new file.</p>`,'Save update',async d=>{
+    const label=d.querySelector('#udLab').value.trim()||`Update ${updPad(u.n)}`, notes=d.querySelector('#udNotes').value.trim();
+    setTimeout(()=>updCommit(label,notes),0); });
+}
+async function updCommit(label,notes){
+  const st=B.st, u=st.upd; let saved=null;
+  await perRun('Saving update…',async()=>{
+    if(PER.pid!==u.pid){ perPick(u.pid); }
+    if(!PER.periods.length){ const list=await PER.store.listPeriods(u.pid); PER.periods=list.sort((a,b)=>(a.dd||0)-(b.dd||0)||(a.savedAt||0)-(b.savedAt||0)); }
+    const base=await perGetFiles(u.pid,{id:u.perId,files:u.baseRefs});
+    const live=bToXer(st,B.res,'live').map(f=>{ const short=f.name.replace(/_Live\.xer$/,''), T=parseXER(f.text); return {id:uid(),name:`${short}_UP${updPad(u.n)}_${updDdTag(st.dd)}.xer`,role:'live',tables:T,info:fileInfo(T)}; });
+    const files=live.concat(base.map(f=>({...f,role:'baseline'})));
+    const id=await perSavePeriod(u.pid,files,{label,notes:notes||`Updated in the workbench from ${u.perLabel}`});
+    S.files=files.map(f=>({...f,period:id})); PER.loaded={pid:u.pid,id,label}; saved={id,label};
+    B.st=null; B.undo=[]; B.redo=[]; try{ localStorage.removeItem('pacer.builder'); }catch(_){} document.getElementById('buildWrap').innerHTML='';
+    rebuild(true); });
+  if(!saved) return;
+  renderBuild(); renderMeta(); setTab('per'); perToast(`Saved “${saved.label}” as the latest update of ${u.projName}.`);
+}
+function portUpdateChoice(pid){
+  const p=PER.projects.find(x=>x.id===pid); if(!p) return;
+  perDialog(`Update ${p.name}`,`<label class="uopt"><input type="radio" name="ucM" value="edit" checked><span><b>Update it here</b> Set a new data date, enter progress and change the programme in the workbench.</span></label>
+    <label class="uopt"><input type="radio" name="ucM" value="xer"><span><b>Upload XER files</b> Use an update you’ve already done in P6.</span></label>`,'Continue',d=>{
+    const v=d.querySelector('[name=ucM]:checked').value; setTimeout(()=>v==='edit'?updStart(pid):portUpload(pid),0); });
+}
 
 function init(){
   readTheme(); loadPrefs(); exLoad(); ifcLoad(); bLoad(); try{ const cp=JSON.parse(localStorage.getItem('pacer.cp')||'null'); if(cp&&['off','hi','only'].includes(cp.mode)) S.cp={...S.cp,...cp}; }catch(_){} try{ const tl=JSON.parse(localStorage.getItem('pacer.tilos')||'null'); if(tl){ const {styles,...rest}=tl; Object.assign(S.tld,rest); S.styles=styles||{}; } const st=JSON.parse(localStorage.getItem('pacer.site')||'null'); if(st&&Array.isArray(st.marks)) S.site=st; }catch(_){} try{ S.chmap=JSON.parse(localStorage.getItem('pacer.chmap')||'{}')||{}; const cf=JSON.parse(localStorage.getItem('pacer.chfmt')||'null'); if(cf&&FMT[cf.fmt]) S.tld.fmt=cf.fmt; }catch(_){} try{ const lg=localStorage.getItem('pacer.logic'); if(['off','sel','all'].includes(lg)) S.logic=lg; }catch(_){} wire();
