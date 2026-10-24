@@ -85,6 +85,12 @@ function docStore(db){
     updatePeriod:(pid,id,f)=>proj(pid).collection('periods').doc(id).update(f),
     async deleteProject(pid){ const pr=proj(pid), ps=await pr.collection('periods').get(), fs=await files(pid).get();
       for(const d of ps.docs) await pr.collection('periods').doc(d.id).delete(); for(const d of fs.docs) await this.dropFile(pid,d.id); await pr.delete(); },
+    watchRisks:(cb,err)=>base('risks').onSnapshot(s=>cb(rows(s)),err),
+    async createRisk(r){ const ref=base('risks').doc(), now=Date.now(); await ref.set(Object.assign({parentId:null,programmeId:null,projectId:null},r,{createdBy:PER.uid||'local',createdAt:now,updatedAt:now,updatedBy:PER.uid||'local'})); return ref.id; },
+    updateRisk:(id,f)=>base('risks').doc(id).update(Object.assign({},f,{updatedAt:Date.now(),updatedBy:PER.uid||'local'})),
+    deleteRisk:id=>base('risks').doc(id).delete(),
+    async getRiskCfg(){ const d=await db.collection('settings').doc('risk').get(); return d.exists?(d.data()||{}).config:null; },
+    setRiskCfg:cfg=>db.collection('settings').doc('risk').set({config:cfg,at:Date.now(),by:PER.uid||'local'}),
     async getQuality(){ const d=await db.collection('settings').doc('quality').get(); return d.exists?(d.data()||{}).config:null; },
     setQuality:cfg=>db.collection('settings').doc('quality').set({config:cfg,at:Date.now(),by:PER.uid||'local'}),
     profiles:ids=>PER.mode==='cloud'&&PER.user?PER.user.profiles([...new Set(ids.filter(x=>x&&x!=='local'))]):Promise.resolve({})
@@ -99,6 +105,8 @@ function supaStore(sb){
   const pCols=f=>{ const o={}; if('name' in f) o.name=f.name; if('programmeId' in f) o.programme_id=f.programmeId||null; ['code','status','manager','description'].forEach(k=>{ if(k in f) o[k]=f[k]||(k==='status'?'active':''); }); return o; };
   const gCols=f=>{ const o={}; ['name','code','client','description','colour','sort'].forEach(k=>{ if(k in f) o[k]=f[k]; }); return o; };
   const mapR=r=>({id:r.id,label:r.label,notes:r.notes||'',dd:r.dd==null?null:Number(r.dd),stats:r.stats||{},files:r.files||[],narrative:r.narrative||{},savedBy:r.saved_by,savedAt:Date.parse(r.saved_at)||0});
+  const mapK=r=>({id:r.id,level:r.level,programmeId:r.programme_id||null,projectId:r.project_id||null,parentId:r.parent_id||null,ref:r.ref||'',title:r.title,status:r.status||'open',d:r.data||{},space:r.space,createdBy:r.owner,updatedBy:r.updated_by,updatedAt:Date.parse(r.updated_at)||0,createdAt:Date.parse(r.created_at)||0});
+  const kCols=f=>{ const o={}, M={level:'level',programmeId:'programme_id',projectId:'project_id',parentId:'parent_id',ref:'ref',title:'title',status:'status',d:'data'}; for(const k in M) if(k in f) o[M[k]]=f[k]===undefined?null:f[k]; return o; };
   let n=0;
   const watch=(table,filter,load,cb,err)=>{ let alive=true, t=null; const run=()=>load().then(x=>{ if(alive) cb(x); }).catch(e=>{ if(alive&&err) err(e); }); run();
     const ch=sb.channel('sw-'+table+'-'+(++n)+'-'+Date.now()).on('postgres_changes',Object.assign({event:'*',schema:'public',table},filter?{filter}:{}),()=>{ clearTimeout(t); t=setTimeout(run,300); }).subscribe();
@@ -126,6 +134,12 @@ function supaStore(sb){
     async updatePeriod(pid,id,f){ const o={}; if('narrative' in f) o.narrative=f.narrative||{}; if('notes' in f) o.notes=f.notes||''; if('label' in f) o.label=f.label; ok(await sb.from('periods').update(o).eq('id',id)); },
     async deletePeriod(pid,id){ ok(await sb.from('periods').delete().eq('id',id)); },
     async deleteProject(pid){ const fs=ok(await sb.from('xer_files').select('path').eq('project_id',pid)); if(fs.length) await sb.storage.from('xer').remove(fs.map(f=>f.path)); ok(await sb.from('projects').delete().eq('id',pid)); },
+    watchRisks(cb,err){ const sp=PER.space, me=PER.uid; return watch('risks',null,async()=>{ let q=sb.from('risks').select('*').eq('space',sp); if(sp==='private') q=q.eq('owner',me); return ok(await q).map(mapK); },cb,err); },
+    async createRisk(r){ return ok(await sb.from('risks').insert(Object.assign(kCols(r),{space:PER.space})).select('id').single()).id; },
+    async updateRisk(id,f){ ok(await sb.from('risks').update(kCols(f)).eq('id',id)); },
+    async deleteRisk(id){ ok(await sb.from('risks').delete().eq('id',id)); },
+    async getRiskCfg(){ if(!PER.companyId) return null; const r=ok(await sb.from('company_settings').select('risk').eq('company_id',PER.companyId).maybeSingle()); return r&&r.risk&&Object.keys(r.risk).length?r.risk:null; },
+    async setRiskCfg(cfg){ if(!PER.companyId) throw new Error('Choose a company first.'); ok(await sb.from('company_settings').upsert({company_id:PER.companyId,risk:cfg,updated_by:PER.uid||null,updated_at:new Date().toISOString()})); },
     async profiles(ids){ ids=[...new Set(ids.filter(Boolean))]; const out={}; if(!ids.length) return out; const rs=ok(await sb.from('profiles').select('id,name,email').in('id',ids));
       rs.forEach(r=>out[r.id]={id:r.id,name:r.name||r.email||'',isMe:r.id===PER.uid}); return out; }
   };
@@ -251,7 +265,7 @@ function authDone(mode){
   const au=document.getElementById('auth'); if(au){ au.classList.add('out'); setTimeout(()=>au.remove(),260); }
   renderUserChip(); perSubscribe(); setTab('port'); qLoad();
 }
-function perReset(){ if(PER.unP) PER.unP(); if(PER.unR) PER.unR(); if(PER.unG) PER.unG(); PER.unP=PER.unR=PER.unG=null; PER.projects=[]; PER.programmes=[]; PER.periods=[]; PER.pid=null; PER.mode=null; PER.store=null; PER.loaded=null; PER.company=null; PER.site={}; PER.platform=false; try{ brandApply(); siteApply(); }catch(_){} const m=document.getElementById('userMenu'); if(m) m.hidden=true; renderUserChip(); perRenderAll(); }
+function perReset(){ if(typeof RK!=='undefined'){ if(RK.un){ try{ RK.un(); }catch(_){} RK.un=null; } RK.risks=[]; RK.loaded=false; RK.cfg=null; } if(PER.unP) PER.unP(); if(PER.unR) PER.unR(); if(PER.unG) PER.unG(); PER.unP=PER.unR=PER.unG=null; PER.projects=[]; PER.programmes=[]; PER.periods=[]; PER.pid=null; PER.mode=null; PER.store=null; PER.loaded=null; PER.company=null; PER.site={}; PER.platform=false; try{ brandApply(); siteApply(); }catch(_){} const m=document.getElementById('userMenu'); if(m) m.hidden=true; renderUserChip(); perRenderAll(); if(typeof rkRender==='function') rkRender(); }
 async function signOut(){
   try{ localStorage.removeItem('pacer.auth'); }catch(_){}
   const wasSupa=PER.mode==='supa'; perReset();

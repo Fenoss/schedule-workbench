@@ -112,6 +112,26 @@ Only signed-in, approved users can call the function. Edge functions have a time
 - **Account menu (top right):** switch between **Team** and **Private** workspaces, manage users (admins) and sign out.
 - **Offline:** the app still works offline. Choose **Work offline on this device** and data stays in that browser only.
 
+## Risk Workbench
+
+Click the logo to switch between the Schedule Workbench and the Risk Workbench. Both use the same programmes and projects, sign-in and access rules.
+
+- **Registers at three levels.** There is a portfolio register, one for each programme and one for each project. Choose a register from the selector in the top bar. Tick *Include lower registers* to see everything below it as well.
+- **Register formats.** A company admin sets them under Admin → Risk registers (in offline mode, use *Configure*). There are three options:
+  - *Aligned*: every register uses the same columns.
+  - *Tiered*: portfolio, programme and project registers each have their own columns.
+  - *Programme-led*: each programme can tailor its register, and its projects follow it.
+  Admins can also add their own fields. The scoring matrix, categories and escalation thresholds are shared by every register so that risks roll up.
+- **Parent and child risks.** A project risk can roll up to a programme or portfolio risk, and a programme risk can roll up to a portfolio risk. Use *Escalate* to create the parent, or *Add child risk* to delegate one down. A parent marked Σ takes its exposure from its children, so totals count each estimate once.
+- **Interface risks.** These sit between two or more projects. They are shown on the interface matrix, with an optional Interface ID that matches the schedule's Interface ID code. Own them in the register above both projects.
+- **Assessment.**
+  - Qualitative: probability × the highest impact across cost, schedule and the other dimensions, scored for inherent, current and target.
+  - Quantitative: probability, a three-point cost and schedule estimate, a distribution and the schedule activities affected, with an optional post-response estimate. These are kept ready for Monte Carlo.
+- **Responses.** Each risk has a strategy, response owner, plan, trigger, fallback, contingency and tracked actions. The Responses tab lists every action with its due date and status.
+- **Exports.** Excel (register, assessment, responses and actions) and Print / PDF.
+
+The database part is `supabase/risks.sql`, which is also included at the end of `schema.sql`.
+
 ## Changing the app
 Edit the files in `src/` (the scripts in `src/js/` are joined in name order into one page), then:
 ```bash

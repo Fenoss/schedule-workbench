@@ -28,7 +28,7 @@ function confirmIn(b,label){ if(b.dataset.armed){ return true; } b.dataset.armed
 function admAllowed(){ return typeof PER!=='undefined'&&PER.mode==='supa'&&(PER.platform||PER.srole==='admin'); }
 function admSections(){ const co=PER.company?PER.company.name:'Company', L=[];
   if(PER.platform) L.push({g:'Workbench (owner)',items:[['wb-overview','Overview'],['wb-companies','Companies'],['wb-admins','Company admins'],['wb-people','All people'],['wb-owners','Owners'],['wb-log','Activity log']]});
-  if(PER.companyId) L.push({g:co,items:[['co-overview','Overview'],['co-people','People'],['co-invites','Invitations'],['co-access','Sign-in & access'],['co-brand','Branding'],['co-features','Features'],['co-quality','Quality checks'],['co-log','Activity log']]});
+  if(PER.companyId) L.push({g:co,items:[['co-overview','Overview'],['co-people','People'],['co-invites','Invitations'],['co-access','Sign-in & access'],['co-brand','Branding'],['co-features','Features'],['co-quality','Quality checks'],['co-risk','Risk registers'],['co-log','Activity log']]});
   return L; }
 function admGo(sec){ ADM.sec=sec; if(S.tab!=='admin') setTab('admin'); else renderAdmin(); }
 function renderAdminTab(){ /* Admin lives in the account menu now */ }
@@ -49,6 +49,7 @@ const admStat=(l,v,s,cls)=>`<div class="stat"><div class="sl">${esc(l)}</div><di
 const admOk=r=>{ if(r.error) throw r.error; return r.data; };
 const admCount=async q=>{ const r=await q; if(r.error) throw r.error; return r.count||0; };
 const ADM_R={
+  async 'co-risk'(){ await rkLoadCfg(); RK.ce=rkClone(rkCfg()); return admH('Risk registers','How the portfolio, programme and project risk registers line up, the columns each one shows, the scoring matrix and when to escalate. These settings apply to everyone in this company.')+rkCfgHtml('admin'); },
   async 'wb-overview'(){ const cos=admOk(await PER.sb.rpc('owner_companies')), ppl=admOk(await PER.sb.from('profiles').select('id,company_id,role,is_owner'));
     const sum=k=>cos.reduce((n,c)=>n+(+c[k]||0),0), none=ppl.filter(u=>!u.company_id&&!u.is_owner).length, susp=cos.filter(c=>c.status!=='active').length, noAdmin=cos.filter(c=>!+c.admins&&c.status==='active');
     return admH('Workbench overview','Everything across every company on this workbench. Only owners see this page.')+
@@ -130,7 +131,7 @@ const ADM_R={
 };
 // Email the invitation through the invite-email function (Supabase sends it). Falls back to telling the admin to let them know.
 async function admEmailInvite(email){ try{ const {data,error}=await PER.sb.functions.invoke('invite-email',{body:{email,redirectTo:supaRedirect()}}); if(error||!data||data.error) throw new Error((data&&data.error)||(error&&error.message)||'no reply'); return data.sent==='magiclink'?' A sign-in link was emailed to them.':' An invitation email was sent.'; }catch(e){ return ` The email couldn’t be sent (${e.message}), so let them know to sign in with that address.`; } }
-const AUD_L={'access.changed':'Access changed','person.moved':'Moved company','owner.added':'Owner added','owner.removed':'Owner removed','person.signed_up':'Signed up','person.deleted':'Person deleted','company.created':'Company created','company.deleted':'Company deleted','company.suspended':'Company suspended','company.reactivated':'Company reactivated','company.renamed':'Company renamed','company.signin_changed':'Sign-in settings changed','company.branding_changed':'Branding changed','invite.sent':'Invited','invite.cancelled':'Invitation cancelled','settings.quality_changed':'Quality checks changed','settings.features_changed':'Features changed','project.created':'Project created','project.deleted':'Project deleted','programme.created':'Programme created','programme.deleted':'Programme deleted','update.saved':'Update saved','update.deleted':'Update deleted'};
+const AUD_L={'access.changed':'Access changed','person.moved':'Moved company','owner.added':'Owner added','owner.removed':'Owner removed','person.signed_up':'Signed up','person.deleted':'Person deleted','company.created':'Company created','company.deleted':'Company deleted','company.suspended':'Company suspended','company.reactivated':'Company reactivated','company.renamed':'Company renamed','company.signin_changed':'Sign-in settings changed','company.branding_changed':'Branding changed','invite.sent':'Invited','invite.cancelled':'Invitation cancelled','settings.quality_changed':'Quality checks changed','settings.risk_changed':'Risk register settings changed','risk.created':'Risk added','risk.deleted':'Risk deleted','risk.status':'Risk status changed','risk.linked':'Risk linked to parent','settings.features_changed':'Features changed','project.created':'Project created','project.deleted':'Project deleted','programme.created':'Programme created','programme.deleted':'Programme deleted','update.saved':'Update saved','update.deleted':'Update deleted'};
 const AUD_G=[['','Everything'],['access','Access and people'],['company','Company settings'],['invite','Invitations'],['settings','Quality and features'],['project','Projects and programmes'],['update','Schedule updates']];
 function audDetail(a){ const d=a.detail||{}; switch(a.action){
   case 'access.changed': return `${d.from||'—'} → ${d.to||'—'}`; case 'person.moved': return `${d.from||'no company'} → ${d.to||'no company'}`;
@@ -138,7 +139,7 @@ function audDetail(a){ const d=a.detail||{}; switch(a.action){
   case 'invite.sent': return `${d.role}${d.joined_now?' · joined straight away':''}`; case 'settings.quality_changed': return d.default?`default ${d.default.toUpperCase()}`:'';
   case 'settings.features_changed': return ['ai','build','samples'].filter(k=>k in d).map(k=>`${({ai:'AI',build:'Build',samples:'Samples'})[k]} ${d[k]===false?'off':'on'}`).join(' · ');
   case 'company.branding_changed': return [d.title?`title “${d.title}”`:'',d.accent||'',d.logo?'logo':''].filter(Boolean).join(' · ');
-  case 'person.signed_up': return d.role||''; case 'update.saved': return d.notes||''; default: return ''; } }
+  case 'person.signed_up': return d.role||''; case 'risk.created': case 'risk.deleted': return d.level||''; case 'risk.status': return `${d.from||''} → ${d.to||''}`; case 'risk.linked': return d.parent?`to ${d.parent}`:''; case 'settings.risk_changed': return d.align||''; case 'update.saved': return d.notes||''; default: return ''; } }
 async function admLog(all){ const g=ADM.logG||''; let q=PER.sb.from('audit_log').select('*').order('at',{ascending:false}).limit(300); if(!all) q=q.eq('company_id',PER.companyId); if(g) q=q.like('action',g+'.%');
   const rows=admOk(await q), cos=all?((PER.companies||[]).reduce((m,c)=>(m[c.id]=c.name,m),{})):{};
   return admH('Activity log',all?'Every recorded change across the workbench: access, companies, invitations, settings, projects and schedule updates. Newest first.':'Recorded changes in your company: access, invitations, settings, projects and schedule updates. Newest first.')+
@@ -195,5 +196,6 @@ function brandApply(){
   if(BRAND0.html==null) BRAND0.html=br.innerHTML;
   if(b.accent&&/^#[0-9a-f]{6}$/i.test(b.accent)){ R.setProperty('--accent',b.accent); R.setProperty('--accentSoft',`color-mix(in srgb, ${b.accent} 14%, var(--surface))`); R.setProperty('--accentText',`color-mix(in srgb, ${b.accent} 72%, var(--ink))`); R.setProperty('--accentBtn',`color-mix(in srgb, ${b.accent} 78%, #000)`); } else { ['--accent','--accentSoft','--accentText','--accentBtn'].forEach(k=>R.removeProperty(k)); }
   if(b.logo||b.title){ br.innerHTML=(b.logo?`<img class="blogo" src="${esc(b.logo)}" alt="">`:BRAND0.html.match(/<svg[\s\S]*?<\/svg>/)[0])+`<span class="bname">${b.title?esc(b.title):'Schedule <span>Workbench</span>'}</span>`; } else br.innerHTML=BRAND0.html;
+  if(typeof rkBrand==='function') rkBrand();
 }
 function siteApply(){ const s=(typeof PER!=='undefined'&&PER.mode==='supa'&&PER.site)||{}; document.body.classList.toggle('no-ai',s.ai===false); document.body.classList.toggle('no-build',s.build===false); document.body.classList.toggle('no-samples',s.samples===false); if(s.build===false&&S.tab==='build') setTab('port'); }

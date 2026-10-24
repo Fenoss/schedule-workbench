@@ -1048,24 +1048,250 @@ body.no-ai #btnAi,body.no-ai .bai-btn,body.no-ai [data-bnew="ai"],body.no-build 
 .ml-h{display:flex;flex-direction:column;gap:2px;font-size:13px;margin-bottom:4px}
 .ml-i{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;text-align:left;border:1px solid var(--line);border-left:4px solid var(--line);border-radius:8px;background:var(--surface);padding:8px 10px}
 .ml-i.crit{border-left-color:var(--accent)} .ml-c{font-weight:700;font-variant-numeric:tabular-nums} .ml-n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .ml-d,.ml-s{grid-column:1/-1;font-size:12.5px;color:var(--ink2)} .ml-more{align-self:center;margin-top:6px}
+
+/* ===== Workbench switcher ===== */
+.appw{position:relative;display:flex;align-items:center;flex:none}
+.top .brand{background:none;border:0;padding:4px 6px 4px 0;border-radius:8px;cursor:pointer;text-align:left}
+.top .brand:hover{background:var(--surface2)}
+.appchev{color:var(--ink3);margin-left:-2px;margin-right:4px;pointer-events:none}
+.apptag{font-style:normal;font-family:var(--fBody);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--accentSoft);color:var(--accentText);border-radius:999px;padding:2px 8px;margin-left:8px;vertical-align:4px}
+.appmenu{position:absolute;left:0;top:calc(100% + 6px);width:min(360px,calc(100vw - 32px));z-index:45;box-shadow:var(--shadow);padding:6px}
+.appi{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px;border:0;border-radius:8px;background:none}
+.appi:hover,.appi:focus-visible{background:var(--band)}
+.appi.cur{background:var(--accentSoft)}
+.appi>span:nth-child(2){display:flex;flex-direction:column;flex:1;min-width:0}
+.appi b{font-family:var(--fDisplay);font-size:18px;text-transform:uppercase;letter-spacing:.02em}
+.appi .muted{font-size:13px}
+.appic svg{width:32px;height:32px;display:block}
+.appok{color:var(--accentText);font-weight:800}
+body.app-risk .nav1:not(.rknav),body.app-risk .ctxw:not(.rkscw),body.app-risk .navs,body.app-risk #btnFiles,body.app-risk #btnFilters{display:none!important}
+body.app-risk:not(.in-admin) .main>.side,body.app-risk:not(.in-admin) .main>.stage{display:none!important}
+body.app-risk .main{grid-template-columns:minmax(0,1fr)}
+body.in-admin #riskWrap,body.in-admin #rkScopeW{display:none!important}
+body.app-risk.in-admin .main>.side{display:none!important}
+.rknav .n1t{font-size:18px}
+@media (max-width:1180px){ .rkscw .cx-2{display:none} }
+
+/* ===== Risk Workbench ===== */
+.rkw{display:flex;flex-direction:column;gap:12px;min-width:0}
+.rk-head .ph-t h2{margin:0}
+.rk-stats{grid-template-columns:repeat(6,minmax(0,1fr))}
+.rk-stats .sv{font-size:28px}.rk-stats .ss{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:1100px){ .rk-stats{grid-template-columns:repeat(3,minmax(0,1fr))} .rk-stats .stat:nth-child(4){border-left:0} .rk-stats .stat:nth-child(n+4){border-top:1px solid var(--line)} }
+@media (max-width:600px){ .rk-stats{grid-template-columns:repeat(2,minmax(0,1fr))} .rk-stats .stat{border-left:0!important;border-top:1px solid var(--line)} .rk-stats .stat:nth-child(-n+2){border-top:0} .rk-stats .stat:nth-child(even){border-left:1px solid var(--line)!important} }
+.rk-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.rk-grid .span2{grid-column:span 2}.rk-grid .span3{grid-column:1/-1}
+@media (max-width:1100px){ .rk-grid{grid-template-columns:minmax(0,1fr)} .rk-grid .span2,.rk-grid .span3{grid-column:auto} }
+.rk-grid .dpanel,.rk-ifcw .dpanel,.rk-esc{padding:14px 16px}
+.rk-grid .ph,.rk-ifcw .ph,.rk-tree .ph,.rk-regs .ph,.rk-esc .ph{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.rk-grid .ph .sl,.rk-ifcw .ph .sl,.rk-tree .ph .sl,.rk-regs .ph .sl,.rk-esc .ph .sl{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+.pn{font-size:12px;color:var(--ink3);margin:8px 0 0}
+.ph .pn{margin:0}
+.ph .sg,.ph .btn{margin-left:auto}
+.rk-chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px 0 4px;border-radius:999px;background:color-mix(in srgb,var(--rc) 16%,transparent);color:color-mix(in srgb,var(--rc) 70%,var(--ink));font-weight:700;font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.rk-chip::before{content:"";width:16px;height:16px;border-radius:50%;background:var(--rc);flex:none}
+.rk-chip em{font-style:normal;font-weight:600;font-size:11px;opacity:.9}
+.rk-chip.na{background:var(--band);color:var(--ink3);padding:0 9px}.rk-chip.na::before{display:none}
+.rk-ref{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink2);white-space:nowrap;font-size:12px}
+.rk-tt{font-weight:600}
+.rk-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.rk-tag{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:1px 6px;border-radius:4px;background:var(--band);color:var(--ink2);white-space:nowrap}
+.rk-tag.up{background:color-mix(in srgb,var(--active) 14%,transparent);color:var(--active)}
+.rk-tag.ifc{background:color-mix(in srgb,#9B5DE5 16%,transparent);color:color-mix(in srgb,#8A4AD8 75%,var(--ink))}
+.rk-opp{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:4px;background:color-mix(in srgb,var(--early) 16%,transparent);color:var(--early);margin-right:6px}
+.rk-st{font-size:12px;font-weight:600;white-space:nowrap}
+.rk-st.occurred{color:var(--late)}.rk-st.closed{color:var(--ink3)}.rk-st.draft{color:var(--ink3);font-style:italic}.rk-st.monitor{color:var(--active)}
+.rk-tr{font-size:12px}.rk-tr.up{color:var(--late)}.rk-tr.dn{color:var(--early)}.rk-tr.fl{color:var(--ink3)}
+.rk-pj{display:inline-block;font-size:12px;font-weight:600;padding:1px 7px;border-radius:4px;background:var(--band);margin:1px 2px 1px 0;white-space:nowrap}
+.rk-dead td,.rk-node.rk-dead{opacity:.55}
+.rk-long{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+/* matrix */
+.rk-heat{display:grid;grid-template-columns:auto repeat(5,minmax(0,1fr));gap:4px;align-items:stretch}
+.rk-hl{font-size:11px;color:var(--ink2);display:flex;align-items:center;justify-content:flex-end;text-align:right;padding-right:4px;line-height:1.1}
+.rk-hx{font-size:11px;color:var(--ink2);text-align:center;line-height:1.1;padding-top:2px}
+.rk-hc{aspect-ratio:1.5;min-height:34px;border:0;border-radius:6px;background:color-mix(in srgb,var(--rc) 22%,var(--surface));color:var(--ink);font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;gap:2px;font-variant-numeric:tabular-nums}
+.rk-hc.has{background:var(--rc);color:#fff}
+button.rk-hc:hover{outline:2px solid var(--ink);outline-offset:-2px}
+.rk-hc.on{outline:3px solid var(--ink);outline-offset:-3px}
+.rk-heat.sm{grid-template-columns:16px repeat(5,26px);gap:3px}
+.rk-heat.sm .rk-hc{aspect-ratio:auto;min-height:24px;height:24px;font-size:10px}
+.rk-hax{display:flex;justify-content:space-between;font-size:11px;color:var(--ink3);margin-top:6px}
+.rk-mk{display:inline-flex;width:15px;height:15px;border-radius:50%;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;background:#555}
+.rk-mk.pre{background:#6b6b78}.rk-mk.cur{background:#1d1d24;box-shadow:0 0 0 1.5px #fff}.rk-mk.tgt{background:var(--early)}
+.rk-mkl{display:flex;gap:10px;font-size:12px;color:var(--ink2);margin-top:8px;flex-wrap:wrap}.rk-mkl span{display:inline-flex;align-items:center;gap:4px}
+/* exposure + categories */
+.rk-xg{margin-bottom:12px}.rk-xh{font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:4px}
+.rk-xb{display:grid;grid-template-columns:104px 1fr 74px;align-items:center;gap:8px;font-size:12px;margin:3px 0}
+.rk-xb b{text-align:right;font-variant-numeric:tabular-nums}
+.rk-xt{height:12px;background:var(--band);border-radius:3px;overflow:hidden}
+.rk-xt i{display:block;height:100%;border-radius:3px}
+.rk-xt i.pre{background:var(--base)}.rk-xt i.opp{background:var(--active)}.rk-xt i.cur{background:var(--accent)}.rk-xt i.tgt{background:var(--early)}
+.rk-cat{display:grid;grid-template-columns:minmax(0,150px) 1fr 28px;gap:8px;align-items:center;width:100%;border:0;background:none;padding:4px 2px;font-size:13px;text-align:left;border-radius:4px}
+.rk-cat:hover{background:var(--band)}
+.rk-cat>span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk-cb{display:flex;height:12px;border-radius:3px;overflow:hidden}.rk-cb i{display:block;height:100%}.rk-cb i.na{background:var(--base)}
+.rk-cat b{text-align:right;font-variant-numeric:tabular-nums}
+.rk-mini td{vertical-align:middle}
+.rk-mini tbody tr{cursor:pointer}
+.rk-brk tbody tr{cursor:pointer}
+.rk-esc{border-left:3px solid #E0A21B}
+/* register */
+.rk-fbar{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;padding:10px 14px}
+.rk-fbar input[type=search]{height:34px;border:1px solid var(--line);border-radius:6px;padding:0 10px;min-width:220px;flex:1 1 220px;max-width:340px;background:var(--surface)}
+.rk-fbar .ctl select{height:32px}
+.rk-pf{display:inline-flex;align-items:center;gap:4px;background:var(--accentSoft);color:var(--accentText);border-radius:999px;padding:2px 4px 2px 10px;font-size:12px;font-weight:700}
+.rk-pf .fx{width:22px;height:22px;font-size:15px}
+.rk-tw{padding:0;overflow:hidden}
+.rk-regw{max-height:none;border:0;border-radius:0}
+.rk-reg th{padding:0}
+.rk-sort{display:block;width:100%;text-align:left;border:0;background:none;font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;padding:8px 10px;white-space:nowrap}
+.rk-reg th.num .rk-sort{text-align:right}
+.rk-reg td{vertical-align:middle}
+.rk-gh td{background:var(--surface2);cursor:default}
+.rk-c-title{min-width:260px}
+.rk-asel{height:28px;border:1px solid var(--line);border-radius:5px;background:var(--surface);font-size:13px}
+.rk-mix{display:flex;gap:6px;flex-wrap:wrap}.rk-mixi{font-size:12px;background:var(--band);border-radius:999px;padding:2px 9px}
+/* hierarchy */
+.rk-treew{display:grid;grid-template-columns:260px minmax(0,1fr);gap:12px;align-items:start}
+@media (max-width:900px){ .rk-treew{grid-template-columns:minmax(0,1fr)} }
+.rk-regs{padding:12px;position:sticky;top:90px}
+.rk-rt{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;text-align:left;padding:6px 8px 6px calc(8px + var(--dep)*16px);border-radius:6px;font-size:13px}
+.rk-rt span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk-rt b{font-variant-numeric:tabular-nums;font-size:12px;color:var(--ink2)}
+.rk-rt:hover{background:var(--band)}.rk-rt.on{background:var(--accentSoft);color:var(--accentText)}
+.rk-tree{padding:14px 16px}
+.rk-node{display:flex;align-items:center;gap:10px;padding:8px 8px 8px calc(8px + var(--dep)*28px);border-top:1px solid var(--grid);cursor:pointer;position:relative}
+.rk-node:hover{background:var(--band)}
+.rk-node[style*="--dep:1"]::before,.rk-node[style*="--dep:2"]::before,.rk-node[style*="--dep:3"]::before{content:"";position:absolute;left:calc(var(--dep)*28px - 12px);top:0;bottom:50%;width:10px;border-left:1.5px solid var(--base);border-bottom:1.5px solid var(--base);border-bottom-left-radius:4px}
+.rk-lv{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:4px;flex:none}
+.rk-lv.l0{background:var(--ink);color:var(--surface)}.rk-lv.l1{background:color-mix(in srgb,var(--active) 18%,transparent);color:var(--active)}.rk-lv.l2{background:var(--band);color:var(--ink2)}
+.rk-nt{flex:1;min-width:0;display:flex;flex-direction:column}
+.rk-ns{font-size:12px}
+.rk-nev{font-size:13px;min-width:70px;text-align:right}
+.rk-nb{display:flex;gap:4px;opacity:0;transition:opacity .12s}@media (hover:none){.rk-nb{opacity:1}}.rk-node:hover .rk-nb,.rk-nb:focus-within{opacity:1}
+.rk-nb .btn{height:28px;padding:0 8px;font-size:12px}
+.rk-hot{border-color:#E0A21B!important;color:#9A6A00}
+/* interfaces */
+.rk-ifcw{display:flex;flex-direction:column;gap:12px}
+.rk-mx{display:grid;grid-template-columns:minmax(140px,220px) repeat(var(--n),minmax(34px,52px));gap:3px;overflow-x:auto;padding-bottom:4px}
+.rk-mxh{font-size:11px;font-weight:700;text-align:center;color:var(--ink2);writing-mode:vertical-rl;transform:rotate(180deg);justify-self:center;padding:4px 0;white-space:nowrap;max-height:110px;overflow:hidden;text-overflow:ellipsis}
+.rk-mxl{display:flex;flex-direction:column;justify-content:center;font-size:12px;min-width:0;padding-right:6px}.rk-mxl span{color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk-mxc{height:34px;border-radius:5px;background:var(--surface2);border:1px solid var(--grid)}
+.rk-mxc.x{background:none;border-color:transparent}
+.rk-mxc.g{background:color-mix(in srgb,var(--active) 5%,var(--surface2))}
+.rk-mxc.has{border:0;background:var(--rc);color:#fff;font-weight:800;font-size:14px}
+.rk-mxc.has:hover{outline:2px solid var(--ink);outline-offset:-2px}.rk-mxc.on{outline:3px solid var(--ink);outline-offset:-3px}
+.rk-ifcw .ptw{max-height:none}
+/* editor sheet */
+.rk-scrim{position:fixed;inset:0;background:rgba(10,10,16,.35);z-index:58}
+.rk-sheet{position:fixed;top:0;right:0;bottom:0;width:min(860px,100vw);background:var(--surface);z-index:59;box-shadow:var(--shadow);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s ease}
+.rk-sheet.in{transform:none}
+.rk-sh-h{display:flex;align-items:flex-start;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 16px) 20px 10px}
+.rk-sh-t{flex:1;min-width:0}
+.rk-sh-m{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rk-sh-h h2{margin:6px 0 2px;font-size:22px;line-height:1.2}
+.rk-sh-tabs{padding:0 20px}
+.rk-sh-b{flex:1;overflow:auto;padding:16px 20px 24px}
+.rk-sh-b fieldset{border:0;margin:0;padding:0;min-width:0;display:flex;flex-direction:column;gap:14px}
+.rk-sh-f{display:flex;align-items:center;gap:8px;padding:12px 20px calc(env(safe-area-inset-bottom,0px) + 12px);border-top:1px solid var(--line)}
+.rk-sh-b .pfl select{height:40px;border:1px solid var(--line);border-radius:6px;padding:0 8px;font-size:15px;font-weight:400;color:var(--ink);background:var(--surface)}
+.rk-sh-b .pfl small{font-weight:400}
+.rk-g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.rk-g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.rk-g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:700px){ .rk-g3,.rk-g4{grid-template-columns:repeat(2,minmax(0,1fr))} .rk-g2{grid-template-columns:minmax(0,1fr)} }
+.rk-stmt{margin:8px 0 0;padding:10px 12px;background:var(--surface2);border-radius:6px;font-size:14px}
+.rk-h4{margin:8px 0 0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+.rk-h4 .muted{text-transform:none;letter-spacing:0;font-weight:400}
+.rk-ass{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}
+@media (max-width:700px){ .rk-ass{grid-template-columns:minmax(0,1fr)} }
+.rk-assw{max-height:none}
+.rk-asst th{white-space:normal}.rk-asst tbody th{text-align:left;font-size:12px;color:var(--ink2);padding:6px 10px;font-weight:600;background:none;position:static;text-transform:none;letter-spacing:0}
+.rk-asst td{padding:5px 6px}.rk-asst select{width:100%;height:34px;border:1px solid var(--line);border-radius:5px;background:var(--surface);font-size:13px}
+.rk-asst tbody tr{cursor:default}.rk-asst tbody tr:hover{background:none}
+.rk-ths{font-size:10.5px;text-transform:none;letter-spacing:0;font-weight:400}
+.rk-tri{display:grid;grid-template-columns:80px repeat(3,minmax(0,1fr));gap:10px;align-items:end}
+.rk-tril{font-weight:700;font-size:13px;padding-bottom:10px}
+.rk-evs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;background:var(--surface2);border-radius:6px;padding:10px 12px}
+.rk-evs>div{display:flex;flex-direction:column}.rk-evs .sl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}.rk-evs b{font-size:20px;font-variant-numeric:tabular-nums}.rk-evs .muted{font-size:12px}
+.rk-roll{padding:10px 12px;background:var(--accentSoft);border-radius:6px}
+.rk-mc{padding:10px 12px;border:1px dashed var(--line);border-radius:6px}
+.rk-strat{align-self:flex-start}.rk-strat button{height:34px;padding:0 16px}
+.pfl textarea{font:inherit;font-size:15px;font-weight:400}
+.rk-oa{display:flex;align-items:center;gap:10px;width:100%;border:0;border-top:1px solid var(--grid);background:none;text-align:left;padding:8px 2px;font-size:13px}.rk-oa:hover{background:var(--band)}.rk-oa>span:first-child{flex:1;min-width:0;display:flex;flex-direction:column}.rk-oa .num{white-space:nowrap;font-weight:700}
+.rk-ifl tbody tr,.rk-acts tbody tr{cursor:pointer}.rk-ifl td,.rk-acts td{vertical-align:middle}
+.rk-at td{padding:4px 6px;vertical-align:middle}.rk-at input,.rk-at select{width:100%;height:32px;border:1px solid var(--line);border-radius:5px;padding:0 8px;background:var(--surface);font-size:13px}
+.rk-at input.rk-num{width:100px}.rk-at tbody tr{cursor:default}.rk-at tbody tr:hover{background:none}
+.rk-odr input[type=date]{border-color:var(--late);color:var(--late)}
+.rk-card{display:flex;align-items:center;gap:8px;width:100%;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:8px 10px;text-align:left;margin-top:6px}
+.rk-card:hover{border-color:var(--ink3)}.rk-card .rk-tt{flex:1;min-width:0}
+.rk-pjl{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;padding:10px 12px;background:var(--surface2);border-radius:6px}
+.rk-pjg{display:flex;flex-direction:column;gap:4px;font-size:13px}.rk-pjg>b{font-size:12px;color:var(--ink2)}
+.rk-pjb{display:flex;align-items:flex-start;gap:8px;font-weight:400;cursor:pointer}.rk-pjb input{margin-top:3px;flex:none}
+/* register settings */
+.rk-cfg{display:flex;flex-direction:column;gap:22px}
+.rk-cfg section{display:flex;flex-direction:column;gap:10px}
+.rk-cfg h3{margin:0;font-family:var(--fDisplay);font-size:20px;text-transform:uppercase;letter-spacing:.02em}
+.rk-cfg .fh{font-size:12px;font-weight:700;color:var(--ink2);margin:6px 0 4px}
+.rk-al{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:800px){ .rk-al{grid-template-columns:minmax(0,1fr)} }
+.rk-alo{display:flex;flex-direction:column;gap:4px;border:1px solid var(--line);border-radius:8px;padding:12px;cursor:pointer;position:relative}
+.rk-alo input{position:absolute;top:12px;right:12px}
+.rk-alo.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;background:var(--accentSoft)}
+.rk-alo .muted{font-size:13px}
+.rk-ccw{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px}
+@media (max-width:900px){ .rk-ccw{grid-template-columns:minmax(0,1fr)} }
+.rk-cc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.rk-cci{display:flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--grid);border-radius:6px;margin-bottom:4px;font-size:13px;background:var(--surface)}
+.rk-cci.on{border-color:var(--accent)}
+.rk-cci .fx{width:26px;height:26px;font-size:14px}.rk-cci .sp{flex:1}
+.rk-cfgm .mh{margin-bottom:12px}
+.rk-grid .dpanel,.rk-esc{overflow-x:auto;min-width:0}
+.rk-cca{display:flex;flex-wrap:wrap;gap:6px}
+.rk-ccb{border:1px dashed var(--line);background:none;border-radius:999px;padding:3px 10px;font-size:12px}
+.rk-ccb:hover{border-color:var(--ink3);border-style:solid}
+.rk-fl{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.rk-fli{display:grid;grid-template-columns:200px 120px minmax(0,1fr) 30px;gap:6px;width:100%}
+.rk-cfg input:not([type=radio]):not([type=checkbox]):not([type=color]),.rk-cfg select{height:34px;border:1px solid var(--line);border-radius:5px;padding:0 8px;background:var(--surface);font-size:13px;min-width:0}
+.rk-cfg textarea{border:1px solid var(--line);border-radius:5px;padding:8px;background:var(--surface);font:inherit;font-size:13px}
+.rk-pb{display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap}
+.rk-pb input[type=number]{width:90px}.rk-pb input[type=color]{width:34px;height:34px;padding:0;border:1px solid var(--line);border-radius:5px;background:none}
+.rk-il{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.rk-dim{border:1px solid var(--grid);border-radius:6px;padding:8px 10px;margin-bottom:6px}
+.rk-dimh{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.rk-dimv{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.rk-dimv label{display:flex;flex-direction:column;gap:2px;font-size:11px;color:var(--ink3)}
+.rk-prev{max-width:520px}
+.rk-cfga{position:sticky;bottom:0;background:var(--surface);padding:10px 0;border-top:1px solid var(--line)}
+.mcard.rk-cfgm{width:min(1080px,100%)}
+
 @media print{
   .top,.navs,.side,#auth,.ptoast,.btn,.plink,.pbusy,.selbar,.note,.aipanel,#userMenu,#ctxMenu,.perbar .ctl,.pmsel select,.setup{display:none!important}
   body{background:#fff} .main{display:block!important;padding:0!important} .card{box-shadow:none!important;break-inside:avoid} .dpanel,.prog,.pitem{break-inside:avoid}
   .pergrid{display:block!important} .perlist{display:none!important} .wrap{max-width:none!important;padding:0 8px!important}
+  .rk-sheet,.rk-scrim,.rk-fbar input,.rk-nb,.rk-regs{display:none!important} .rk-grid,.rk-treew{display:block!important} .rk-regw{overflow:visible!important}
 }
 </style>
 
 <header class="top">
   <div class="wrap top-in">
-    <div class="brand">
+    <div class="appw"><button class="brand" id="appSw" aria-haspopup="true" aria-expanded="false" title="Switch between the Schedule and Risk workbenches">
       <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="var(--accent)"/><rect x="6" y="6.5" width="11" height="4" rx="2" fill="#fff"/><path d="M6 16h4.5l2.5-3.5 3 7 2.5-3.5H26" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="15" y="21.5" width="11" height="4" rx="2" fill="#fff" opacity=".75"/></svg>
       <span class="bname">Schedule <span>Workbench</span></span>
-    </div>
+    </button><svg class="appchev" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><div class="card appmenu" id="appMenu" role="menu" hidden></div></div>
     <nav class="nav1" role="tablist" aria-label="Area">
       <button class="n1t" role="tab" id="tabPort" aria-selected="false">Portfolio</button>
       <button class="n1t" role="tab" id="navProj" aria-selected="false">Project<span class="n1p" id="navProjName"></span></button>
       <button class="n1t" role="tab" id="tabBuild" aria-selected="false">Build</button>
     </nav>
+    <nav class="nav1 rknav" id="rkNav" role="tablist" aria-label="Risk views" hidden>
+      <button class="n1t" role="tab" data-rkt="over" aria-selected="false">Overview</button>
+      <button class="n1t" role="tab" data-rkt="reg" aria-selected="false">Register</button>
+      <button class="n1t" role="tab" data-rkt="tree" aria-selected="false">Hierarchy</button>
+      <button class="n1t" role="tab" data-rkt="ifc" aria-selected="false">Interfaces</button>
+      <button class="n1t" role="tab" data-rkt="resp" aria-selected="false">Responses</button>
+    </nav>
+    <div class="ctxw rkscw" id="rkScopeW" hidden><button class="ctx" id="rkScope" aria-haspopup="true" aria-expanded="false" title="Choose register"></button><div class="card ctxmenu" id="rkScopeMenu" hidden></div></div>
     <div class="ctxw"><button class="ctx" id="meta" aria-haspopup="true" aria-expanded="false" aria-label="Select Schedule" title="Select Schedule"></button><div class="card ctxmenu" id="ctxMenu" hidden></div></div>
     <div class="top-actions">
       <button class="btn only-m" id="btnFilters">View &amp; filters <span class="cnt" id="fBadge" hidden></span></button>
@@ -1163,6 +1389,7 @@ body.no-ai #btnAi,body.no-ai .bai-btn,body.no-ai [data-bnew="ai"],body.no-build 
     </div>
     <div class="note" id="note"></div>
   </section>
+  <div class="rkw" id="riskWrap" hidden></div>
 </main>
 
 
@@ -4434,7 +4661,7 @@ const PROJ_TABS=['dash','gantt','tld','dq','ifc','per','exec'];
 function setTab(t){
   if(t==='ai'){ t=S.lastProj||'dash'; setTimeout(()=>aiPanel(true),0); }
   S.tab=t; if(t==='admin'&&!admAllowed()) t='port';
-  const TABS={port:'tabPort',dash:'tabDash',per:'tabPer',gantt:'tabGantt',tld:'tabTld',dq:'tabDq',ifc:'tabIfc',exec:'tabExec',build:'tabBuild'}; Object.entries(TABS).forEach(([x,id])=>{ const b=document.getElementById(id); if(b) b.setAttribute('aria-selected',t===x); }); const uc=document.getElementById('userChip'); if(uc) uc.classList.toggle('on',t==='admin');
+  const TABS={port:'tabPort',dash:'tabDash',per:'tabPer',gantt:'tabGantt',tld:'tabTld',dq:'tabDq',ifc:'tabIfc',exec:'tabExec',build:'tabBuild'}; Object.entries(TABS).forEach(([x,id])=>{ const b=document.getElementById(id); if(b) b.setAttribute('aria-selected',t===x); }); const uc=document.getElementById('userChip'); if(uc) uc.classList.toggle('on',t==='admin'); document.body.classList.toggle('in-admin',t==='admin');
   const inProj=PROJ_TABS.includes(t); document.getElementById('navProj').setAttribute('aria-selected',inProj); document.getElementById('nav2').hidden=!inProj;
   if(inProj) S.lastProj=t; else if(!document.getElementById('aiWrap').hidden) aiPanel(false);
   gWrap.hidden=t!=='gantt'; tWrap.hidden=t!=='tld'; document.getElementById('dqWrap').hidden=t!=='dq'; document.getElementById('dashWrap').hidden=t!=='dash'; document.getElementById('execWrap').hidden=t!=='exec'; document.getElementById('ifcWrap').hidden=t!=='ifc'; document.getElementById('buildWrap').hidden=t!=='build'; document.getElementById('perWrap').hidden=t!=='per'; document.getElementById('portWrap').hidden=t!=='port'; document.getElementById('adminWrap').hidden=t!=='admin'; if(t!=='build') document.getElementById('bAi').hidden=true; if(t!=='exec'){ const pk=document.getElementById('exPick'); if(pk) pk.hidden=true; }
@@ -4733,6 +4960,12 @@ function docStore(db){
     updatePeriod:(pid,id,f)=>proj(pid).collection('periods').doc(id).update(f),
     async deleteProject(pid){ const pr=proj(pid), ps=await pr.collection('periods').get(), fs=await files(pid).get();
       for(const d of ps.docs) await pr.collection('periods').doc(d.id).delete(); for(const d of fs.docs) await this.dropFile(pid,d.id); await pr.delete(); },
+    watchRisks:(cb,err)=>base('risks').onSnapshot(s=>cb(rows(s)),err),
+    async createRisk(r){ const ref=base('risks').doc(), now=Date.now(); await ref.set(Object.assign({parentId:null,programmeId:null,projectId:null},r,{createdBy:PER.uid||'local',createdAt:now,updatedAt:now,updatedBy:PER.uid||'local'})); return ref.id; },
+    updateRisk:(id,f)=>base('risks').doc(id).update(Object.assign({},f,{updatedAt:Date.now(),updatedBy:PER.uid||'local'})),
+    deleteRisk:id=>base('risks').doc(id).delete(),
+    async getRiskCfg(){ const d=await db.collection('settings').doc('risk').get(); return d.exists?(d.data()||{}).config:null; },
+    setRiskCfg:cfg=>db.collection('settings').doc('risk').set({config:cfg,at:Date.now(),by:PER.uid||'local'}),
     async getQuality(){ const d=await db.collection('settings').doc('quality').get(); return d.exists?(d.data()||{}).config:null; },
     setQuality:cfg=>db.collection('settings').doc('quality').set({config:cfg,at:Date.now(),by:PER.uid||'local'}),
     profiles:ids=>PER.mode==='cloud'&&PER.user?PER.user.profiles([...new Set(ids.filter(x=>x&&x!=='local'))]):Promise.resolve({})
@@ -4747,6 +4980,8 @@ function supaStore(sb){
   const pCols=f=>{ const o={}; if('name' in f) o.name=f.name; if('programmeId' in f) o.programme_id=f.programmeId||null; ['code','status','manager','description'].forEach(k=>{ if(k in f) o[k]=f[k]||(k==='status'?'active':''); }); return o; };
   const gCols=f=>{ const o={}; ['name','code','client','description','colour','sort'].forEach(k=>{ if(k in f) o[k]=f[k]; }); return o; };
   const mapR=r=>({id:r.id,label:r.label,notes:r.notes||'',dd:r.dd==null?null:Number(r.dd),stats:r.stats||{},files:r.files||[],narrative:r.narrative||{},savedBy:r.saved_by,savedAt:Date.parse(r.saved_at)||0});
+  const mapK=r=>({id:r.id,level:r.level,programmeId:r.programme_id||null,projectId:r.project_id||null,parentId:r.parent_id||null,ref:r.ref||'',title:r.title,status:r.status||'open',d:r.data||{},space:r.space,createdBy:r.owner,updatedBy:r.updated_by,updatedAt:Date.parse(r.updated_at)||0,createdAt:Date.parse(r.created_at)||0});
+  const kCols=f=>{ const o={}, M={level:'level',programmeId:'programme_id',projectId:'project_id',parentId:'parent_id',ref:'ref',title:'title',status:'status',d:'data'}; for(const k in M) if(k in f) o[M[k]]=f[k]===undefined?null:f[k]; return o; };
   let n=0;
   const watch=(table,filter,load,cb,err)=>{ let alive=true, t=null; const run=()=>load().then(x=>{ if(alive) cb(x); }).catch(e=>{ if(alive&&err) err(e); }); run();
     const ch=sb.channel('sw-'+table+'-'+(++n)+'-'+Date.now()).on('postgres_changes',Object.assign({event:'*',schema:'public',table},filter?{filter}:{}),()=>{ clearTimeout(t); t=setTimeout(run,300); }).subscribe();
@@ -4774,6 +5009,12 @@ function supaStore(sb){
     async updatePeriod(pid,id,f){ const o={}; if('narrative' in f) o.narrative=f.narrative||{}; if('notes' in f) o.notes=f.notes||''; if('label' in f) o.label=f.label; ok(await sb.from('periods').update(o).eq('id',id)); },
     async deletePeriod(pid,id){ ok(await sb.from('periods').delete().eq('id',id)); },
     async deleteProject(pid){ const fs=ok(await sb.from('xer_files').select('path').eq('project_id',pid)); if(fs.length) await sb.storage.from('xer').remove(fs.map(f=>f.path)); ok(await sb.from('projects').delete().eq('id',pid)); },
+    watchRisks(cb,err){ const sp=PER.space, me=PER.uid; return watch('risks',null,async()=>{ let q=sb.from('risks').select('*').eq('space',sp); if(sp==='private') q=q.eq('owner',me); return ok(await q).map(mapK); },cb,err); },
+    async createRisk(r){ return ok(await sb.from('risks').insert(Object.assign(kCols(r),{space:PER.space})).select('id').single()).id; },
+    async updateRisk(id,f){ ok(await sb.from('risks').update(kCols(f)).eq('id',id)); },
+    async deleteRisk(id){ ok(await sb.from('risks').delete().eq('id',id)); },
+    async getRiskCfg(){ if(!PER.companyId) return null; const r=ok(await sb.from('company_settings').select('risk').eq('company_id',PER.companyId).maybeSingle()); return r&&r.risk&&Object.keys(r.risk).length?r.risk:null; },
+    async setRiskCfg(cfg){ if(!PER.companyId) throw new Error('Choose a company first.'); ok(await sb.from('company_settings').upsert({company_id:PER.companyId,risk:cfg,updated_by:PER.uid||null,updated_at:new Date().toISOString()})); },
     async profiles(ids){ ids=[...new Set(ids.filter(Boolean))]; const out={}; if(!ids.length) return out; const rs=ok(await sb.from('profiles').select('id,name,email').in('id',ids));
       rs.forEach(r=>out[r.id]={id:r.id,name:r.name||r.email||'',isMe:r.id===PER.uid}); return out; }
   };
@@ -4899,7 +5140,7 @@ function authDone(mode){
   const au=document.getElementById('auth'); if(au){ au.classList.add('out'); setTimeout(()=>au.remove(),260); }
   renderUserChip(); perSubscribe(); setTab('port'); qLoad();
 }
-function perReset(){ if(PER.unP) PER.unP(); if(PER.unR) PER.unR(); if(PER.unG) PER.unG(); PER.unP=PER.unR=PER.unG=null; PER.projects=[]; PER.programmes=[]; PER.periods=[]; PER.pid=null; PER.mode=null; PER.store=null; PER.loaded=null; PER.company=null; PER.site={}; PER.platform=false; try{ brandApply(); siteApply(); }catch(_){} const m=document.getElementById('userMenu'); if(m) m.hidden=true; renderUserChip(); perRenderAll(); }
+function perReset(){ if(typeof RK!=='undefined'){ if(RK.un){ try{ RK.un(); }catch(_){} RK.un=null; } RK.risks=[]; RK.loaded=false; RK.cfg=null; } if(PER.unP) PER.unP(); if(PER.unR) PER.unR(); if(PER.unG) PER.unG(); PER.unP=PER.unR=PER.unG=null; PER.projects=[]; PER.programmes=[]; PER.periods=[]; PER.pid=null; PER.mode=null; PER.store=null; PER.loaded=null; PER.company=null; PER.site={}; PER.platform=false; try{ brandApply(); siteApply(); }catch(_){} const m=document.getElementById('userMenu'); if(m) m.hidden=true; renderUserChip(); perRenderAll(); if(typeof rkRender==='function') rkRender(); }
 async function signOut(){
   try{ localStorage.removeItem('pacer.auth'); }catch(_){}
   const wasSupa=PER.mode==='supa'; perReset();
@@ -4960,7 +5201,7 @@ function confirmIn(b,label){ if(b.dataset.armed){ return true; } b.dataset.armed
 function admAllowed(){ return typeof PER!=='undefined'&&PER.mode==='supa'&&(PER.platform||PER.srole==='admin'); }
 function admSections(){ const co=PER.company?PER.company.name:'Company', L=[];
   if(PER.platform) L.push({g:'Workbench (owner)',items:[['wb-overview','Overview'],['wb-companies','Companies'],['wb-admins','Company admins'],['wb-people','All people'],['wb-owners','Owners'],['wb-log','Activity log']]});
-  if(PER.companyId) L.push({g:co,items:[['co-overview','Overview'],['co-people','People'],['co-invites','Invitations'],['co-access','Sign-in & access'],['co-brand','Branding'],['co-features','Features'],['co-quality','Quality checks'],['co-log','Activity log']]});
+  if(PER.companyId) L.push({g:co,items:[['co-overview','Overview'],['co-people','People'],['co-invites','Invitations'],['co-access','Sign-in & access'],['co-brand','Branding'],['co-features','Features'],['co-quality','Quality checks'],['co-risk','Risk registers'],['co-log','Activity log']]});
   return L; }
 function admGo(sec){ ADM.sec=sec; if(S.tab!=='admin') setTab('admin'); else renderAdmin(); }
 function renderAdminTab(){ /* Admin lives in the account menu now */ }
@@ -4981,6 +5222,7 @@ const admStat=(l,v,s,cls)=>`<div class="stat"><div class="sl">${esc(l)}</div><di
 const admOk=r=>{ if(r.error) throw r.error; return r.data; };
 const admCount=async q=>{ const r=await q; if(r.error) throw r.error; return r.count||0; };
 const ADM_R={
+  async 'co-risk'(){ await rkLoadCfg(); RK.ce=rkClone(rkCfg()); return admH('Risk registers','How the portfolio, programme and project risk registers line up, the columns each one shows, the scoring matrix and when to escalate. These settings apply to everyone in this company.')+rkCfgHtml('admin'); },
   async 'wb-overview'(){ const cos=admOk(await PER.sb.rpc('owner_companies')), ppl=admOk(await PER.sb.from('profiles').select('id,company_id,role,is_owner'));
     const sum=k=>cos.reduce((n,c)=>n+(+c[k]||0),0), none=ppl.filter(u=>!u.company_id&&!u.is_owner).length, susp=cos.filter(c=>c.status!=='active').length, noAdmin=cos.filter(c=>!+c.admins&&c.status==='active');
     return admH('Workbench overview','Everything across every company on this workbench. Only owners see this page.')+
@@ -5062,7 +5304,7 @@ const ADM_R={
 };
 // Email the invitation through the invite-email function (Supabase sends it). Falls back to telling the admin to let them know.
 async function admEmailInvite(email){ try{ const {data,error}=await PER.sb.functions.invoke('invite-email',{body:{email,redirectTo:supaRedirect()}}); if(error||!data||data.error) throw new Error((data&&data.error)||(error&&error.message)||'no reply'); return data.sent==='magiclink'?' A sign-in link was emailed to them.':' An invitation email was sent.'; }catch(e){ return ` The email couldn’t be sent (${e.message}), so let them know to sign in with that address.`; } }
-const AUD_L={'access.changed':'Access changed','person.moved':'Moved company','owner.added':'Owner added','owner.removed':'Owner removed','person.signed_up':'Signed up','person.deleted':'Person deleted','company.created':'Company created','company.deleted':'Company deleted','company.suspended':'Company suspended','company.reactivated':'Company reactivated','company.renamed':'Company renamed','company.signin_changed':'Sign-in settings changed','company.branding_changed':'Branding changed','invite.sent':'Invited','invite.cancelled':'Invitation cancelled','settings.quality_changed':'Quality checks changed','settings.features_changed':'Features changed','project.created':'Project created','project.deleted':'Project deleted','programme.created':'Programme created','programme.deleted':'Programme deleted','update.saved':'Update saved','update.deleted':'Update deleted'};
+const AUD_L={'access.changed':'Access changed','person.moved':'Moved company','owner.added':'Owner added','owner.removed':'Owner removed','person.signed_up':'Signed up','person.deleted':'Person deleted','company.created':'Company created','company.deleted':'Company deleted','company.suspended':'Company suspended','company.reactivated':'Company reactivated','company.renamed':'Company renamed','company.signin_changed':'Sign-in settings changed','company.branding_changed':'Branding changed','invite.sent':'Invited','invite.cancelled':'Invitation cancelled','settings.quality_changed':'Quality checks changed','settings.risk_changed':'Risk register settings changed','risk.created':'Risk added','risk.deleted':'Risk deleted','risk.status':'Risk status changed','risk.linked':'Risk linked to parent','settings.features_changed':'Features changed','project.created':'Project created','project.deleted':'Project deleted','programme.created':'Programme created','programme.deleted':'Programme deleted','update.saved':'Update saved','update.deleted':'Update deleted'};
 const AUD_G=[['','Everything'],['access','Access and people'],['company','Company settings'],['invite','Invitations'],['settings','Quality and features'],['project','Projects and programmes'],['update','Schedule updates']];
 function audDetail(a){ const d=a.detail||{}; switch(a.action){
   case 'access.changed': return `${d.from||'—'} → ${d.to||'—'}`; case 'person.moved': return `${d.from||'no company'} → ${d.to||'no company'}`;
@@ -5070,7 +5312,7 @@ function audDetail(a){ const d=a.detail||{}; switch(a.action){
   case 'invite.sent': return `${d.role}${d.joined_now?' · joined straight away':''}`; case 'settings.quality_changed': return d.default?`default ${d.default.toUpperCase()}`:'';
   case 'settings.features_changed': return ['ai','build','samples'].filter(k=>k in d).map(k=>`${({ai:'AI',build:'Build',samples:'Samples'})[k]} ${d[k]===false?'off':'on'}`).join(' · ');
   case 'company.branding_changed': return [d.title?`title “${d.title}”`:'',d.accent||'',d.logo?'logo':''].filter(Boolean).join(' · ');
-  case 'person.signed_up': return d.role||''; case 'update.saved': return d.notes||''; default: return ''; } }
+  case 'person.signed_up': return d.role||''; case 'risk.created': case 'risk.deleted': return d.level||''; case 'risk.status': return `${d.from||''} → ${d.to||''}`; case 'risk.linked': return d.parent?`to ${d.parent}`:''; case 'settings.risk_changed': return d.align||''; case 'update.saved': return d.notes||''; default: return ''; } }
 async function admLog(all){ const g=ADM.logG||''; let q=PER.sb.from('audit_log').select('*').order('at',{ascending:false}).limit(300); if(!all) q=q.eq('company_id',PER.companyId); if(g) q=q.like('action',g+'.%');
   const rows=admOk(await q), cos=all?((PER.companies||[]).reduce((m,c)=>(m[c.id]=c.name,m),{})):{};
   return admH('Activity log',all?'Every recorded change across the workbench: access, companies, invitations, settings, projects and schedule updates. Newest first.':'Recorded changes in your company: access, invitations, settings, projects and schedule updates. Newest first.')+
@@ -5127,6 +5369,7 @@ function brandApply(){
   if(BRAND0.html==null) BRAND0.html=br.innerHTML;
   if(b.accent&&/^#[0-9a-f]{6}$/i.test(b.accent)){ R.setProperty('--accent',b.accent); R.setProperty('--accentSoft',`color-mix(in srgb, ${b.accent} 14%, var(--surface))`); R.setProperty('--accentText',`color-mix(in srgb, ${b.accent} 72%, var(--ink))`); R.setProperty('--accentBtn',`color-mix(in srgb, ${b.accent} 78%, #000)`); } else { ['--accent','--accentSoft','--accentText','--accentBtn'].forEach(k=>R.removeProperty(k)); }
   if(b.logo||b.title){ br.innerHTML=(b.logo?`<img class="blogo" src="${esc(b.logo)}" alt="">`:BRAND0.html.match(/<svg[\s\S]*?<\/svg>/)[0])+`<span class="bname">${b.title?esc(b.title):'Schedule <span>Workbench</span>'}</span>`; } else br.innerHTML=BRAND0.html;
+  if(typeof rkBrand==='function') rkBrand();
 }
 function siteApply(){ const s=(typeof PER!=='undefined'&&PER.mode==='supa'&&PER.site)||{}; document.body.classList.toggle('no-ai',s.ai===false); document.body.classList.toggle('no-build',s.build===false); document.body.classList.toggle('no-samples',s.samples===false); if(s.build===false&&S.tab==='build') setTab('port'); }
 async function supaUsers(){
@@ -5153,14 +5396,14 @@ function perRenderAll(){ renderPer(); if(typeof renderPort==='function') renderP
 function perSubscribe(){
   if(PER.unP) PER.unP(); if(PER.unR) PER.unR(); if(PER.unG) PER.unG(); PER.unR=PER.unG=null; PER.periods=[]; PER.projects=[]; PER.programmes=[]; PER.schemaOld=false;
   if(!PER.store){ perRenderAll(); return; }
-  PER.unG=PER.store.watchProgrammes(list=>{ PER.programmes=list.sort((a,b)=>(a.sort||0)-(b.sort||0)||String(a.name).localeCompare(b.name)); PER.schemaOld=false; if(typeof renderPort==='function') renderPort(); renderMeta(); },
+  PER.unG=PER.store.watchProgrammes(list=>{ PER.programmes=list.sort((a,b)=>(a.sort||0)-(b.sort||0)||String(a.name).localeCompare(b.name)); PER.schemaOld=false; if(typeof renderPort==='function') renderPort(); renderMeta(); if(typeof rkRender==='function') rkRender(); },
     e=>{ if(/programmes|schema cache|does not exist|42P01|PGRST20/i.test((e&&(e.message||e.code))||'')){ PER.schemaOld=true; if(typeof renderPort==='function') renderPort(); } else perToast(perErr(e),'err'); });
-  PER.unP=PER.store.watchProjects(list=>{ PER.projects=list.map(p=>Object.assign({programmeId:null,code:'',status:'active',manager:'',description:'',summary:null},p)).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)); if(typeof renderPort==='function') renderPort(); renderMeta();
+  PER.unP=PER.store.watchProjects(list=>{ PER.projects=list.map(p=>Object.assign({programmeId:null,code:'',status:'active',manager:'',description:'',summary:null},p)).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)); if(typeof renderPort==='function') renderPort(); renderMeta(); if(typeof rkRender==='function') rkRender();
       let want=PER.pid; if(!want){ try{ want=localStorage.getItem('pacer.proj.'+PER.space); }catch(_){} }
       if(!PER.projects.some(p=>p.id===want)) want=PER.projects[0]?PER.projects[0].id:null;
       if(want!==PER.pid||!PER.unR) perPick(want); else renderPer(); },
     e=>{ perToast(perErr(e),'err'); perRenderAll(); });
-  perRenderAll();
+  perRenderAll(); if(typeof rkSubscribe==='function') rkSubscribe();
 }
 function perPick(pid){
   if(PER.unR) PER.unR(); PER.unR=null; PER.pid=pid; PER.periods=[]; PER.cmp={a:null,b:null,tab:PER.cmp.tab,manual:false}; PER.ms=null;
@@ -5503,7 +5746,7 @@ function wirePer(){
   document.addEventListener('click',e=>{ if(!menu.hidden&&!menu.contains(e.target)&&e.target!==chip){ menu.hidden=true; chip.setAttribute('aria-expanded','false'); } });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!menu.hidden){ menu.hidden=true; chip.setAttribute('aria-expanded','false'); chip.focus(); } });
   menu.addEventListener('click',e=>{ const s=e.target.closest('[data-space]'); if(s){ PER.space=s.dataset.space; try{ localStorage.setItem('pacer.space',PER.space); }catch(_){} PER.pid=null; perCmpCache.clear(); renderUserChip(); perSubscribe(); return; }
-    const u=e.target.closest('[data-um]'); if(!u) return; menu.hidden=true; if(u.dataset.um==='out') signOut(); else if(u.dataset.um==='users') admGo('co-overview'); else if(u.dataset.um==='owner') admGo('wb-overview'); else setTab('port'); });
+    const u=e.target.closest('[data-um]'); if(!u) return; menu.hidden=true; if(u.dataset.um==='out') signOut(); else if(u.dataset.um==='users') admGo('co-overview'); else if(u.dataset.um==='owner') admGo('wb-overview'); else { if(RK.app==='risk') rkApp('schedule'); setTab('port'); } });
   menu.addEventListener('change',e=>{ if(e.target.id==='umCo'&&e.target.value){ menu.hidden=true; coSwitch(e.target.value); } });
   wirePort();
   const w=document.getElementById('perWrap');
@@ -6381,6 +6624,719 @@ function mobileList(){ const host=document.getElementById('mList'); if(!host) re
     ${(S.rows||[]).length>ML.n?`<button class="btn sm ml-more" data-ml-more>Show ${Math.min(150,(S.rows||[]).length-ML.n)} more</button>`:''}`; }
 document.addEventListener('click',e=>{ const m=e.target.closest('#mList [data-ml-more]'); if(m){ ML.n+=150; mobileList(); return; } const i=e.target.closest('#mList .ml-i'); if(i) openDrawer(i.dataset.k); });
 addEventListener('resize',()=>{ if(S.tab==='gantt') mobileList(); });
+/* ================= Risk Workbench: model, configuration and storage =================
+   Risk registers at portfolio, programme and project level, sharing one scoring matrix so risks roll up.
+   A risk can have a parent at a higher level (escalated or aggregated risks) and can be an interface risk
+   between two or more projects. Each risk carries qualitative scores (inherent, current, target) and a
+   three-point quantitative estimate kept ready for Monte Carlo. */
+const RK={app:'schedule',tab:'over',scope:{lv:'portfolio',id:null},roll:true,risks:[],un:null,loaded:false,schemaOld:false,cfg:null,
+  q:'',f:{st:'live',cat:'',rt:'',type:'',owner:'',ifc:false},cell:null,sort:{k:'cur',d:-1},group:'',heat:'cur',ifcG:'',ifcPair:null,act:{f:'open',owner:''},
+  ed:null,edTab:'det',ce:null,ceLv:'portfolio',ceProg:''};
+const RLV=['portfolio','programme','project'], RLV_L={portfolio:'Portfolio',programme:'Programme',project:'Project'};
+const RST={draft:'Draft',open:'Open',monitor:'Monitoring',occurred:'Occurred',closed:'Closed'}, RST_LIVE=['draft','open','monitor'];
+const RSTRAT={threat:[['avoid','Avoid'],['reduce','Reduce'],['transfer','Transfer'],['accept','Accept']],opp:[['exploit','Exploit'],['enhance','Enhance'],['share','Share'],['accept','Accept']]};
+const RACT={todo:'Not started',doing:'In progress',done:'Done',dropped:'Cancelled'};
+const RDIST={tri:'Triangular',pert:'PERT',uni:'Uniform'};
+const RQ=['pre','cur','tgt'], RQ_L={pre:'Inherent',cur:'Current',tgt:'Target'}, RQ_S={pre:'Before any response',cur:'With responses in place today',tgt:'Once all planned actions are done'};
+
+function rkDefaultCfg(){
+  return {v:1,align:'aligned',
+    cols:{all:['ref','title','scope','category','owner','status','cur','trend','costEV','timeEV','strategy','actions','review'],
+      portfolio:['ref','title','scope','category','owner','status','pre','cur','tgt','costEV','timeEV','children','review'],
+      programme:['ref','title','scope','category','owner','status','cur','tgt','costEV','timeEV','ifc','children','actions','review'],
+      project:['ref','title','category','owner','status','pre','cur','tgt','trend','costEV','timeEV','strategy','actions','nextdue','review']},
+    progCols:{},fields:[],
+    prob:[{l:'Very low',max:10},{l:'Low',max:30},{l:'Medium',max:50},{l:'High',max:70},{l:'Very high',max:100}],
+    ilab:['Very low','Low','Medium','High','Very high'],
+    dims:[{id:'cost',l:'Cost',kind:'cost',b:[50000,250000,1000000,5000000]},{id:'time',l:'Schedule',kind:'time',b:[7,30,90,180]},
+      {id:'hs',l:'Health & safety',kind:'text',d:['First aid only','Medical treatment','Lost-time injury','Major injury','Fatality']},
+      {id:'rep',l:'Reputation',kind:'text',d:['Internal only','Local complaint','Regional media','National media','Licence to operate at stake']}],
+    bands:[{l:'Low',max:4,c:'#2E9E6A'},{l:'Medium',max:9,c:'#D99A00'},{l:'High',max:16,c:'#E8641E'},{l:'Very high',max:25,c:'#C8243A'}],
+    cats:['Commercial','Design','Construction','Interfaces','Stakeholder & consents','Environmental','Health & safety','Third parties & utilities','Supply chain','Operational readiness','Funding & governance'],
+    esc:{programme:{score:15,cost:1000000},portfolio:{score:20,cost:5000000}},
+    review:30,cur:'$'};
+}
+function rkCfg(){ if(RK._cc&&RK._ccSrc===RK.cfg) return RK._cc; const d=rkDefaultCfg(), c=RK.cfg||{}; const o=Object.assign({},d,c); o.cols=Object.assign({},d.cols,c.cols||{}); o.esc=Object.assign({},d.esc,c.esc||{}); o.progCols=c.progCols||{}; o.fields=c.fields||[]; RK._cc=o; RK._ccSrc=RK.cfg; return o; }
+
+/* ---- columns available to a register ---- */
+const RCOL={
+  ref:{l:'Ref',w:84}, title:{l:'Risk',w:300}, type:{l:'Type',w:90}, level:{l:'Level',w:96}, scope:{l:'Register',w:170}, category:{l:'Category',w:150},
+  owner:{l:'Owner',w:120}, status:{l:'Status',w:100}, cause:{l:'Cause',w:220}, event:{l:'Event',w:220}, effect:{l:'Effect',w:220},
+  pre:{l:'Inherent',w:92}, cur:{l:'Current',w:92}, tgt:{l:'Target',w:92}, trend:{l:'Trend',w:66},
+  prob:{l:'Probability',w:92,num:1}, cost3:{l:'Cost min / likely / max',w:190,num:1}, costEV:{l:'Cost exposure',w:110,num:1}, time3:{l:'Days min / likely / max',w:160,num:1}, timeEV:{l:'Schedule exposure',w:110,num:1},
+  strategy:{l:'Response',w:96}, respOwner:{l:'Response owner',w:120}, actions:{l:'Actions',w:84,num:1}, nextdue:{l:'Next action due',w:118,num:1},
+  prox:{l:'Proximity',w:100,num:1}, review:{l:'Next review',w:104,num:1}, raised:{l:'Raised',w:96,num:1}, updated:{l:'Updated',w:96,num:1},
+  parent:{l:'Parent risk',w:160}, children:{l:'Child risks',w:90,num:1}, ifc:{l:'Interface between',w:200}, acts:{l:'Schedule activities',w:150}, cont:{l:'Contingency',w:110,num:1}
+};
+const RCOL_REQ=['ref','title'];
+function rkColDefs(){ const o={}; for(const k in RCOL) o[k]=RCOL[k].l; rkCfg().fields.forEach(f=>o['f:'+f.id]=f.l); return o; }
+// Which column set a register uses, following the alignment the admin chose.
+function rkColsFor(scope){ const c=rkCfg(), lv=scope.lv; let cols;
+  if(c.align==='aligned') cols=c.cols.all;
+  else if(c.align==='tiered') cols=c.cols[lv];
+  else { const gid=lv==='programme'?scope.id:lv==='project'?(rkProj(scope.id)||{}).programmeId:null; cols=lv==='portfolio'?c.cols.portfolio:(gid&&c.progCols[gid])||(lv==='programme'?c.cols.programme:c.cols.project); }
+  const defs=rkColDefs(); cols=(cols||[]).filter(k=>k in defs); RCOL_REQ.slice().reverse().forEach(k=>{ if(!cols.includes(k)) cols.unshift(k); }); return cols; }
+function rkColSource(scope){ const c=rkCfg(), lv=scope.lv; if(c.align==='aligned') return 'One format for every register'; if(c.align==='tiered') return `${RLV_L[lv]} format`;
+  if(lv==='portfolio') return 'Portfolio format'; const gid=lv==='programme'?scope.id:(rkProj(scope.id)||{}).programmeId, g=rkProg(gid); return g&&c.progCols[gid]?`${g.name} format`:`Default ${lv} format`; }
+
+/* ---- lookups ---- */
+const rkProg=id=>id&&(typeof PER!=='undefined')?PER.programmes.find(g=>g.id===id):null;
+const rkProj=id=>id&&(typeof PER!=='undefined')?PER.projects.find(p=>p.id===id):null;
+const rkById=id=>RK.risks.find(r=>r.id===id)||null;
+const rkRank=lv=>RLV.indexOf(lv);
+function rkProgOf(r){ return r.level==='programme'?r.programmeId:r.level==='project'?((rkProj(r.projectId)||{}).programmeId||null):null; }
+function rkScopeOf(r){ return r.level==='portfolio'?{lv:'portfolio',id:null}:r.level==='programme'?{lv:'programme',id:r.programmeId}:{lv:'project',id:r.projectId}; }
+function rkScopeName(sc){ if(!sc||sc.lv==='portfolio') return rkPortName(); const x=sc.lv==='programme'?rkProg(sc.id):rkProj(sc.id); return x?x.name:`(removed ${sc.lv})`; }
+function rkPortName(){ return typeof PER!=='undefined'&&PER.mode==='supa'&&PER.company?PER.company.name+' portfolio':'Portfolio'; }
+function rkScopeCode(sc){ if(sc.lv==='portfolio') return 'PF'; const x=sc.lv==='programme'?rkProg(sc.id):rkProj(sc.id); return (x&&x.code)||(sc.lv==='programme'?'PG':'PR'); }
+const rkLive=r=>RST_LIVE.includes(r.status);
+const rkKids=r=>r&&r.id?RK.risks.filter(x=>x.parentId===r.id&&x.id!==r.id):[];
+function rkAncestors(r){ const out=[], seen=new Set(); let p=r&&rkById(r.parentId); while(p&&!seen.has(p.id)){ seen.add(p.id); out.push(p); p=rkById(p.parentId); } return out; }
+function rkDesc(r){ const out=[], st=[...rkKids(r)], seen=new Set([r.id]); while(st.length){ const k=st.shift(); if(seen.has(k.id)) continue; seen.add(k.id); out.push(k); st.push(...rkKids(k)); } return out; }
+// Risks that can be this risk's parent: a higher level whose register contains this one.
+function rkParentOptions(r){ const g=rkProgOf(r); return RK.risks.filter(p=>p.id!==r.id&&rkRank(p.level)<rkRank(r.level)&&!rkDesc(r).some(d=>d.id===p.id)&&(p.level==='portfolio'||(p.level==='programme'&&p.programmeId===g))); }
+// Is this risk in the register being viewed? roll=true also brings in lower-level registers.
+function rkIn(r,sc,roll){ if(sc.lv==='portfolio') return roll||r.level==='portfolio';
+  if(sc.lv==='programme') return (r.level==='programme'&&r.programmeId===sc.id)||(roll&&r.level==='project'&&rkProgOf(r)===sc.id)||(rkIfcPids(r).some(pid=>(rkProj(pid)||{}).programmeId===sc.id)&&r.level!=='portfolio'&&roll);
+  return (r.level==='project'&&r.projectId===sc.id)||rkIfcPids(r).includes(sc.id); }
+const rkIfcPids=r=>(r.d&&r.d.ifc&&r.d.ifc.on&&Array.isArray(r.d.ifc.pids))?r.d.ifc.pids:[];
+const rkIsIfc=r=>rkIfcPids(r).length>=2||(r.d&&r.d.ifc&&r.d.ifc.on&&rkIfcPids(r).length>=1&&r.level==='project');
+
+/* ---- scoring ---- */
+function rkImpactFromValue(dim,v){ if(v==null||!isFinite(v)||v<=0) return 0; const b=dim.b||[]; let i=1; b.forEach(t=>{ if(v>t) i++; }); return Math.min(5,i); }
+function rkProbScore(pct){ if(pct==null||!isFinite(pct)||pct<=0) return 0; const P=rkCfg().prob; for(let i=0;i<P.length;i++) if(pct<=P[i].max) return i+1; return 5; }
+function rkScore(s){ if(!s||!s.p) return null; const I=Object.values(s.i||{}).map(Number).filter(x=>x>0); if(!I.length) return null; return s.p*Math.max(...I); }
+function rkBand(score){ if(score==null) return null; const B=rkCfg().bands; for(const b of B) if(score<=b.max) return b; return B[B.length-1]; }
+const rkQS=(r,k)=>rkScore(r.d&&r.d.q&&r.d.q[k]);
+function rkCurScore(r){ return rkQS(r,'cur')??rkQS(r,'pre'); }
+function rkChip(score,o){ o=o||{}; if(score==null) return `<span class="rk-chip na"${o.t?` title="${esc(o.t)}"`:''}>—</span>`; const b=rkBand(score); return `<span class="rk-chip" style="--rc:${b.c}" title="${esc((o.t?o.t+': ':'')+b.l+' · score '+score)}">${score}<em>${esc(o.short?b.l.replace('Very high','V high'):b.l)}</em></span>`; }
+/* ---- quantitative ---- */
+function rkMean(t,dist){ if(!t) return null; const v=k=>t[k]===''||t[k]==null||!isFinite(+t[k])?null:+t[k]; let a=v('min'),m=v('ml'),b=v('max');
+  if(a==null&&m==null&&b==null) return null; if(m==null) m=a!=null&&b!=null?(a+b)/2:(a??b); if(a==null) a=m; if(b==null) b=m;
+  return dist==='pert'?(a+4*m+b)/6:dist==='uni'?(a+b)/2:(a+m+b)/3; }
+function rkQt(r,post){ const q=(r.d&&r.d.qt)||{}, s=post&&q.post&&(q.post.p!=null&&q.post.p!=='')?q.post:q; return {p:+s.p||0,cost:rkMean(s.cost,q.dist),time:rkMean(s.time,q.dist)}; }
+// Own expected value. A parent set to roll up its children reports their total instead.
+function rkEV(r,post,k){ const q=(r.d&&r.d.qt)||{}; if(q.fromKids){ return rkKids(r).filter(rkLive).reduce((n,c)=>n+rkEV(c,post,k),0); } const x=rkQt(r,post); return x[k]==null?0:x.p/100*x[k]; }
+// For totals: count each estimate once (roll-up parents are carried by their children).
+function rkEVown(r,post,k){ const q=(r.d&&r.d.qt)||{}; if(q.fromKids) return 0; const x=rkQt(r,post); return x[k]==null?0:x.p/100*x[k]; }
+// Portfolio totals: threats only, each estimate once. Opportunities are reported separately.
+const rkIsOpp=r=>r.d&&r.d.type==='opp';
+const rkTot=(L,post,k)=>L.reduce((n,r)=>n+(rkIsOpp(r)?0:rkEVown(r,post,k)),0);
+const rkOppTot=(L,post,k)=>L.reduce((n,r)=>n+(rkIsOpp(r)?-rkEVown(r,post,k):0),0);
+function rkMoney(v,o){ o=o||{}; if(v==null||!isFinite(v)) return '—'; const c=rkCfg().cur||'$', a=Math.abs(v), s=v<0?'−':'';
+  if(o.full) return s+c+Math.round(a).toLocaleString(); return s+c+(a>=1e9?(a/1e9).toFixed(1)+'bn':a>=1e6?(a/1e6).toFixed(a>=1e7?0:1)+'m':a>=1e3?(a/1e3).toFixed(0)+'k':Math.round(a)); }
+const rkDays=v=>v==null||!isFinite(v)?'—':`${Math.round(v)} d`;
+function rkTrend(r){ const h=(r.d&&r.d.hist)||[]; if(h.length<2) return 0; const a=h[h.length-2].cur, b=h[h.length-1].cur; if(a==null||b==null) return 0; return Math.sign(b-a); }
+const rkTrendHtml=t=>t>0?'<span class="rk-tr up" title="Score up since last review">▲</span>':t<0?'<span class="rk-tr dn" title="Score down since last review">▼</span>':'<span class="rk-tr fl" title="No change">–</span>';
+const rkToday=()=>{ const n=new Date(); return Date.UTC(n.getFullYear(),n.getMonth(),n.getDate()); };
+const rkActs=r=>((r.d&&r.d.actions)||[]);
+const rkOpenActs=r=>rkActs(r).filter(a=>a.status!=='done'&&a.status!=='dropped');
+const rkOverdue=a=>a.due&&a.due<rkToday()&&a.status!=='done'&&a.status!=='dropped';
+const rkReviewDue=r=>rkLive(r)&&r.d&&r.d.review&&r.d.review<rkToday();
+function rkEscTo(r){ if(!rkLive(r)||r.level==='portfolio') return null; const e=rkCfg().esc, sc=rkCurScore(r)||0, ev=rkEV(r,false,'cost');
+  const up=r.level==='project'?['programme','portfolio']:['portfolio']; let want=null;
+  up.forEach(lv=>{ const t=e[lv]; if(t&&((t.score&&sc>=t.score)||(t.cost&&ev>=t.cost))) want=want||lv; });
+  if(!want) return null; const par=rkAncestors(r); if(par.some(p=>rkRank(p.level)<=rkRank(want))) return null; return want; }
+
+/* ---- storage ---- */
+function rkCanEdit(){ return typeof PER!=='undefined'&&!!PER.mode&&!perRO(); }
+function rkCanDel(r){ return rkCanEdit()&&perCanDel(r&&r.createdBy); }
+function rkAdmin(){ return typeof qAdmin==='function'?qAdmin():true; }
+async function rkLoadCfg(){ let c=null; try{ if(PER.store&&PER.store.getRiskCfg) c=await PER.store.getRiskCfg(); }catch(e){ if(/risk|column|schema cache|42703/i.test((e&&(e.message||e.code))||'')) RK.schemaOld=true; else console.warn('risk settings',e); }
+  if(!c&&PER.mode==='local'){ try{ c=JSON.parse(localStorage.getItem('pacer.rkcfg')||'null'); }catch(_){} }
+  RK.cfg=c&&typeof c==='object'?c:null; }
+async function rkSaveCfg(cfg){ if(!PER.store||!PER.store.setRiskCfg) throw new Error('Sign in to save settings.'); await PER.store.setRiskCfg(cfg); if(PER.mode==='local'){ try{ localStorage.setItem('pacer.rkcfg',JSON.stringify(cfg)); }catch(_){} } RK.cfg=cfg; }
+function rkSubscribe(){
+  if(RK.un){ try{ RK.un(); }catch(_){} RK.un=null; } RK.risks=[]; RK.loaded=false;
+  if(typeof PER==='undefined'||!PER.store||!PER.store.watchRisks){ rkRender(); return; }
+  RK.un=PER.store.watchRisks(list=>{ RK.schemaOld=false; RK.loaded=true; RK.risks=list.map(r=>Object.assign({status:'open',ref:'',parentId:null,programmeId:null,projectId:null},r,{d:r.d||{}})); rkRender(); },
+    e=>{ RK.loaded=true; if(/risks|schema cache|does not exist|42P01|PGRST20/i.test((e&&(e.message||e.code))||'')){ RK.schemaOld=true; rkRender(); } else perToast(perErr(e),'err'); });
+  rkLoadCfg().then(()=>rkRender());
+}
+function rkNextRef(sc){ const pre=rkScopeCode(sc)+'-R'; let n=0; RK.risks.forEach(r=>{ if(String(r.ref).startsWith(pre)){ const k=parseInt(String(r.ref).slice(pre.length),10); if(k>n) n=k; } }); return pre+String(n+1).padStart(3,'0'); }
+function rkSnap(r){ return {at:Date.now(),by:typeof userName==='function'?userName():'',cur:rkCurScore(r),tgt:rkQS(r,'tgt'),ev:Math.round(rkEV(r,false,'cost')),evt:Math.round(rkEV(r,false,'time')*10)/10,st:r.status}; }
+async function rkCreate(r){ r=Object.assign({status:'open',parentId:null,programmeId:null,projectId:null},r); delete r.id; delete r.createdAt; delete r.updatedAt; r.d=Object.assign({},r.d||{}); if(!r.ref) r.ref=rkNextRef(rkScopeOf(r)); if(!r.d.raised) r.d.raised=rkToday();
+  if(!r.d.review) r.d.review=rkToday()+rkCfg().review*DAY; r.d.hist=(r.d.hist||[]).concat([rkSnap(r)]); return PER.store.createRisk(r); }
+async function rkUpdate(r,prev){ const d=Object.assign({},r.d); const s=rkSnap(r), h=(d.hist||[]).slice(-49), last=h[h.length-1];
+  if(!last||last.cur!==s.cur||last.tgt!==s.tgt||last.ev!==s.ev||last.evt!==s.evt||last.st!==s.st||d._reviewed){ h.push(s); } delete d._reviewed; d.hist=h;
+  const f={level:r.level,programmeId:r.level==='programme'?r.programmeId:null,projectId:r.level==='project'?r.projectId:null,parentId:r.parentId||null,ref:r.ref,title:r.title,status:r.status,d};
+  await PER.store.updateRisk(r.id,f); }
+async function rkDelete(r){ for(const k of rkKids(r)) await PER.store.updateRisk(k.id,{parentId:null}); await PER.store.deleteRisk(r.id); }
+/* ================= Risk Workbench: shell, views and editor ================= */
+const RLOGO='<svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="var(--accent)"/><rect x="6" y="6" width="6" height="6" rx="1.5" fill="#fff" opacity=".45"/><rect x="13" y="6" width="6" height="6" rx="1.5" fill="#fff" opacity=".7"/><rect x="20" y="6" width="6" height="6" rx="1.5" fill="#fff"/><rect x="6" y="13" width="6" height="6" rx="1.5" fill="#fff" opacity=".3"/><rect x="13" y="13" width="6" height="6" rx="1.5" fill="#fff" opacity=".45"/><rect x="20" y="13" width="6" height="6" rx="1.5" fill="#fff" opacity=".7"/><rect x="6" y="20" width="6" height="6" rx="1.5" fill="#fff" opacity=".2"/><rect x="13" y="20" width="6" height="6" rx="1.5" fill="#fff" opacity=".3"/><rect x="20" y="20" width="6" height="6" rx="1.5" fill="#fff" opacity=".45"/></svg>';
+const RTABS=[['over','Overview'],['reg','Register'],['tree','Hierarchy'],['ifc','Interfaces'],['resp','Responses']];
+
+/* ---- switching between the Schedule and Risk workbenches ---- */
+function rkBrand(){ const br=document.querySelector('.top .brand'); if(!br) return; const risk=RK.app==='risk', nm=br.querySelector('.bname'), b=(typeof PER!=='undefined'&&PER.mode==='supa'&&PER.company&&PER.company.branding)||{};
+  const svg=br.querySelector('svg'); if(svg&&!b.logo){ if(!br._slogo) br._slogo=svg.outerHTML; svg.outerHTML=risk?RLOGO:br._slogo; }
+  if(nm){ if(b.title){ nm.innerHTML=esc(b.title)+`<em class="apptag">${risk?'Risk':'Schedule'}</em>`; } else nm.innerHTML=`${risk?'Risk':'Schedule'} <span>Workbench</span>`; }
+  br.setAttribute('aria-label',(risk?'Risk':'Schedule')+' Workbench. Switch workbench'); document.title=(risk?'Risk':'Schedule')+' Workbench'; }
+function rkApp(app,o){ o=o||{}; app=app==='risk'?'risk':'schedule'; RK.app=app; try{ localStorage.setItem('pacer.app',app); }catch(_){}
+  if(!o.keepHash){ try{ history.replaceState(null,'',app==='risk'?'#risk':location.pathname+location.search); }catch(_){} }
+  document.body.classList.toggle('app-risk',app==='risk'); rkBrand();
+  document.getElementById('rkNav').hidden=app!=='risk'; document.getElementById('rkScopeW').hidden=app!=='risk'; document.getElementById('riskWrap').hidden=app!=='risk';
+  if(app==='risk'){ if(S.tab==='admin') setTab('port'); if(typeof aiPanel==='function'&&!document.getElementById('aiWrap').hidden) aiPanel(false); hideDrawer&&hideDrawer(); rkRender(); window.scrollTo(0,0); }
+  else { redraw(); } }
+function rkAppMenu(){ const m=document.getElementById('appMenu'); const it=(k,t,d,ic)=>`<button class="appi${RK.app===k?' cur':''}" data-app="${k}" role="menuitemradio" aria-checked="${RK.app===k}"><span class="appic">${ic}</span><span><b>${t}</b><span class="muted">${d}</span></span>${RK.app===k?'<span class="appok" aria-hidden="true">✓</span>':''}</button>`;
+  m.innerHTML=`<div class="cxm-h">Switch workbench</div>${it('schedule','Schedule Workbench','P6 schedules, updates, quality and reporting',(document.querySelector('.top .brand')||{})._slogo||LOGO)}${it('risk','Risk Workbench','Risk registers, interfaces and responses',RLOGO)}`; }
+function wireRk(){
+  const top=document.querySelector('.top .brand'), m=document.getElementById('appMenu'); if(!top||!m) return;
+  const close=()=>{ m.hidden=true; top.setAttribute('aria-expanded','false'); };
+  top.onclick=e=>{ e.stopPropagation(); if(!m.hidden){ close(); return; } rkAppMenu(); m.hidden=false; top.setAttribute('aria-expanded','true'); const c=m.querySelector('.appi.cur'); if(c) c.focus(); };
+  m.addEventListener('click',e=>{ const b=e.target.closest('[data-app]'); if(!b) return; close(); if(b.dataset.app!==RK.app) rkApp(b.dataset.app); });
+  document.addEventListener('click',e=>{ if(!m.hidden&&!m.contains(e.target)&&!top.contains(e.target)) close(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!m.hidden){ close(); top.focus(); } });
+  document.getElementById('rkNav').addEventListener('click',e=>{ const b=e.target.closest('[data-rkt]'); if(b) rkGo(b.dataset.rkt); });
+  const sb=document.getElementById('rkScope'), sm=document.getElementById('rkScopeMenu'), sclose=()=>{ sm.hidden=true; sb.setAttribute('aria-expanded','false'); };
+  sb.onclick=e=>{ e.stopPropagation(); if(!sm.hidden){ sclose(); return; } sm.dataset.q=''; rkScopeMenu(); sm.hidden=false; sb.setAttribute('aria-expanded','true'); const q=document.getElementById('rkScQ'); if(q) q.focus(); };
+  sm.addEventListener('input',e=>{ if(e.target.id==='rkScQ'){ sm.dataset.q=e.target.value; const pos=e.target.selectionStart; rkScopeMenu(); const q=document.getElementById('rkScQ'); if(q){ q.focus(); try{ q.setSelectionRange(pos,pos); }catch(_){} } } });
+  sm.addEventListener('click',e=>{ const b=e.target.closest('[data-sc]'); if(!b) return; sclose(); const [lv,id]=b.dataset.sc.split(':'); rkSetScope({lv,id:id||null}); });
+  document.addEventListener('click',e=>{ if(!sm.hidden&&!sm.contains(e.target)&&!sb.contains(e.target)) sclose(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!sm.hidden){ sclose(); sb.focus(); } });
+  const w=document.getElementById('riskWrap'); w.addEventListener('click',rkClick); w.addEventListener('change',rkChange); w.addEventListener('input',rkInput);
+  document.addEventListener('click',rkCfgClick); document.addEventListener('change',rkCfgChange);
+  try{ const sc=JSON.parse(localStorage.getItem('pacer.rkscope')||'null'); if(sc&&RLV.includes(sc.lv)) RK.scope=sc; const t=localStorage.getItem('pacer.rktab'); if(RTABS.some(x=>x[0]===t)) RK.tab=t; RK.roll=localStorage.getItem('pacer.rkroll')!=='0'; }catch(_){}
+  let want='schedule'; try{ want=location.hash==='#risk'?'risk':(localStorage.getItem('pacer.app')||'schedule'); }catch(_){}
+  if(want==='risk') rkApp('risk',{keepHash:true}); else rkBrand();
+}
+function rkGo(t){ RK.tab=t; try{ localStorage.setItem('pacer.rktab',t); }catch(_){} if(S.tab==='admin') setTab('port'); rkRender(); window.scrollTo(0,0); }
+function rkSetScope(sc){ RK.scope={lv:sc.lv,id:sc.lv==='portfolio'?null:sc.id}; RK.cell=null; RK.ifcPair=null; try{ localStorage.setItem('pacer.rkscope',JSON.stringify(RK.scope)); }catch(_){} rkRender(); }
+function rkScopeValid(){ const sc=RK.scope; if(sc.lv==='programme'&&!rkProg(sc.id)) RK.scope={lv:'portfolio',id:null}; if(sc.lv==='project'&&!rkProj(sc.id)) RK.scope={lv:'portfolio',id:null}; }
+function rkScopeBtn(){ const b=document.getElementById('rkScope'); if(!b) return; const sc=RK.scope, n=RK.risks.filter(r=>rkLive(r)&&rkIn(r,sc,RK.roll)).length;
+  const g=sc.lv==='project'?rkProg((rkProj(sc.id)||{}).programmeId):null;
+  b.innerHTML=`<span class="cx-t"><span class="cx-1">${g?`<span class="cx-g">${esc(g.name)}</span><span class="cx-s" aria-hidden="true">/</span>`:''}<b>${esc(rkScopeName(sc))}</b><span class="pill">${RLV_L[sc.lv]}</span></span><span class="cx-2">${n} live risk${n===1?'':'s'}${sc.lv!=='project'?(RK.roll?' · includes lower registers':' · this register only'):''} · ${esc(rkColSource(sc))}</span></span><svg class="cx-c" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>`;
+  b.setAttribute('aria-label','Register: '+rkScopeName(sc)+'. Choose register'); }
+function rkScopeMenu(){ const m=document.getElementById('rkScopeMenu'), q=(m.dataset.q||'').toLowerCase(), cnt=sc=>RK.risks.filter(r=>rkLive(r)&&rkIn(r,sc,false)).length, cur=RK.scope;
+  const it=(sc,name,sub,cls)=>{ const on=cur.lv===sc.lv&&(cur.id||null)===(sc.id||null); return `<button class="cxm-i ${cls||''}${on?' cur':''}" data-sc="${sc.lv}:${sc.id||''}"><span class="cxm-n">${esc(name)}${on?' <em>Open</em>':''}</span><span class="cxm-d">${esc(sub)}</span></button>`; };
+  const match=s=>!q||String(s).toLowerCase().includes(q);
+  let h=match(rkPortName())?it({lv:'portfolio'},rkPortName(),`Portfolio register · ${cnt({lv:'portfolio'})} live`,'rk-l0'):'';
+  const G=PER.programmes||[], P=PER.projects||[];
+  G.forEach(g=>{ const ps=P.filter(p=>p.programmeId===g.id), gm=match(g.name)||match(g.code); const pm=ps.filter(p=>gm||match(p.name)||match(p.code));
+    if(gm||pm.length){ h+=it({lv:'programme',id:g.id},g.name,`Programme register${g.code?' · '+g.code:''} · ${cnt({lv:'programme',id:g.id})} live`,'rk-l1'); pm.forEach(p=>h+=it({lv:'project',id:p.id},p.name,`Project register${p.code?' · '+p.code:''} · ${cnt({lv:'project',id:p.id})} live`,'rk-l2')); } });
+  const loose=P.filter(p=>!p.programmeId||!G.some(g=>g.id===p.programmeId)).filter(p=>match(p.name)||match(p.code));
+  if(loose.length){ h+='<div class="cxm-h">Not in a programme</div>'; loose.forEach(p=>h+=it({lv:'project',id:p.id},p.name,`Project register · ${cnt({lv:'project',id:p.id})} live`,'rk-l1')); }
+  m.innerHTML=`<div class="cxm-h">Choose a register</div><input class="cxm-q" id="rkScQ" type="search" placeholder="Search programmes and projects" value="${esc(m.dataset.q||'')}" aria-label="Search registers"><div class="cxm-l">${h||'<p class="muted" style="padding:8px 10px">Nothing matches.</p>'}</div>`; }
+
+/* ---- page frame ---- */
+function rkRender(){
+  if(RK.app!=='risk') return; const el=document.getElementById('riskWrap'); if(!el) return;
+  document.querySelectorAll('#rkNav [data-rkt]').forEach(b=>b.setAttribute('aria-selected',b.dataset.rkt===RK.tab));
+  if(typeof PER==='undefined'||!PER.mode){ document.getElementById('rkScopeW').hidden=true; el.innerHTML='<div class="card pempty big"><h3>Sign in to manage risk</h3><p class="muted">Risk registers live alongside your programmes and projects, so sign in (or work offline on this device) to open them.</p><button class="btn primary" data-rk="signin">Sign in</button></div>'; return; }
+  document.getElementById('rkScopeW').hidden=false; rkScopeValid(); rkScopeBtn();
+  if(RK.schemaOld&&PER.mode==='supa'){ el.innerHTML=`<div class="card pwarn portold"><b>One database step left.</b> The Risk Workbench needs the latest <code>supabase/schema.sql</code>. Open Supabase → SQL Editor → New query, paste the whole file from the GitHub repo and click Run, then reload this page.</div>`; return; }
+  if(!RK.loaded){ el.innerHTML='<div class="card pempty"><p class="muted">Loading risk registers…</p></div>'; return; }
+  const sy=window.scrollY, act=document.activeElement, aid=act&&act.id, apos=act&&act.selectionStart;
+  const body=RK.tab==='reg'?rkRegHtml():RK.tab==='tree'?rkTreeHtml():RK.tab==='ifc'?rkIfcHtml():RK.tab==='resp'?rkRespHtml():rkOverHtml();
+  el.innerHTML=rkHeadHtml()+(RK.risks.length?body:rkEmptyHtml());
+  if(aid){ const n=document.getElementById(aid); if(n&&n!==document.body){ n.focus(); try{ if(apos!=null) n.setSelectionRange(apos,apos); }catch(_){} } }
+  if(Math.abs(window.scrollY-sy)>2) window.scrollTo(0,sy);
+}
+function rkHeadHtml(){ const sc=RK.scope, ed=rkCanEdit();
+  const sub={over:'Exposure, hot spots and what needs attention',reg:'Every risk in this register',tree:'Parent and child risks across portfolio, programme and project',ifc:'Risks that sit between projects',resp:'Response actions and who owns them'}[RK.tab];
+  return `<div class="card porthead rk-head"><div class="ph-t"><h2>${esc(rkScopeName(sc))}</h2><span class="pspace">${RLV_L[sc.lv]} register · ${esc(sub)}</span></div>
+    <div class="ph-c">${sc.lv!=='project'?`<label class="tg" title="Show risks from the programme and project registers below this one"><input type="checkbox" data-rkf="roll" ${RK.roll?'checked':''}> Include lower registers</label>`:''}
+      ${RK.risks.length?'<button class="btn sm ghost" data-rk="xls" title="Download this register as an Excel workbook">Excel</button><button class="btn sm ghost" data-rk="print">Print / PDF</button>':''}
+      ${rkAdmin()?'<button class="btn sm ghost" data-rk="cfg" title="Columns, scoring matrix and how registers line up">Configure</button>':''}
+      ${ed?`<button class="btn sm primary" data-rk="new">New risk</button>`:''}</div></div>`; }
+function rkEmptyHtml(){ const ed=rkCanEdit();
+  return `<div class="card pempty big"><h3>Start your risk registers</h3><p class="muted">Each programme and project has its own register, and the portfolio has one above them. Risks can be escalated to a parent at a higher level, shared between projects as interface risks, and scored both qualitatively and with three-point estimates.</p>
+    <div class="prow">${ed?`<button class="btn primary" data-rk="new">Add the first risk</button>${(typeof PER!=='undefined'&&PER.mode==='supa'&&PER.site&&PER.site.samples===false)?'':'<button class="btn" data-rk="sample">Load sample risks</button>'}`:''}${rkAdmin()?'<button class="btn" data-rk="cfg">Configure registers</button>':''}</div>
+    ${ed?'':'<p class="muted">You have view-only access, so ask a contributor or admin to add risks.</p>'}</div>`; }
+function rkVis(){ return RK.risks.filter(r=>rkIn(r,RK.scope,RK.roll)); }
+
+/* ---- Overview ---- */
+function rkPos(r,k){ const st=r.d&&r.d.q&&(r.d.q[k]||(k==='cur'?r.d.q.pre:null)); if(!st||!st.p) return null; const I=Object.values(st.i||{}).map(Number).filter(x=>x>0); if(!I.length) return null; return {p:st.p,i:Math.max(...I)}; }
+function rkHeat(list,k,o){ o=o||{}; const c=rkCfg(), N={}; list.forEach(r=>{ const p=rkPos(r,k); if(p){ const key=p.p+'-'+p.i; N[key]=(N[key]||0)+1; } });
+  let h='<div class="rk-heat'+(o.sm?' sm':'')+'" role="grid" aria-label="Probability and impact matrix">';
+  for(let p=5;p>=1;p--){ h+=`<div class="rk-hl" role="rowheader">${o.sm?p:esc(c.prob[p-1].l)}</div>`; for(let i=1;i<=5;i++){ const n=N[p+'-'+i]||0, b=rkBand(p*i), on=RK.cell&&RK.cell.p===p&&RK.cell.i===i&&RK.cell.k===k;
+    h+=o.sm?`<div class="rk-hc" style="--rc:${b.c}">${o.mark&&o.mark[p+'-'+i]?o.mark[p+'-'+i]:''}</div>`:`<button class="rk-hc${n?' has':''}${on?' on':''}" style="--rc:${b.c}" data-heat="${k}:${p}:${i}" title="${esc(c.prob[p-1].l)} probability × ${esc(c.ilab[i-1])} impact = ${p*i} (${b.l}) · ${n} risk${n===1?'':'s'}">${n||''}</button>`; } }
+  h+=`<div></div>${[1,2,3,4,5].map(i=>`<div class="rk-hx">${o.sm?i:esc(c.ilab[i-1])}</div>`).join('')}</div>`;
+  return h+(o.sm?'':'<div class="rk-hax"><span>Probability ↑</span><span>Impact →</span></div>'); }
+function rkOverHtml(){ const V=rkVis(), L=V.filter(rkLive), c=rkCfg(), hi=c.bands[1].max, T=rkToday();
+  const sum=(f)=>L.reduce((n,r)=>n+f(r),0);
+  const evC={cur:rkTot(L,false,'cost'),tgt:rkTot(L,true,'cost')}, evT={cur:rkTot(L,false,'time'),tgt:rkTot(L,true,'time')}, opC=rkOppTot(L,false,'cost'), opT=rkOppTot(L,false,'time');
+  const thr=L.filter(r=>(r.d.type||'threat')==='threat'), opp=L.filter(r=>r.d.type==='opp'), high=thr.filter(r=>(rkCurScore(r)||0)>hi);
+  const acts=L.flatMap(r=>rkOpenActs(r).map(a=>({a,r}))), od=acts.filter(x=>rkOverdue(x.a)), rv=L.filter(rkReviewDue);
+  const tiles=`<div class="card stats rk-stats">
+    <div class="stat"><div class="sl">Live risks</div><div class="sv">${L.length}</div><div class="ss">${thr.length} threat${thr.length===1?'':'s'} · ${opp.length} opportunit${opp.length===1?'y':'ies'}</div></div>
+    <div class="stat"><div class="sl">High or above</div><div class="sv ${high.length?'late':''}">${high.length}</div><div class="ss">current score over ${hi}</div></div>
+    <div class="stat"><div class="sl">Cost exposure</div><div class="sv">${rkMoney(evC.cur)}</div><div class="ss">threats · ${rkMoney(evC.tgt)} after responses</div></div>
+    <div class="stat"><div class="sl">Schedule exposure</div><div class="sv">${rkDays(evT.cur)}</div><div class="ss">threats · ${rkDays(evT.tgt)} after responses</div></div>
+    <div class="stat"><div class="sl">Actions overdue</div><div class="sv ${od.length?'late':''}">${od.length}</div><div class="ss">of ${acts.length} open action${acts.length===1?'':'s'}</div></div>
+    <div class="stat"><div class="sl">Reviews due</div><div class="sv ${rv.length?'amber':''}">${rv.length}</div><div class="ss">past their review date</div></div></div>`;
+  const heat=`<div class="card dpanel rk-pheat"><div class="ph"><span class="sl">Risk matrix</span><div class="sg" role="group" aria-label="Which score">${RQ.map(k=>`<button data-rkheat="${k}" class="${RK.heat===k?'on':''}">${RQ_L[k]}</button>`).join('')}</div></div>${rkHeat(L,RK.heat)}<p class="pn">${esc(RQ_S[RK.heat])}. Click a square to list its risks.</p></div>`;
+  const mx=Math.max(evC.cur,evC.tgt,opC,1), mt=Math.max(evT.cur,evT.tgt,opT,1);
+  const bar=(l,v,m,f,cls)=>`<div class="rk-xb"><span>${l}</span><div class="rk-xt"><i class="${cls}" style="width:${Math.max(.5,v/m*100).toFixed(1)}%"></i></div><b>${f(v)}</b></div>`;
+  const expo=`<div class="card dpanel"><div class="ph"><span class="sl">Exposure</span><span class="pn">probability × mean of the three-point estimate</span></div>
+    <div class="rk-xg"><div class="rk-xh">Cost</div>${bar('Threats now',evC.cur,mx,rkMoney,'cur')}${bar('After responses',evC.tgt,mx,rkMoney,'tgt')}${opC?bar('Opportunities',opC,mx,rkMoney,'opp'):''}</div>
+    <div class="rk-xg"><div class="rk-xh">Schedule</div>${bar('Threats now',evT.cur,mt,rkDays,'cur')}${bar('After responses',evT.tgt,mt,rkDays,'tgt')}${opT?bar('Opportunities',opT,mt,rkDays,'opp'):''}</div>
+    <p class="pn">Ready for Monte Carlo: ${L.filter(r=>rkQt(r).cost!=null||rkQt(r).time!=null).length} of ${L.length} live risks have a three-point estimate.</p></div>`;
+  const top=L.slice().sort((a,b)=>(rkCurScore(b)||0)-(rkCurScore(a)||0)||rkEV(b,false,'cost')-rkEV(a,false,'cost')).slice(0,8);
+  const topH=`<div class="card dpanel span2"><div class="ph"><span class="sl">Top risks</span><span class="pn">by current score, then cost exposure</span></div>${top.length?`<table class="ptab rk-mini"><tbody>${top.map(r=>`<tr data-rid="${esc(r.id)}"><td class="rk-ref">${esc(r.ref)}</td><td>${rkTitleCell(r)}</td><td class="muted">${esc(rkScopeName(rkScopeOf(r)))}</td><td>${rkChip(rkCurScore(r),{short:1})}</td><td class="num">${rkMoney(rkEV(r,false,'cost'))}</td><td class="num">${rkDays(rkEV(r,false,'time'))}</td></tr>`).join('')}</tbody></table>`:'<p class="muted">No live risks.</p>'}</div>`;
+  const cats=[...new Set(L.map(r=>r.d.cat||'Uncategorised'))].map(k=>({k,R:L.filter(r=>(r.d.cat||'Uncategorised')===k)})).sort((a,b)=>b.R.length-a.R.length), cm=Math.max(1,...cats.map(x=>x.R.length));
+  const catH=`<div class="card dpanel"><div class="ph"><span class="sl">By category</span><span class="pn">coloured by current rating</span></div>${cats.map(x=>`<button class="rk-cat" data-rkcat="${esc(x.k)}"><span>${esc(x.k)}</span><span class="rk-cb">${c.bands.map(b=>{ const n=x.R.filter(r=>{ const s=rkCurScore(r); return s!=null&&rkBand(s).l===b.l; }).length; return n?`<i style="width:${n/cm*100}%;background:${b.c}" title="${n} ${esc(b.l)}"></i>`:''; }).join('')}${(()=>{ const n=x.R.filter(r=>rkCurScore(r)==null).length; return n?`<i class="na" style="width:${n/cm*100}%" title="${n} not scored"></i>`:''; })()}</span><b>${x.R.length}</b></button>`).join('')||'<p class="muted">No live risks.</p>'}</div>`;
+  const kids=rkChildRegs(), brk=kids.length?`<div class="card dpanel span3"><div class="ph"><span class="sl">Registers below this one</span><span class="pn">each includes its lower registers · click to open</span></div><div class="ptw"><table class="ptab rk-brk"><thead><tr><th>Register</th><th class="num">Live</th><th class="num">High+</th><th>Worst</th><th class="num">Cost exposure</th><th class="num">Schedule exposure</th><th class="num">Overdue actions</th><th class="num">Reviews due</th><th class="num">Escalated up</th></tr></thead><tbody>${kids.map(k=>{ const R=RK.risks.filter(r=>rkLive(r)&&rkIn(r,k.sc,k.roll)), w=Math.max(0,...R.map(r=>rkCurScore(r)||0));
+      return `<tr data-rksc="${k.sc.lv}:${k.sc.id||''}"><td><b>${esc(k.name)}</b><div class="muted">${esc(k.sub)}</div></td><td class="num">${R.length}</td><td class="num${R.filter(r=>(rkCurScore(r)||0)>hi).length?' late':''}">${R.filter(r=>(rkCurScore(r)||0)>hi).length}</td><td>${w?rkChip(w,{short:1}):'—'}</td><td class="num">${rkMoney(rkTot(R,false,'cost'))}</td><td class="num">${rkDays(rkTot(R,false,'time'))}</td><td class="num${R.flatMap(rkOpenActs).filter(rkOverdue).length?' late':''}">${R.flatMap(rkOpenActs).filter(rkOverdue).length}</td><td class="num">${R.filter(rkReviewDue).length}</td><td class="num">${R.filter(r=>r.parentId).length}</td></tr>`; }).join('')}</tbody></table></div></div>`:'';
+  const escs=L.map(r=>({r,lv:rkEscTo(r)})).filter(x=>x.lv);
+  const escH=escs.length?`<div class="card dpanel span3 rk-esc"><div class="ph"><span class="sl">Escalation suggested</span><span class="pn">over the thresholds your admin set, with no parent risk at that level yet</span></div><table class="ptab rk-mini"><tbody>${escs.slice(0,8).map(({r,lv})=>`<tr data-rid="${esc(r.id)}"><td class="rk-ref">${esc(r.ref)}</td><td>${rkTitleCell(r)}</td><td class="muted">${esc(rkScopeName(rkScopeOf(r)))}</td><td>${rkChip(rkCurScore(r),{short:1})}</td><td class="num">${rkMoney(rkEV(r,false,'cost'))}</td><td>${rkCanEdit()?`<button class="btn sm" data-rkesc="${esc(r.id)}:${lv}">Escalate to ${lv}</button>`:`<span class="muted">to ${lv}</span>`}</td></tr>`).join('')}</tbody></table></div>`:'';
+  const od5=od.slice().sort((a,b)=>a.a.due-b.a.due).slice(0,6);
+  const actH=`<div class="card dpanel"><div class="ph"><span class="sl">Overdue actions</span><button class="btn sm ghost" data-rkgo2="resp">All responses</button></div>${od5.length?od5.map(x=>`<button class="rk-oa" data-rid="${esc(x.r.id)}" data-rtab="resp"><span><b>${esc(x.a.t)}</b><span class="muted">${esc(x.r.ref)} · ${esc(x.a.owner||'no owner')}</span></span><span class="late num">${Math.round((T-x.a.due)/DAY)} d late</span></button>`).join(''):'<p class="muted">Nothing overdue.</p>'}</div>`;
+  return tiles+escH+`<div class="dgrid rk-grid">${heat}${topH}${expo}${catH}${actH}${brk}</div>`;
+}
+function rkChildRegs(){ const sc=RK.scope, out=[];
+  if(sc.lv==='portfolio'){ out.push({sc:{lv:'portfolio'},roll:false,name:'Portfolio register',sub:'risks owned at portfolio level'}); (PER.programmes||[]).forEach(g=>out.push({sc:{lv:'programme',id:g.id},roll:true,name:g.name,sub:(n=>`Programme register and its ${n} project register${n===1?'':'s'}`)(PER.projects.filter(p=>p.programmeId===g.id).length)})); }
+  else if(sc.lv==='programme'){ const g=rkProg(sc.id); out.push({sc:{lv:'programme',id:sc.id},roll:false,name:(g?g.name:'Programme')+' register',sub:'risks owned at programme level'}); PER.projects.filter(p=>p.programmeId===sc.id).forEach(p=>out.push({sc:{lv:'project',id:p.id},roll:false,name:p.name,sub:'Project register'+(p.code?' · '+p.code:'')})); }
+  return out; }
+function rkTitleCell(r){ const k=rkKids(r).length, ifc=rkIsIfc(r); return `<span class="rk-tt">${r.d.type==='opp'?'<span class="rk-opp" title="Opportunity">Opp</span>':''}${esc(r.title)}</span>${k||ifc||r.parentId?`<span class="rk-tags">${r.parentId?`<span class="rk-tag up" title="Has a parent risk">↑ ${esc((rkById(r.parentId)||{}).ref||'parent')}</span>`:''}${k?`<span class="rk-tag" title="Child risks">${k} child${k===1?'':'ren'}</span>`:''}${ifc?'<span class="rk-tag ifc" title="Interface risk">Interface</span>':''}</span>`:''}`; }
+
+/* ---- Register ---- */
+function rkCell(r,k){ const d=r.d||{}, c=rkCfg();
+  switch(k){
+    case 'ref': return `<span class="rk-ref">${esc(r.ref)}</span>`;
+    case 'title': return rkTitleCell(r);
+    case 'type': return d.type==='opp'?'Opportunity':'Threat';
+    case 'level': return RLV_L[r.level];
+    case 'scope': return esc(rkScopeName(rkScopeOf(r)));
+    case 'category': return esc(d.cat||'');
+    case 'owner': return esc(d.owner||'');
+    case 'status': return `<span class="rk-st ${r.status}">${esc(RST[r.status]||r.status)}</span>`;
+    case 'cause': case 'event': case 'effect': return `<span class="rk-long">${esc(d[k]||'')}</span>`;
+    case 'pre': case 'tgt': return rkChip(rkQS(r,k),{short:1});
+    case 'cur': return rkChip(rkCurScore(r),{short:1});
+    case 'trend': return rkTrendHtml(rkTrend(r));
+    case 'prob': { const q=d.qt||{}; return q.p!=null&&q.p!==''?`${+q.p}%`:'—'; }
+    case 'cost3': { const t=(d.qt||{}).cost; return t&&[t.min,t.ml,t.max].some(x=>x!==''&&x!=null)?[t.min,t.ml,t.max].map(x=>x===''||x==null?'—':rkMoney(+x)).join(' / '):'—'; }
+    case 'time3': { const t=(d.qt||{}).time; return t&&[t.min,t.ml,t.max].some(x=>x!==''&&x!=null)?[t.min,t.ml,t.max].map(x=>x===''||x==null?'—':Math.round(+x)).join(' / '):'—'; }
+    case 'costEV': { const v=rkEV(r,false,'cost'); return (d.qt||{}).fromKids?`<span title="Rolled up from child risks">Σ ${rkMoney(v)}</span>`:rkMoney(v); }
+    case 'timeEV': { const v=rkEV(r,false,'time'); return (d.qt||{}).fromKids?`<span title="Rolled up from child risks">Σ ${rkDays(v)}</span>`:rkDays(v); }
+    case 'strategy': { const s=(d.resp||{}).strat, L=RSTRAT[d.type==='opp'?'opp':'threat'].find(x=>x[0]===s); return L?L[1]:'—'; }
+    case 'respOwner': return esc((d.resp||{}).owner||'');
+    case 'actions': { const A=rkActs(r).filter(a=>a.status!=='dropped'), dn=A.filter(a=>a.status==='done').length, od=A.filter(rkOverdue).length; return A.length?`${dn}/${A.length}${od?` <span class="late" title="${od} overdue">●</span>`:''}`:'—'; }
+    case 'nextdue': { const n=rkOpenActs(r).filter(a=>a.due).sort((a,b)=>a.due-b.due)[0]; return n?`<span class="${rkOverdue(n)?'late':''}">${fmtD(n.due)}</span>`:'—'; }
+    case 'prox': return d.prox?fmtD(d.prox):'—';
+    case 'review': return d.review?`<span class="${rkReviewDue(r)?'late':''}">${fmtD(d.review)}</span>`:'—';
+    case 'raised': return d.raised?fmtD(d.raised):'—';
+    case 'updated': return r.updatedAt?fmtD(r.updatedAt):'—';
+    case 'parent': { const p=rkById(r.parentId); return p?`<span title="${esc(p.title)}">${esc(p.ref)} · ${esc(p.title)}</span>`:'—'; }
+    case 'children': { const n=rkKids(r).length; return n||'—'; }
+    case 'ifc': { const P=rkIfcPids(r).map(id=>rkProj(id)).filter(Boolean); return P.length?P.map(p=>`<span class="rk-pj">${esc(p.code||p.name)}</span>`).join(' ')+((d.ifc||{}).code?` <span class="muted">${esc(d.ifc.code)}</span>`:''):'—'; }
+    case 'acts': return esc((d.qt||{}).acts||'');
+    case 'cont': { const ct=(d.resp||{}).cont; return ct!=null&&ct!==''?rkMoney(+ct):'—'; }
+  }
+  if(k.startsWith('f:')){ const f=c.fields.find(x=>'f:'+x.id===k), v=(d.f||{})[k.slice(2)]; if(v==null||v==='') return ''; return f&&f.type==='date'?fmtD(v):f&&f.type==='number'?esc((+v).toLocaleString()):esc(v); }
+  return ''; }
+function rkCellX(r,k){ const d=r.d||{};
+  switch(k){ case 'ref': return r.ref; case 'title': return r.title; case 'type': return d.type==='opp'?'Opportunity':'Threat'; case 'level': return RLV_L[r.level]; case 'scope': return rkScopeName(rkScopeOf(r));
+    case 'category': return d.cat||''; case 'owner': return d.owner||''; case 'status': return RST[r.status]||r.status; case 'cause': case 'event': case 'effect': return d[k]||'';
+    case 'pre': case 'tgt': return rkQS(r,k)??''; case 'cur': return rkCurScore(r)??''; case 'trend': return ({1:'Up','-1':'Down',0:'No change'})[rkTrend(r)];
+    case 'prob': return (d.qt||{}).p??''; case 'cost3': { const t=(d.qt||{}).cost||{}; return [t.min,t.ml,t.max].map(x=>x??'').join(' / '); } case 'time3': { const t=(d.qt||{}).time||{}; return [t.min,t.ml,t.max].map(x=>x??'').join(' / '); }
+    case 'costEV': return Math.round(rkEV(r,false,'cost')); case 'timeEV': return Math.round(rkEV(r,false,'time')*10)/10;
+    case 'strategy': { const s=(d.resp||{}).strat, L=RSTRAT[d.type==='opp'?'opp':'threat'].find(x=>x[0]===s); return L?L[1]:''; } case 'respOwner': return (d.resp||{}).owner||'';
+    case 'actions': { const A=rkActs(r).filter(a=>a.status!=='dropped'); return A.length?`${A.filter(a=>a.status==='done').length}/${A.length}`:''; }
+    case 'nextdue': { const n=rkOpenActs(r).filter(a=>a.due).sort((a,b)=>a.due-b.due)[0]; return n?xD(n.due):''; }
+    case 'prox': return xD(d.prox); case 'review': return xD(d.review); case 'raised': return xD(d.raised); case 'updated': return xD(r.updatedAt);
+    case 'parent': { const p=rkById(r.parentId); return p?p.ref+' '+p.title:''; } case 'children': return rkKids(r).length||'';
+    case 'ifc': return rkIfcPids(r).map(id=>(rkProj(id)||{}).name).filter(Boolean).join(', '); case 'acts': return (d.qt||{}).acts||''; case 'cont': return (d.resp||{}).cont??''; }
+  if(k.startsWith('f:')){ const v=(d.f||{})[k.slice(2)]; const f=rkCfg().fields.find(x=>'f:'+x.id===k); return v==null?'':f&&f.type==='date'?xD(v):v; }
+  return ''; }
+function rkSortV(r,k){ switch(k){ case 'pre': case 'tgt': return rkQS(r,k)??-1; case 'cur': return rkCurScore(r)??-1; case 'costEV': return rkEV(r,false,'cost'); case 'timeEV': return rkEV(r,false,'time');
+  case 'prob': return +((r.d.qt||{}).p)||0; case 'trend': return rkTrend(r); case 'children': return rkKids(r).length; case 'actions': return rkOpenActs(r).length;
+  case 'nextdue': { const n=rkOpenActs(r).filter(a=>a.due).sort((a,b)=>a.due-b.due)[0]; return n?n.due:Infinity; } case 'review': return r.d.review||Infinity; case 'prox': return r.d.prox||Infinity; case 'raised': return r.d.raised||0; case 'updated': return r.updatedAt||0;
+  case 'status': return Object.keys(RST).indexOf(r.status); case 'level': return rkRank(r.level); case 'ref': return r.ref; }
+  return String(rkCellX(r,k)||'').toLowerCase(); }
+function rkFiltered(){ const f=RK.f, q=RK.q.trim().toLowerCase();
+  return rkVis().filter(r=>{ const d=r.d||{};
+    if(f.st==='live'&&!rkLive(r)) return false; if(f.st&&f.st!=='live'&&f.st!=='all'&&r.status!==f.st) return false;
+    if(f.cat&&(d.cat||'')!==f.cat) return false; if(f.type&&(d.type||'threat')!==f.type) return false; if(f.owner&&(d.owner||'')!==f.owner) return false; if(f.ifc&&!rkIsIfc(r)) return false;
+    if(f.rt){ const s=rkCurScore(r), b=s==null?null:rkBand(s); if(f.rt==='none'?s!=null:!b||b.l!==f.rt) return false; }
+    if(RK.cell){ const p=rkPos(r,RK.cell.k); if(!p||p.p!==RK.cell.p||p.i!==RK.cell.i) return false; }
+    if(q&&![r.ref,r.title,d.cat,d.owner,d.cause,d.event,d.effect,d.desc,(d.ifc||{}).code].some(x=>String(x||'').toLowerCase().includes(q))) return false;
+    return true; }); }
+function rkRegCols(){ let cols=rkColsFor(RK.scope); if(RK.roll&&RK.scope.lv!=='project'&&!cols.includes('scope')) cols=cols.slice(0,2).concat(['scope'],cols.slice(2)); return cols; }
+function rkRegHtml(){ const V=rkVis(), c=rkCfg(), f=RK.f, cols=rkRegCols(), defs=rkColDefs(), R=rkFiltered();
+  const {k,d}=RK.sort; R.sort((a,b)=>{ const x=rkSortV(a,k), y=rkSortV(b,k); return (x<y?-1:x>y?1:0)*d||String(a.ref).localeCompare(String(b.ref)); });
+  const owners=[...new Set(V.map(r=>r.d.owner).filter(Boolean))].sort(), cats=[...new Set(c.cats.concat(V.map(r=>r.d.cat).filter(Boolean)))];
+  const bar=`<div class="card rk-fbar"><input type="search" id="rkQ" placeholder="Search risks, causes, owners, refs" value="${esc(RK.q)}" aria-label="Search risks">
+    <label class="ctl"><span>Status</span><select data-rkf="st"><option value="live"${f.st==='live'?' selected':''}>Live</option><option value="all"${f.st==='all'?' selected':''}>All</option>${Object.entries(RST).map(([v,l])=>`<option value="${v}"${f.st===v?' selected':''}>${l}</option>`).join('')}</select></label>
+    <label class="ctl"><span>Category</span><select data-rkf="cat"><option value="">All</option>${cats.map(x=>`<option${f.cat===x?' selected':''}>${esc(x)}</option>`).join('')}</select></label>
+    <label class="ctl"><span>Rating</span><select data-rkf="rt"><option value="">All</option>${c.bands.slice().reverse().map(b=>`<option${f.rt===b.l?' selected':''}>${esc(b.l)}</option>`).join('')}<option value="none"${f.rt==='none'?' selected':''}>Not scored</option></select></label>
+    <label class="ctl"><span>Type</span><select data-rkf="type"><option value="">All</option><option value="threat"${f.type==='threat'?' selected':''}>Threats</option><option value="opp"${f.type==='opp'?' selected':''}>Opportunities</option></select></label>
+    <label class="ctl"><span>Owner</span><select data-rkf="owner"><option value="">Anyone</option>${owners.map(o=>`<option${f.owner===o?' selected':''}>${esc(o)}</option>`).join('')}</select></label>
+    <label class="ctl"><span>Group</span><select data-rkf="group"><option value="">None</option>${[['scope','Register'],['cat','Category'],['owner','Owner'],['status','Status'],['parent','Parent risk']].map(([v,l])=>`<option value="${v}"${RK.group===v?' selected':''}>${l}</option>`).join('')}</select></label>
+    <label class="tg"><input type="checkbox" data-rkf="ifc" ${f.ifc?'checked':''}> Interface risks only</label>
+    ${RK.cell?`<span class="rk-pf">${esc(RQ_L[RK.cell.k])} P${RK.cell.p} × I${RK.cell.i}<button class="fx" data-rk="cellx" aria-label="Clear matrix filter">×</button></span>`:''}
+    <span class="sp"></span><span class="muted">${R.length} of ${V.length}</span></div>`;
+  const th=cols.map(k=>`<th class="${RCOL[k]&&RCOL[k].num?'num':''}" style="min-width:${(RCOL[k]||{w:120}).w}px"><button class="rk-sort" data-rksort="${esc(k)}">${esc(defs[k])}${RK.sort.k===k?(RK.sort.d>0?' ▲':' ▼'):''}</button></th>`).join('');
+  const row=r=>`<tr data-rid="${esc(r.id)}" class="${rkLive(r)?'':'rk-dead'}">${cols.map(k=>`<td class="${RCOL[k]&&RCOL[k].num?'num':''} rk-c-${k.replace(':','_')}">${rkCell(r,k)}</td>`).join('')}</tr>`;
+  let body='';
+  if(RK.group){ const key=r=>RK.group==='scope'?rkScopeName(rkScopeOf(r)):RK.group==='cat'?(r.d.cat||'Uncategorised'):RK.group==='owner'?(r.d.owner||'No owner'):RK.group==='status'?(RST[r.status]||r.status):(r.parentId?((rkById(r.parentId)||{}).ref||'')+' '+((rkById(r.parentId)||{}).title||''):'No parent');
+    const G=new Map(); R.forEach(r=>{ const g=key(r); if(!G.has(g)) G.set(g,[]); G.get(g).push(r); });
+    [...G.entries()].sort((a,b)=>a[0].localeCompare(b[0])).forEach(([g,rs])=>{ body+=`<tr class="rk-gh"><td colspan="${cols.length}"><b>${esc(g)}</b> <span class="muted">${rs.length} risk${rs.length===1?'':'s'} · threat exposure ${rkMoney(rkTot(rs,false,'cost'))}</span></td></tr>`+rs.map(row).join(''); }); }
+  else body=R.map(row).join('');
+  return bar+`<div class="card rk-tw"><div class="ptw rk-regw"><table class="ptab rk-reg"><thead><tr>${th}</tr></thead><tbody>${body||`<tr><td colspan="${cols.length}" class="muted">No risks match these filters.</td></tr>`}</tbody></table></div></div>`; }
+
+/* ---- Hierarchy ---- */
+function rkTreeHtml(){ const V=rkVis(), vis=new Set(V.map(r=>r.id)), sc=RK.scope;
+  const roots=V.filter(r=>!r.parentId||!vis.has(r.parentId)).sort((a,b)=>rkRank(a.level)-rkRank(b.level)||(rkCurScore(b)||0)-(rkCurScore(a)||0));
+  const node=(r,dep,seen)=>{ if(seen.has(r.id)) return ''; seen.add(r.id); const K=rkKids(r).filter(k=>vis.has(k.id)).sort((a,b)=>(rkCurScore(b)||0)-(rkCurScore(a)||0)), outside=r.parentId&&!vis.has(r.parentId)?rkById(r.parentId):null, ed=rkCanEdit(), esc2=rkEscTo(r);
+    return `<div class="rk-node${rkLive(r)?'':' rk-dead'}" style="--dep:${dep}" data-rid="${esc(r.id)}"><span class="rk-lv l${rkRank(r.level)}">${RLV_L[r.level]}</span><span class="rk-ref">${esc(r.ref)}</span><span class="rk-nt">${rkTitleCell(r)}<span class="muted rk-ns">${esc(rkScopeName(rkScopeOf(r)))}${outside?` · feeds <b>${esc(outside.ref)}</b> ${esc(outside.title)} (${esc(rkScopeName(rkScopeOf(outside)))})`:''}</span></span>
+      ${rkChip(rkCurScore(r),{short:1})}<span class="num rk-nev" title="${(r.d.qt||{}).fromKids?'Rolled up from child risks':'Own estimate'}">${(r.d.qt||{}).fromKids?'Σ ':''}${rkMoney(rkEV(r,false,'cost'))}</span>
+      <span class="rk-nb">${ed&&r.level!=='project'?`<button class="btn sm ghost" data-rkchild="${esc(r.id)}" title="Add a risk in a lower register that rolls up to this one">+ Child</button>`:''}${ed&&r.level!=='portfolio'&&!r.parentId?`<button class="btn sm ghost${esc2?' rk-hot':''}" data-rkesc="${esc(r.id)}:${r.level==='project'?(esc2||'programme'):'portfolio'}" title="Create a parent risk at a higher level">Escalate${esc2?' ⚑':''}</button>`:''}</span></div>${K.map(k=>node(k,dep+1,seen)).join('')}`; };
+  const seen=new Set(), tree=roots.map(r=>node(r,0,seen)).join('');
+  const regs=`<div class="card rk-regs"><div class="ph"><span class="sl">Registers</span></div>${rkRegTree()}</div>`;
+  const help=`<p class="pn">Parent risks sit in a higher register and roll up their children: a programme risk can be the parent of project risks in that programme, and a portfolio risk can be the parent of any programme or project risk. A parent marked Σ takes its exposure from its children, so totals count each estimate once.</p>`;
+  return `<div class="rk-treew">${regs}<div class="card rk-tree"><div class="ph"><span class="sl">Risk hierarchy</span><span class="pn">${V.length} risk${V.length===1?'':'s'} in view${RK.roll||sc.lv==='project'?'':' · tick “Include lower registers” to see children'}</span></div>${help}${tree||'<p class="muted">No risks in this register yet.</p>'}</div></div>`; }
+function rkRegTree(){ const cnt=sc=>RK.risks.filter(r=>rkLive(r)&&rkIn(r,sc,false)).length, cur=RK.scope;
+  const it=(sc,name,dep)=>{ const on=cur.lv===sc.lv&&(cur.id||null)===(sc.id||null); return `<button class="rk-rt${on?' on':''}" style="--dep:${dep}" data-rksc="${sc.lv}:${sc.id||''}"><span>${esc(name)}</span><b>${cnt(sc)}</b></button>`; };
+  let h=it({lv:'portfolio'},'Portfolio',0); (PER.programmes||[]).forEach(g=>{ h+=it({lv:'programme',id:g.id},g.name,1); PER.projects.filter(p=>p.programmeId===g.id).forEach(p=>h+=it({lv:'project',id:p.id},p.name,2)); });
+  PER.projects.filter(p=>!p.programmeId||!PER.programmes.some(g=>g.id===p.programmeId)).forEach(p=>h+=it({lv:'project',id:p.id},p.name,1)); return h; }
+
+/* ---- Interfaces ---- */
+function rkIfcProjects(){ const sc=RK.scope; if(sc.lv==='programme') return PER.projects.filter(p=>p.programmeId===sc.id);
+  if(sc.lv==='project'){ const me=rkProj(sc.id); const ids=new Set([sc.id]); RK.risks.filter(r=>rkIfcPids(r).includes(sc.id)).forEach(r=>rkIfcPids(r).forEach(id=>ids.add(id))); return PER.projects.filter(p=>ids.has(p.id)).sort((a,b)=>(a.id===sc.id?-1:b.id===sc.id?1:0)); }
+  const G=PER.programmes||[]; return PER.projects.slice().sort((a,b)=>G.findIndex(g=>g.id===a.programmeId)-G.findIndex(g=>g.id===b.programmeId)||String(a.name).localeCompare(b.name)); }
+function rkIfcHtml(){ const P=rkIfcProjects(), ids=new Set(P.map(p=>p.id)), I=RK.risks.filter(r=>rkIsIfc(r)&&rkIfcPids(r).some(id=>ids.has(id))&&(RK.f.st==='all'||rkLive(r)));
+  const pair=(a,b)=>I.filter(r=>rkIfcPids(r).includes(a)&&rkIfcPids(r).includes(b));
+  const short=p=>p.code||p.name.split(/\s+/).map(w=>w[0]).join('').slice(0,5);
+  let mx='';
+  if(P.length>=2){ mx=`<div class="rk-mx" style="--n:${P.length}"><div></div>${P.map(p=>`<div class="rk-mxh" title="${esc(p.name)}">${esc(short(p))}</div>`).join('')}`;
+    P.forEach((a,i)=>{ mx+=`<div class="rk-mxl" title="${esc(a.name)}"><b>${esc(short(a))}</b><span>${esc(a.name)}</span></div>`; P.forEach((b,j)=>{ if(j<=i){ mx+=`<div class="rk-mxc x"></div>`; return; } const R=pair(a.id,b.id), w=Math.max(0,...R.map(r=>rkCurScore(r)||0)), on=RK.ifcPair&&RK.ifcPair.includes(a.id)&&RK.ifcPair.includes(b.id), sameG=a.programmeId&&a.programmeId===b.programmeId;
+      mx+=R.length?`<button class="rk-mxc has${on?' on':''}" style="--rc:${w?rkBand(w).c:'var(--ink3)'}" data-rkpair="${esc(a.id)}|${esc(b.id)}" title="${esc(a.name)} ↔ ${esc(b.name)}: ${R.length} interface risk${R.length===1?'':'s'}${w?' · worst '+rkBand(w).l:''}">${R.length}</button>`:`<div class="rk-mxc${sameG?' g':''}"></div>`; }); });
+    mx+='</div>'; }
+  const L=RK.ifcPair?I.filter(r=>RK.ifcPair.every(id=>rkIfcPids(r).includes(id))):I;
+  const list=`<table class="ptab rk-ifl"><thead><tr><th>Ref</th><th style="min-width:260px">Interface risk</th><th style="min-width:220px">Between</th><th>Interface ID</th><th>Owned by</th><th>Current</th><th class="num">Cost exposure</th><th class="num">Schedule exposure</th><th class="num">Actions</th><th>Status</th></tr></thead><tbody>${L.sort((a,b)=>(rkCurScore(b)||0)-(rkCurScore(a)||0)).map(r=>`<tr data-rid="${esc(r.id)}" class="${rkLive(r)?'':'rk-dead'}"><td>${rkCell(r,'ref')}</td><td>${rkTitleCell(r)}</td><td>${rkIfcPids(r).map(id=>rkProj(id)).filter(Boolean).map(p=>`<span class="rk-pj" title="${esc(p.name)}">${esc(p.name)}</span>`).join(' ')}</td><td>${esc((r.d.ifc||{}).code||'')}</td><td class="muted">${esc(rkScopeName(rkScopeOf(r)))}</td><td>${rkChip(rkCurScore(r),{short:1})}</td><td class="num">${rkMoney(rkEV(r,false,'cost'))}</td><td class="num">${rkDays(rkEV(r,false,'time'))}</td><td class="num">${rkCell(r,'actions')}</td><td>${rkCell(r,'status')}</td></tr>`).join('')||'<tr><td colspan="10" class="muted">No interface risks here yet.</td></tr>'}</tbody></table>`;
+  const unowned=I.filter(r=>{ const gs=new Set(rkIfcPids(r).map(id=>(rkProj(id)||{}).programmeId||'-')); const need=gs.size>1?'portfolio':'programme'; return rkLive(r)&&rkRank(r.level)>rkRank(need); });
+  return `<div class="rk-ifcw"><div class="card dpanel"><div class="ph"><span class="sl">Interface matrix</span><span class="pn">${P.length} project${P.length===1?'':'s'} · ${I.length} interface risk${I.length===1?'':'s'} · click a square to filter</span>${rkCanEdit()?'<button class="btn sm" data-rk="newifc">New interface risk</button>':''}</div>
+    ${P.length>=2?mx:`<p class="muted">${RK.scope.lv==='project'?'This project has no interface risks with other projects yet.':'Add at least two projects to this register to manage interfaces between them.'}</p>`}
+    <p class="pn">Interface risks sit between two or more projects. Own them in the register above both projects — the programme, or the portfolio when they cross programmes — so neither side carries them alone.</p></div>
+    <div class="card dpanel"><div class="ph"><span class="sl">Interface risks</span>${RK.ifcPair?`<span class="rk-pf">${RK.ifcPair.map(id=>esc((rkProj(id)||{}).name||'')).join(' ↔ ')}<button class="fx" data-rk="pairx" aria-label="Clear">×</button></span>`:''}<label class="tg"><input type="checkbox" data-rkf="ifcall" ${RK.f.st==='all'?'checked':''}> Include closed</label></div>
+    ${unowned.length?`<p class="pwarn">${unowned.length} interface risk${unowned.length===1?' is':'s are'} owned in a project register. Consider moving ${unowned.length===1?'it':'them'} up so both sides see ${unowned.length===1?'it':'them'}: ${unowned.slice(0,4).map(r=>`<b>${esc(r.ref)}</b>`).join(', ')}.</p>`:''}
+    <div class="ptw">${list}</div></div></div>`; }
+
+/* ---- Responses ---- */
+function rkRespHtml(){ const V=rkVis().filter(r=>rkLive(r)||r.status==='occurred'), T=rkToday(), F=RK.act;
+  const all=V.flatMap(r=>rkActs(r).map((a,i)=>({a,r,i})));
+  const open=all.filter(x=>x.a.status!=='done'&&x.a.status!=='dropped'), od=open.filter(x=>rkOverdue(x.a)), soon=open.filter(x=>x.a.due&&x.a.due>=T&&x.a.due<=T+30*DAY), done=all.filter(x=>x.a.status==='done');
+  const owners=[...new Set(all.map(x=>x.a.owner).filter(Boolean))].sort();
+  let L=F.f==='overdue'?od:F.f==='soon'?soon:F.f==='done'?done:F.f==='all'?all:open; if(F.owner) L=L.filter(x=>(x.a.owner||'')===F.owner);
+  L=L.slice().sort((x,y)=>(x.a.due||Infinity)-(y.a.due||Infinity));
+  const noResp=V.filter(r=>rkLive(r)&&(r.d.type||'threat')==='threat'&&(rkCurScore(r)||0)>rkCfg().bands[0].max&&!rkOpenActs(r).length&&(r.d.resp||{}).strat!=='accept');
+  const strat={}; V.filter(rkLive).forEach(r=>{ const s=(r.d.resp||{}).strat||'none'; strat[s]=(strat[s]||0)+1; });
+  const SL=Object.assign({none:'Not set'},Object.fromEntries(RSTRAT.threat.concat(RSTRAT.opp)));
+  const tiles=`<div class="card stats rk-stats"><div class="stat"><div class="sl">Open actions</div><div class="sv">${open.length}</div><div class="ss">across ${new Set(open.map(x=>x.r.id)).size} risks</div></div>
+    <div class="stat"><div class="sl">Overdue</div><div class="sv ${od.length?'late':''}">${od.length}</div><div class="ss">past their due date</div></div>
+    <div class="stat"><div class="sl">Due in 30 days</div><div class="sv">${soon.length}</div><div class="ss">to ${fmtD(T+30*DAY)}</div></div>
+    <div class="stat"><div class="sl">Done</div><div class="sv">${done.length}</div><div class="ss">${all.length?Math.round(done.length/all.length*100):0}% of all actions</div></div>
+    <div class="stat"><div class="sl">Action cost</div><div class="sv">${rkMoney(open.reduce((n,x)=>n+(+x.a.cost||0),0))}</div><div class="ss">still to spend on open actions</div></div>
+    <div class="stat"><div class="sl">No response yet</div><div class="sv ${noResp.length?'amber':''}">${noResp.length}</div><div class="ss">threats above ${esc(rkCfg().bands[0].l)} with no action</div></div></div>`;
+  const mix=`<div class="rk-mix">${Object.entries(strat).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`<span class="rk-mixi"><b>${n}</b> ${esc(SL[k]||k)}</span>`).join('')}</div>`;
+  const ed=rkCanEdit();
+  const tbl=`<table class="ptab rk-acts"><thead><tr><th style="min-width:260px">Action</th><th style="min-width:220px">Risk</th><th>Register</th><th>Owner</th><th class="num">Due</th><th>Status</th><th class="num">Cost</th></tr></thead><tbody>${L.map(x=>`<tr data-rid="${esc(x.r.id)}" data-rtab="resp"><td><b>${esc(x.a.t||'')}</b></td><td><span class="rk-ref">${esc(x.r.ref)}</span> ${esc(x.r.title)}</td><td class="muted">${esc(rkScopeName(rkScopeOf(x.r)))}</td><td>${esc(x.a.owner||'')}</td><td class="num ${rkOverdue(x.a)?'late':''}">${x.a.due?fmtD(x.a.due):'—'}</td>
+    <td>${ed?`<select class="rk-asel" data-rkact="${esc(x.r.id)}:${x.i}" aria-label="Action status">${Object.entries(RACT).map(([v,l])=>`<option value="${v}"${x.a.status===v?' selected':''}>${l}</option>`).join('')}</select>`:esc(RACT[x.a.status]||'')}</td><td class="num">${x.a.cost?rkMoney(+x.a.cost):'—'}</td></tr>`).join('')||'<tr><td colspan="7" class="muted">No actions here.</td></tr>'}</tbody></table>`;
+  return tiles+`<div class="card rk-fbar"><div class="sg" role="group" aria-label="Which actions">${[['open','Open'],['overdue','Overdue'],['soon','Due in 30 days'],['done','Done'],['all','All']].map(([k,l])=>`<button data-rkaf="${k}" class="${F.f===k?'on':''}">${l}</button>`).join('')}</div>
+    <label class="ctl"><span>Owner</span><select data-rkf="aowner"><option value="">Anyone</option>${owners.map(o=>`<option${F.owner===o?' selected':''}>${esc(o)}</option>`).join('')}</select></label><span class="sp"></span><span class="muted">Responses chosen:</span>${mix}</div>
+    ${noResp.length?`<div class="card pwarn">Threats with no response action: ${noResp.slice(0,6).map(r=>`<button class="link" data-rid="${esc(r.id)}" data-rtab="resp">${esc(r.ref)}</button>`).join(' ')}${noResp.length>6?` and ${noResp.length-6} more`:''}.</div>`:''}
+    <div class="card rk-tw"><div class="ptw rk-regw">${tbl}</div></div>`; }
+
+/* ---- events ---- */
+function rkClick(e){
+  const t=e.target;
+  if(t.closest('select,input,textarea,label.tg')) return;
+  const b=t.closest('[data-rk]'); if(b){ const k=b.dataset.rk;
+    if(k==='new') rkNew({}); else if(k==='newifc') rkNew({ifc:true}); else if(k==='cfg') rkCfgOpen(); else if(k==='sample') rkSample(); else if(k==='xls') rkExport(); else if(k==='print') repPrint(rkScopeName(RK.scope)+' risk register');
+    else if(k==='cellx'){ RK.cell=null; rkRender(); } else if(k==='pairx'){ RK.ifcPair=null; rkRender(); } else if(k==='signin'){ if(!document.getElementById('auth')) authStart(); } return; }
+  const h=t.closest('[data-heat]'); if(h){ const [k,p,i]=h.dataset.heat.split(':'); RK.cell={k,p:+p,i:+i}; RK.f.st='live'; rkGo('reg'); return; }
+  const hm=t.closest('[data-rkheat]'); if(hm){ RK.heat=hm.dataset.rkheat; rkRender(); return; }
+  const ct=t.closest('[data-rkcat]'); if(ct){ RK.f.cat=ct.dataset.rkcat==='Uncategorised'?'':ct.dataset.rkcat; rkGo('reg'); return; }
+  const so=t.closest('[data-rksort]'); if(so){ const k=so.dataset.rksort; RK.sort=RK.sort.k===k?{k,d:-RK.sort.d}:{k,d:['ref','title','scope','category','owner','level','status'].includes(k)?1:-1}; rkRender(); return; }
+  const sc=t.closest('[data-rksc]'); if(sc){ const [lv,id]=sc.dataset.rksc.split(':'); rkSetScope({lv,id:id||null}); return; }
+  const es=t.closest('[data-rkesc]'); if(es){ e.stopPropagation(); const [id,lv]=es.dataset.rkesc.split(':'); rkEscalate(rkById(id),lv); return; }
+  const ch=t.closest('[data-rkchild]'); if(ch){ e.stopPropagation(); rkNewChild(rkById(ch.dataset.rkchild)); return; }
+  const pr=t.closest('[data-rkpair]'); if(pr){ const ids=pr.dataset.rkpair.split('|'); RK.ifcPair=RK.ifcPair&&ids.every(i=>RK.ifcPair.includes(i))?null:ids; rkRender(); return; }
+  const g2=t.closest('[data-rkgo2]'); if(g2){ rkGo(g2.dataset.rkgo2); return; }
+  const af=t.closest('[data-rkaf]'); if(af){ RK.act.f=af.dataset.rkaf; rkRender(); return; }
+  const row=t.closest('[data-rid]'); if(row){ const r=rkById(row.dataset.rid); if(r) rkOpen(r,row.dataset.rtab||'det'); }
+}
+function rkChange(e){ const t=e.target, k=t.dataset.rkf;
+  if(k){ if(k==='roll'){ RK.roll=t.checked; try{ localStorage.setItem('pacer.rkroll',t.checked?'1':'0'); }catch(_){} }
+    else if(k==='group') RK.group=t.value; else if(k==='ifc') RK.f.ifc=t.checked; else if(k==='ifcall') RK.f.st=t.checked?'all':'live'; else if(k==='aowner') RK.act.owner=t.value; else RK.f[k]=t.value;
+    rkRender(); return; }
+  if(t.dataset.rkact){ const [id,i]=t.dataset.rkact.split(':'), r=rkById(id); if(!r) return; const d=JSON.parse(JSON.stringify(r.d)), a=d.actions[+i]; a.status=t.value; if(t.value==='done') a.doneAt=Date.now();
+    rkUpdate(Object.assign({},r,{d}),r).then(()=>perToast('Action updated.')).catch(er=>perToast(perErr(er),'err')); }
+}
+let rkQT; function rkInput(e){ if(e.target.id==='rkQ'){ clearTimeout(rkQT); rkQT=setTimeout(()=>{ RK.q=e.target.value; rkRender(); },180); } }
+
+/* ---- create, escalate, cascade ---- */
+function rkBlank(sc){ const c=rkCfg(); sc=sc||RK.scope; return {id:null,level:sc.lv,programmeId:sc.lv==='programme'?sc.id:null,projectId:sc.lv==='project'?sc.id:null,parentId:null,ref:'',title:'',status:'open',
+  d:{type:'threat',cat:'',owner:'',cause:'',event:'',effect:'',desc:'',raised:rkToday(),review:rkToday()+c.review*DAY,prox:null,q:{pre:{p:0,i:{}},cur:{p:0,i:{}},tgt:{p:0,i:{}}},qt:{p:'',dist:'tri',cost:{min:'',ml:'',max:''},time:{min:'',ml:'',max:''},acts:'',fromKids:false,post:{p:'',cost:{min:'',ml:'',max:''},time:{min:'',ml:'',max:''}}},resp:{strat:'',owner:'',plan:'',trigger:'',fallback:'',cont:''},actions:[],ifc:{on:false,pids:[],code:''},f:{}}}; }
+function rkNew(o){ o=o||{}; if(!rkCanEdit()) return; const r=rkBlank(o.scope);
+  if(o.ifc){ r.d.ifc.on=true; if(RK.scope.lv==='project'){ const p=rkProj(RK.scope.id); r.d.ifc.pids=[RK.scope.id]; if(p&&p.programmeId){ r.level='programme'; r.programmeId=p.programmeId; r.projectId=null; } }
+    if(RK.ifcPair){ r.d.ifc.pids=RK.ifcPair.slice(); const gs=new Set(RK.ifcPair.map(id=>(rkProj(id)||{}).programmeId)); if(gs.size===1&&[...gs][0]){ r.level='programme'; r.programmeId=[...gs][0]; r.projectId=null; } else { r.level='portfolio'; r.programmeId=r.projectId=null; } }
+    r.d.cat=rkCfg().cats.includes('Interfaces')?'Interfaces':''; }
+  Object.assign(r,o.patch||{}); rkOpen(r,'det',true); }
+function rkNewChild(p){ if(!p||!rkCanEdit()) return; let sc;
+  if(p.level==='portfolio'){ sc=RK.scope.lv!=='portfolio'?RK.scope:(PER.programmes[0]?{lv:'programme',id:PER.programmes[0].id}:PER.projects[0]?{lv:'project',id:PER.projects[0].id}:null); }
+  else { const ps=PER.projects.filter(x=>x.programmeId===p.programmeId); sc=RK.scope.lv==='project'&&ps.some(x=>x.id===RK.scope.id)?RK.scope:ps[0]?{lv:'project',id:ps[0].id}:null; }
+  if(!sc){ perToast(p.level==='portfolio'?'Add a programme or project first.':'Add a project to this programme first.','err'); return; }
+  const r=rkBlank(sc); r.parentId=p.id; r.title=p.title; r.d.cat=p.d.cat||''; r.d.type=p.d.type||'threat'; ['cause','event','effect'].forEach(k=>r.d[k]=p.d[k]||'');
+  rkOpen(r,'det',true); }
+async function rkEscalate(r,lv){ if(!r||!rkCanEdit()) return; lv=lv||(r.level==='project'?'programme':'portfolio');
+  const g=rkProgOf(r); if(lv==='programme'&&!g) lv='portfolio';
+  const sc=lv==='programme'?{lv,id:g}:{lv:'portfolio',id:null};
+  const p=rkBlank(sc); p.title=r.title; p.status='open'; p.ref=rkNextRef(sc); Object.assign(p.d,{type:r.d.type||'threat',cat:r.d.cat||'',cause:r.d.cause||'',event:r.d.event||'',effect:r.d.effect||'',desc:`Escalated from ${r.ref} (${rkScopeName(rkScopeOf(r))}).`,q:JSON.parse(JSON.stringify(r.d.q||{})),qt:Object.assign(p.d.qt,{fromKids:true})});
+  try{ perBusy('Escalating…'); const id=await rkCreate(p); await PER.store.updateRisk(r.id,{parentId:id});
+    perToast(`Escalated to the ${lv} register as ${p.ref||'a new risk'}. Its exposure rolls up from ${r.ref}.`);
+    setTimeout(()=>{ const x=rkById(id); if(x) rkOpen(x,'links'); },350); }
+  catch(e){ perToast(perErr(e),'err'); } finally{ perBusy(''); } }
+
+/* ---- export ---- */
+function rkExport(){ const cols=rkRegCols(), defs=rkColDefs(), R=rkFiltered(), c=rkCfg();
+  const reg=[cols.map(k=>defs[k])].concat(R.map(r=>cols.map(k=>rkCellX(r,k))));
+  const dims=c.dims; const ass=[['Ref','Risk','Register','Level','Type','Status'].concat(...RQ.map(k=>[`${RQ_L[k]} P`,...dims.map(d=>`${RQ_L[k]} ${d.l}`),`${RQ_L[k]} score`,`${RQ_L[k]} rating`]),['Probability %','Distribution','Cost min','Cost likely','Cost max','Cost exposure','Days min','Days likely','Days max','Schedule exposure','Post-response probability %','Post cost min','Post cost likely','Post cost max','Post days min','Post days likely','Post days max','Rolls up from children','Schedule activities','Parent','Interface projects'])]
+    .concat(R.map(r=>{ const q=r.d.q||{}, t=r.d.qt||{}, po=t.post||{}; return [r.ref,r.title,rkScopeName(rkScopeOf(r)),RLV_L[r.level],r.d.type==='opp'?'Opportunity':'Threat',RST[r.status]].concat(...RQ.map(k=>{ const s=q[k]||{}, sc=rkScore(s); return [s.p||'',...dims.map(d=>(s.i||{})[d.id]||''),sc??'',sc!=null?rkBand(sc).l:'']; }),
+      [t.p??'',RDIST[t.dist||'tri'],...['min','ml','max'].map(x=>(t.cost||{})[x]??''),Math.round(rkEV(r,false,'cost')),...['min','ml','max'].map(x=>(t.time||{})[x]??''),Math.round(rkEV(r,false,'time')*10)/10,po.p??'',...['min','ml','max'].map(x=>(po.cost||{})[x]??''),...['min','ml','max'].map(x=>(po.time||{})[x]??''),t.fromKids?'Yes':'',t.acts||'',(rkById(r.parentId)||{}).ref||'',rkIfcPids(r).map(id=>(rkProj(id)||{}).name).filter(Boolean).join(', ')]); }));
+  const acts=[['Risk ref','Risk','Action','Owner','Due','Status','Cost','Completed']].concat(R.flatMap(r=>rkActs(r).map(a=>[r.ref,r.title,a.t||'',a.owner||'',xD(a.due),RACT[a.status]||'',a.cost||'',xD(a.doneAt)])));
+  const resp=[['Risk ref','Risk','Response','Response owner','Plan','Trigger / early warning','Fallback','Contingency']].concat(R.map(r=>{ const p=r.d.resp||{}, L=RSTRAT[r.d.type==='opp'?'opp':'threat'].find(x=>x[0]===p.strat); return [r.ref,r.title,L?L[1]:'',p.owner||'',p.plan||'',p.trigger||'',p.fallback||'',p.cont||'']; }));
+  xlsSave(`${rkScopeName(RK.scope)} risk register ${new Date().toISOString().slice(0,10)}`,[{name:'Register',rows:reg},{name:'Assessment',rows:ass},{name:'Responses',rows:resp},{name:'Actions',rows:acts}]); }
+/* ================= Risk Workbench: risk editor, register configuration and sample risks ================= */
+const RET=[['det','Details'],['ass','Assessment'],['qt','Quantitative'],['resp','Response'],['links','Links'],['hist','History']];
+const rkClone=o=>JSON.parse(JSON.stringify(o));
+function rkOpen(r,tab,isNew){ const b=rkBlank(rkScopeOf(r)), x=rkClone(r); x.d=Object.assign(b.d,x.d||{}); ['q','qt','resp','ifc'].forEach(k=>x.d[k]=Object.assign(rkClone(b.d[k]),x.d[k]||{}));
+  RQ.forEach(k=>{ x.d.q[k]=Object.assign({p:0,i:{}},x.d.q[k]||{}); }); x.d.qt.cost=Object.assign({min:'',ml:'',max:''},x.d.qt.cost||{}); x.d.qt.time=Object.assign({min:'',ml:'',max:''},x.d.qt.time||{});
+  x.d.qt.post=Object.assign({p:'',cost:{min:'',ml:'',max:''},time:{min:'',ml:'',max:''}},x.d.qt.post||{}); x.d.actions=(x.d.actions||[]).map(a=>Object.assign({id:'a'+Math.random().toString(36).slice(2,8),t:'',owner:'',due:null,status:'todo',cost:''},a));
+  RK.ed={r:x,orig:JSON.stringify(x),isNew:!!isNew||!r.id}; RK.edTab=tab||'det'; rkEdRender(true); }
+function rkEdClose(force){ const sh=document.getElementById('rkSheet'); if(!sh) return; RK.ed=null; sh.classList.remove('in'); const sc=document.getElementById('rkScrim'); if(sc) sc.remove(); setTimeout(()=>{ if(!RK.ed) sh.remove(); },200); }
+const rkDirty=()=>RK.ed&&JSON.stringify(RK.ed.r)!==RK.ed.orig;
+function rkEdRender(first){
+  let sh=document.getElementById('rkSheet');
+  if(!sh){ const scr=document.createElement('div'); scr.className='rk-scrim'; scr.id='rkScrim'; document.body.appendChild(scr); scr.onclick=()=>rkEdAsk();
+    sh=document.createElement('aside'); sh.className='rk-sheet'; sh.id='rkSheet'; sh.setAttribute('role','dialog'); sh.setAttribute('aria-modal','true'); sh.setAttribute('aria-labelledby','rkShT'); document.body.appendChild(sh);
+    sh.addEventListener('click',rkEdClick); sh.addEventListener('change',rkEdChange); sh.addEventListener('input',rkEdInput); sh.addEventListener('keydown',e=>{ if(e.key==='Escape'){ e.stopPropagation(); rkEdAsk(); } });
+    requestAnimationFrame(()=>sh.classList.add('in')); }
+  const E=RK.ed, r=E.r, ro=!rkCanEdit(), sc=rkScopeOf(r), body=sh.querySelector('.rk-sh-b'), top=body?body.scrollTop:0, act=document.activeElement, ak=act&&act.dataset&&act.dataset.e, ai=act&&act.dataset&&act.dataset.ai, apos=act&&act.selectionStart;
+  const cs=rkCurScore(r);
+  sh.innerHTML=`<div class="rk-sh-h"><div class="rk-sh-t"><div class="rk-sh-m"><span class="rk-lv l${rkRank(r.level)}">${RLV_L[r.level]}</span><span class="rk-ref">${esc(r.ref||'New risk')}</span>${rkChip(cs,{t:'Current'})}${r.d.type==='opp'?'<span class="rk-opp">Opportunity</span>':''}</div>
+      <h2 id="rkShT">${esc(r.title||'New risk')}</h2><span class="muted">${esc(rkScopeName(sc))}${ro?' · view only':''}</span></div><button class="fx" data-rke="close" aria-label="Close">×</button></div>
+    <div class="ptabs rk-sh-tabs" role="tablist">${RET.map(([k,l])=>`<button role="tab" aria-selected="${RK.edTab===k}" data-rket="${k}">${l}${k==='resp'&&rkActs(r).length?` <em>${rkActs(r).length}</em>`:''}${k==='links'&&(rkKids(r).length||r.parentId||rkIsIfc(r))?` <em>${(r.parentId?1:0)+rkKids(r).length+(rkIsIfc(r)?1:0)}</em>`:''}</button>`).join('')}</div>
+    <div class="rk-sh-b"><fieldset ${ro?'disabled':''}>${({det:rkEdDet,ass:rkEdAss,qt:rkEdQt,resp:rkEdResp,links:rkEdLinks,hist:rkEdHist})[RK.edTab](r)}</fieldset></div>
+    <div class="rk-sh-f">${ro?'':`<button class="btn primary" data-rke="save">${E.isNew?'Add risk':'Save'}</button>`}<button class="btn" data-rke="close">${ro?'Close':'Cancel'}</button>${!ro&&!E.isNew?'<button class="btn ghost" data-rke="reviewed" title="Record a review today and set the next review date">Mark reviewed</button>':''}<span class="sp"></span>${!E.isNew&&rkCanDel(r)?'<button class="link danger" data-rke="del">Delete risk</button>':''}</div>`;
+  const nb=sh.querySelector('.rk-sh-b'); if(!first) nb.scrollTop=top;
+  if(ak||ai){ const n=sh.querySelector(ak?`[data-e="${CSS.escape(ak)}"]`:`[data-ai="${CSS.escape(ai)}"]`); if(n){ n.focus(); try{ if(apos!=null) n.setSelectionRange(apos,apos); }catch(_){} } }
+  else if(first){ const t=sh.querySelector('[data-e="title"]'); if(t&&E.isNew) t.focus(); else sh.querySelector('.fx').focus(); }
+}
+function rkEdAsk(){ if(!rkDirty()){ rkEdClose(); return; } const b=document.querySelector('#rkSheet [data-rke="close"]:not(.fx)'); if(b&&confirmIn(b,'Discard changes?')) rkEdClose(); else if(!b) rkEdClose(); }
+/* field helpers */
+const rkGet=(o,p)=>p.split('.').reduce((x,k)=>x==null?x:x[k],o);
+function rkSet(o,p,v){ const ks=p.split('.'); let x=o; ks.slice(0,-1).forEach(k=>{ if(x[k]==null||typeof x[k]!=='object') x[k]={}; x=x[k]; }); x[ks[ks.length-1]]=v; }
+const rkIn_=(p,v,o)=>{ o=o||{}; return `<label class="pfl ${o.cls||''}"><span>${o.l}</span>${o.ta?`<textarea data-e="${p}" rows="${o.rows||3}" placeholder="${esc(o.ph||'')}">${esc(v??'')}</textarea>`:`<input data-e="${p}" ${o.t?`type="${o.t}" data-t="${o.t}"`:''} value="${esc(o.t==='date'?(v?xD(v):''):v??'')}" placeholder="${esc(o.ph||'')}" ${o.list?`list="${o.list}"`:''} ${o.req?'required':''} ${o.step?`step="${o.step}"`:''} ${o.min!=null?`min="${o.min}"`:''}>`}${o.hint?`<small class="muted">${o.hint}</small>`:''}</label>`; };
+const rkSel_=(p,v,opts,o)=>{ o=o||{}; return `<label class="pfl ${o.cls||''}"><span>${o.l}</span><select data-e="${p}" ${o.t?`data-t="${o.t}"`:''}>${opts.map(([k,l])=>`<option value="${esc(k)}"${String(v??'')===String(k)?' selected':''}>${esc(l)}</option>`).join('')}</select>${o.hint?`<small class="muted">${o.hint}</small>`:''}</label>`; };
+function rkRegOpts(){ const o=[['portfolio:','Portfolio register']]; (PER.programmes||[]).forEach(g=>{ o.push(['programme:'+g.id,'Programme · '+g.name]); PER.projects.filter(p=>p.programmeId===g.id).forEach(p=>o.push(['project:'+p.id,'   Project · '+p.name])); });
+  PER.projects.filter(p=>!p.programmeId||!PER.programmes.some(g=>g.id===p.programmeId)).forEach(p=>o.push(['project:'+p.id,'Project · '+p.name])); return o; }
+function rkEdDet(r){ const c=rkCfg(), d=r.d, owners=[...new Set(RK.risks.flatMap(x=>[x.d.owner,(x.d.resp||{}).owner,...rkActs(x).map(a=>a.owner)]).filter(Boolean))].sort();
+  const cats=[['','Choose…']].concat([...new Set(c.cats.concat(d.cat?[d.cat]:[]))].map(x=>[x,x]));
+  const fv=f=>(d.f||{})[f.id];
+  return `<datalist id="rkOwners">${owners.map(o=>`<option value="${esc(o)}">`).join('')}</datalist>
+    ${rkIn_('title',r.title,{l:'Risk title',req:1,ph:'Short name, e.g. Late possession for depot track connection'})}
+    <div class="rk-g4">${rkSel_('d.type',d.type,[['threat','Threat'],['opp','Opportunity']],{l:'Type'})}${rkSel_('status',r.status,Object.entries(RST),{l:'Status'})}${rkSel_('d.cat',d.cat,cats,{l:'Category'})}${rkIn_('d.owner',d.owner,{l:'Risk owner',list:'rkOwners',ph:'Name or role'})}</div>
+    ${rkSel_('_reg',r.level+':'+(r.level==='programme'?r.programmeId:r.level==='project'?r.projectId:''),rkRegOpts(),{l:'Register',hint:'Which register owns this risk. Move it up or down as it is escalated or delegated.'})}
+    <div class="rk-cee"><div class="rk-g3">${rkIn_('d.cause',d.cause,{l:'Cause',ta:1,ph:'Because of…'})}${rkIn_('d.event',d.event,{l:d.type==='opp'?'Opportunity':'Risk event',ta:1,ph:'…this may happen…'})}${rkIn_('d.effect',d.effect,{l:'Effect',ta:1,ph:'…which would lead to…'})}</div>
+      ${d.cause||d.event||d.effect?`<p class="rk-stmt">Because of <b>${esc(d.cause||'…')}</b>, ${esc(d.event||'…')}, leading to <b>${esc(d.effect||'…')}</b>.</p>`:''}</div>
+    ${rkIn_('d.desc',d.desc,{l:'Notes',ta:1,rows:2})}
+    <div class="rk-g3">${rkIn_('d.raised',d.raised,{l:'Raised',t:'date'})}${rkIn_('d.prox',d.prox,{l:'Proximity',t:'date',hint:'When it could happen'})}${rkIn_('d.review',d.review,{l:'Next review',t:'date',hint:`Review cycle ${c.review} days`})}</div>
+    ${c.fields.length?`<div class="rk-g3">${c.fields.map(f=>f.type==='choice'?rkSel_('d.f.'+f.id,fv(f),[['','—']].concat((f.opts||[]).map(o=>[o,o])),{l:f.l}):rkIn_('d.f.'+f.id,fv(f),{l:f.l,t:f.type==='number'?'number':f.type==='date'?'date':''})).join('')}</div>`:''}`; }
+function rkImpOpts(dim){ const c=rkCfg(), L=c.ilab; const o=[[0,'—']];
+  for(let i=1;i<=5;i++){ let d=''; if(dim.kind==='cost'||dim.kind==='time'){ const b=dim.b||[], f=dim.kind==='cost'?rkMoney:(v=>v+' d'); d=i===1?`≤ ${f(b[0])}`:i===5?`> ${f(b[3])}`:`${f(b[i-2])}–${f(b[i-1])}`; } else d=(dim.d||[])[i-1]||''; o.push([i,`${i} ${L[i-1]}${d?' · '+d:''}`]); }
+  return o; }
+function rkEdAss(r){ const c=rkCfg(), q=r.d.q, prev=[0].concat(c.prob.map(x=>x.max));
+  const po=[[0,'—']].concat(c.prob.map((p,i)=>[i+1,`${i+1} ${p.l} · ${prev[i]}–${p.max}%`]));
+  const mark={}; RQ.forEach(k=>{ const p=rkPos(r,k); if(p){ const key=p.p+'-'+p.i; mark[key]=(mark[key]||'')+`<b class="rk-mk ${k}">${RQ_L[k][0]}</b>`; } });
+  const rows=`<tr><th>Probability</th>${RQ.map(k=>`<td><select data-e="d.q.${k}.p" data-t="number" aria-label="${RQ_L[k]} probability">${po.map(([v,l])=>`<option value="${v}"${+q[k].p===v?' selected':''}>${esc(l)}</option>`).join('')}</select></td>`).join('')}</tr>`+
+    c.dims.map(dm=>`<tr><th>${esc(dm.l)} impact</th>${RQ.map(k=>`<td><select data-e="d.q.${k}.i.${dm.id}" data-t="number" aria-label="${RQ_L[k]} ${esc(dm.l)} impact">${rkImpOpts(dm).map(([v,l])=>`<option value="${v}"${+((q[k].i||{})[dm.id]||0)===v?' selected':''}>${esc(l)}</option>`).join('')}</select></td>`).join('')}</tr>`).join('')+
+    `<tr class="rk-sc"><th>Score</th>${RQ.map(k=>`<td>${rkChip(rkQS(r,k))}</td>`).join('')}</tr>`;
+  const qt=rkQt(r), sug=qt.p||qt.cost!=null||qt.time!=null;
+  return `<p class="muted">Score each stage on the ${c.prob.length}×5 matrix. The score is probability × the highest impact; the rating bands are set by your admin.</p>
+    <div class="rk-ass"><div class="ptw rk-assw"><table class="ptab rk-asst"><thead><tr><th></th>${RQ.map(k=>`<th title="${esc(RQ_S[k])}">${RQ_L[k]}<div class="muted rk-ths">${esc(RQ_S[k])}</div></th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="rk-assm">${rkHeat([],'cur',{sm:1,mark})}<div class="rk-mkl"><span><b class="rk-mk pre">I</b> Inherent</span><span><b class="rk-mk cur">C</b> Current</span><span><b class="rk-mk tgt">T</b> Target</span></div></div></div>
+    <div class="adm-acts">${sug?'<button type="button" class="btn sm" data-rke="suggest" title="Set the current probability and cost and schedule impacts from the three-point estimate">Suggest current from estimate</button>':''}<button type="button" class="btn sm ghost" data-rke="copyq">Copy inherent to current</button></div>`; }
+function rkEdQt(r){ const q=r.d.qt, n=rkKids(r).filter(rkLive).length, c=rkCfg(), cur=c.cur||'$';
+  const tri=(p,l,u)=>`<div class="rk-tri"><span class="rk-tril">${l}</span>${['min','ml','max'].map(k=>`<label class="pfl"><span>${({min:'Minimum',ml:'Most likely',max:'Maximum'})[k]}${u?' ('+u+')':''}</span><input data-e="${p}.${k}" type="number" data-t="number" step="any" value="${esc(rkGet(r,p+'.'+k)??'')}"></label>`).join('')}</div>`;
+  const ev=(post)=>`<div id="rkEv${post?1:0}">${rkEvHtml(r,post)}</div>`;
+  return `${n?`<label class="tg rk-roll"><input type="checkbox" data-e="d.qt.fromKids" data-t="bool" ${q.fromKids?'checked':''}> Roll up exposure from its ${n} live child risk${n===1?'':'s'} (${rkMoney(rkKids(r).filter(rkLive).reduce((s,k)=>s+rkEV(k,false,'cost'),0))}, ${rkDays(rkKids(r).filter(rkLive).reduce((s,k)=>s+rkEV(k,false,'time'),0))})</label>`:''}
+    ${q.fromKids&&n?'<p class="muted">This parent takes its exposure from its children, so totals count each estimate once. Untick to give it an estimate of its own.</p>':`
+    <div class="rk-g3">${rkIn_('d.qt.p',q.p,{l:'Probability of occurring (%)',t:'number',min:0,step:'any'})}${rkSel_('d.qt.dist',q.dist||'tri',Object.entries(RDIST),{l:'Distribution',hint:'Used by Monte Carlo'})}${rkIn_('d.qt.acts',q.acts,{l:'Schedule activities affected',ph:'e.g. DP150, DP160',hint:'Activity IDs, to place the delay in the schedule later'})}</div>
+    <h4 class="rk-h4">Current estimate (if it happens)</h4>${tri('d.qt.cost','Cost',cur)}${tri('d.qt.time','Schedule','days')}${ev(false)}
+    <h4 class="rk-h4">After planned responses <span class="muted">optional</span></h4>
+    <div class="rk-g3">${rkIn_('d.qt.post.p',q.post.p,{l:'Probability (%)',t:'number',min:0,step:'any',hint:'Leave blank if responses don’t change the estimate'})}</div>${tri('d.qt.post.cost','Cost',cur)}${tri('d.qt.post.time','Schedule','days')}${ev(true)}`}
+    <p class="pn rk-mc">Monte Carlo is coming next: it will sample these three-point estimates, using each risk’s probability and distribution, to give P50 and P80 cost and finish dates.</p>`; }
+function rkEvHtml(r,post){ const x=rkQt(r,post); return `<div class="rk-evs"><div><span class="sl">Cost exposure</span><b>${rkMoney(x.cost==null?null:x.p/100*x.cost)}</b><span class="muted">${x.p||0}% × mean ${rkMoney(x.cost)}</span></div><div><span class="sl">Schedule exposure</span><b>${rkDays(x.time==null?null:x.p/100*x.time)}</b><span class="muted">${x.p||0}% × mean ${rkDays(x.time)}</span></div></div>`; }
+function rkEdRendered(){ const r=RK.ed&&RK.ed.r; if(!r) return; [0,1].forEach(i=>{ const el=document.getElementById('rkEv'+i); if(el) el.innerHTML=rkEvHtml(r,!!i); }); }
+function rkEdResp(r){ const p=r.d.resp, S=RSTRAT[r.d.type==='opp'?'opp':'threat'];
+  const hint={avoid:'Change the plan so the risk can’t happen',reduce:'Lower the probability or impact',transfer:'Pass it to a party better placed to manage it (contract, insurance)',accept:'Take it on, with contingency and a fallback',exploit:'Make sure the opportunity happens',enhance:'Raise its probability or benefit',share:'Partner with a party who can help realise it'}[p.strat]||'';
+  return `<div class="pfl"><span>Response strategy</span><div class="sg rk-strat" role="group" aria-label="Response strategy">${S.map(([k,l])=>`<button type="button" data-rkstrat="${k}" class="${p.strat===k?'on':''}">${l}</button>`).join('')}</div>${hint?`<small class="muted">${hint}</small>`:''}</div>
+    <div class="rk-g3">${rkIn_('d.resp.owner',p.owner,{l:'Response owner',list:'rkOwners'})}${rkIn_('d.resp.cont',p.cont,{l:`Contingency held (${rkCfg().cur||'$'})`,t:'number',step:'any'})}${rkIn_('d.resp.contd',p.contd,{l:'Schedule contingency (days)',t:'number',step:'any'})}</div>
+    ${rkIn_('d.resp.plan',p.plan,{l:'Response plan',ta:1,rows:3})}
+    <div class="rk-g2">${rkIn_('d.resp.trigger',p.trigger,{l:'Trigger / early warning',ta:1,rows:2})}${rkIn_('d.resp.fallback',p.fallback,{l:'Fallback plan',ta:1,rows:2,hint:'What you do if it happens anyway'})}</div>
+    <h4 class="rk-h4">Actions</h4>
+    <div class="ptw"><table class="ptab rk-at"><thead><tr><th style="min-width:240px">Action</th><th>Owner</th><th>Due</th><th>Status</th><th>Cost</th><th></th></tr></thead><tbody>${r.d.actions.map((a,i)=>`<tr class="${rkOverdue(a)?'rk-odr':''}"><td><input data-ai="${i}.t" value="${esc(a.t||'')}" placeholder="What will be done" aria-label="Action"></td><td><input data-ai="${i}.owner" value="${esc(a.owner||'')}" list="rkOwners" aria-label="Owner"></td><td><input type="date" data-ai="${i}.due" value="${a.due?xD(a.due):''}" aria-label="Due"></td><td><select data-ai="${i}.status" aria-label="Status">${Object.entries(RACT).map(([v,l])=>`<option value="${v}"${a.status===v?' selected':''}>${l}</option>`).join('')}</select></td><td><input type="number" step="any" data-ai="${i}.cost" value="${esc(a.cost??'')}" aria-label="Cost" class="rk-num"></td><td><button type="button" class="fx" data-rkadel="${i}" aria-label="Remove action">×</button></td></tr>`).join('')||'<tr><td colspan="6" class="muted">No actions yet.</td></tr>'}</tbody></table></div>
+    <datalist id="rkOwners">${[...new Set(RK.risks.flatMap(x=>[x.d.owner,...rkActs(x).map(a=>a.owner)]).filter(Boolean))].sort().map(o=>`<option value="${esc(o)}">`).join('')}</datalist>
+    <div class="adm-acts"><button type="button" class="btn sm" data-rke="addact">Add action</button></div>`; }
+function rkEdLinks(r){ const E=RK.ed, opts=rkParentOptions(r), par=rkById(r.parentId), kids=E.isNew?[]:rkKids(r), ed=rkCanEdit(), ifc=r.d.ifc, G=PER.programmes||[];
+  const pOpts=[['','No parent']].concat(opts.sort((a,b)=>rkRank(a.level)-rkRank(b.level)||String(a.ref).localeCompare(b.ref)).map(p=>[p.id,`${RLV_L[p.level]} · ${p.ref} ${p.title}`]));
+  const projBox=p=>`<label class="rk-pjb" title="${esc(p.code||'')}"><input type="checkbox" data-rkpj="${esc(p.id)}" ${ifc.pids.includes(p.id)?'checked':''}> <span>${esc(p.name)}</span></label>`;
+  const gs=new Set(ifc.pids.map(id=>(rkProj(id)||{}).programmeId||'-')), need=gs.size>1?'portfolio':'programme';
+  return `<h4 class="rk-h4">Parent risk</h4>
+    ${r.level==='portfolio'?'<p class="muted">Portfolio risks are the top of the hierarchy, so they have no parent.</p>':`${rkSel_('parentId',r.parentId||'',pOpts,{l:'Rolls up to',hint:`A parent sits in a higher register: ${r.level==='project'?'this programme or the portfolio':'the portfolio'}.`})}
+    ${par?`<button type="button" class="rk-card" data-rkgo="${esc(par.id)}"><span class="rk-lv l${rkRank(par.level)}">${RLV_L[par.level]}</span><span class="rk-ref">${esc(par.ref)}</span><span class="rk-tt">${esc(par.title)}</span>${rkChip(rkCurScore(par),{short:1})}</button>`:''}
+    ${!E.isNew&&!r.parentId&&ed?`<div class="adm-acts">${r.level==='project'&&rkProgOf(r)?'<button type="button" class="btn sm" data-rke="esc:programme">Escalate to programme</button>':''}<button type="button" class="btn sm" data-rke="esc:portfolio">Escalate to portfolio</button><span class="muted">Creates a parent risk in that register and links this one to it.</span></div>`:''}`}
+    <h4 class="rk-h4">Child risks</h4>
+    ${r.level==='project'?'<p class="muted">Project risks are the lowest level, so they have no children.</p>':E.isNew?'<p class="muted">Add the risk first, then add child risks in the registers below.</p>':`${kids.length?kids.map(k=>`<button type="button" class="rk-card" data-rkgo="${esc(k.id)}"><span class="rk-lv l${rkRank(k.level)}">${RLV_L[k.level]}</span><span class="rk-ref">${esc(k.ref)}</span><span class="rk-tt">${esc(k.title)}<span class="muted"> · ${esc(rkScopeName(rkScopeOf(k)))}</span></span>${rkChip(rkCurScore(k),{short:1})}<span class="num">${rkMoney(rkEV(k,false,'cost'))}</span></button>`).join(''):'<p class="muted">No child risks yet.</p>'}${ed?'<div class="adm-acts"><button type="button" class="btn sm" data-rke="child">Add child risk</button></div>':''}`}
+    <h4 class="rk-h4">Interface</h4>
+    <label class="tg"><input type="checkbox" data-e="d.ifc.on" data-t="bool" ${ifc.on?'checked':''}> This risk sits at an interface between projects</label>
+    ${ifc.on?`<div class="rk-pjl">${G.map(g=>{ const ps=PER.projects.filter(p=>p.programmeId===g.id); return ps.length?`<div class="rk-pjg"><b>${esc(g.name)}</b>${ps.map(projBox).join('')}</div>`:''; }).join('')}${(()=>{ const ps=PER.projects.filter(p=>!p.programmeId||!G.some(g=>g.id===p.programmeId)); return ps.length?`<div class="rk-pjg"><b>Not in a programme</b>${ps.map(projBox).join('')}</div>`:''; })()}</div>
+      ${rkIn_('d.ifc.code',ifc.code,{l:'Interface ID',ph:'e.g. IF-07',hint:'Matches the Interface ID activity code in the schedules, if you use one'})}
+      ${ifc.pids.length<2&&r.level!=='project'?'<p class="pwarn">Tick at least two projects.</p>':''}${ifc.pids.length>=2&&rkRank(r.level)>rkRank(need)?`<p class="pwarn">These projects ${need==='portfolio'?'are in different programmes':'share a programme'}: consider owning this risk in the ${need} register so both sides see it.</p>`:''}`:''}`; }
+function rkEdHist(r){ const h=(r.d.hist||[]).slice().reverse();
+  return `<p class="muted">${RK.ed.isNew?'History starts when the risk is added.':`Added ${r.createdAt?fmtD(r.createdAt):r.d.raised?fmtD(r.d.raised):''} · last saved ${r.updatedAt?fmtD(r.updatedAt):'—'}. A line is recorded whenever the score, exposure or status changes, or when it’s marked reviewed.`}</p>
+    <div class="ptw"><table class="ptab"><thead><tr><th>Date</th><th>By</th><th>Status</th><th>Current</th><th>Target</th><th class="num">Cost exposure</th><th class="num">Schedule exposure</th></tr></thead><tbody>${h.map(x=>`<tr><td class="num">${fmtD(x.at)}</td><td>${esc(x.by||'')}</td><td>${esc(RST[x.st]||x.st||'')}</td><td>${rkChip(x.cur,{short:1})}</td><td>${rkChip(x.tgt,{short:1})}</td><td class="num">${rkMoney(x.ev)}</td><td class="num">${rkDays(x.evt)}</td></tr>`).join('')||'<tr><td colspan="7" class="muted">Nothing recorded yet.</td></tr>'}</tbody></table></div>`; }
+/* editor events */
+function rkEdVal(t){ const ty=t.dataset.t; if(ty==='bool') return t.checked; if(ty==='date') return t.value?Date.parse(t.value+'T00:00:00Z'):null; if(ty==='number') return t.value===''?'':+t.value; return t.value; }
+function rkEdInput(e){ const t=e.target; if(!RK.ed) return; if(t.dataset.e&&t.type!=='checkbox'&&t.tagName!=='SELECT'){ if(t.dataset.e==='title'){ RK.ed.r.title=t.value; const h=document.getElementById('rkShT'); if(h) h.textContent=t.value||'New risk'; return; } rkSet(RK.ed.r,t.dataset.e,rkEdVal(t)); if(/^d\.qt\./.test(t.dataset.e)) rkEdRendered(); }
+  else if(t.dataset.ai&&t.tagName!=='SELECT'){ const [i,k]=t.dataset.ai.split('.'), a=RK.ed.r.d.actions[+i]; if(a) a[k]=k==='due'?(t.value?Date.parse(t.value+'T00:00:00Z'):null):k==='cost'?(t.value===''?'':+t.value):t.value; } }
+function rkEdChange(e){ const t=e.target, E=RK.ed; if(!E) return; const r=E.r;
+  if(t.dataset.e==='_reg'){ const [lv,id]=t.value.split(':'); r.level=lv; r.programmeId=lv==='programme'?id:null; r.projectId=lv==='project'?id:null; if(r.parentId&&!rkParentOptions(r).some(p=>p.id===r.parentId)){ r.parentId=null; perToast('The parent link was removed because it no longer sits above this register.'); } rkEdRender(); return; }
+  if(t.dataset.e){ if(t.dataset.e==='parentId'){ r.parentId=t.value||null; rkEdRender(); return; } rkSet(r,t.dataset.e,rkEdVal(t)); if(t.dataset.e==='d.type'){ r.d.resp.strat=''; } if(t.tagName==='SELECT'||t.type==='checkbox') rkEdRender(); else if(/^d\.qt\./.test(t.dataset.e)) rkEdRendered(); return; }
+  if(t.dataset.ai){ const [i,k]=t.dataset.ai.split('.'), a=r.d.actions[+i]; if(!a) return; if(k==='status'){ a.status=t.value; if(t.value==='done'&&!a.doneAt) a.doneAt=Date.now(); rkEdRender(); } else rkEdInput(e); return; }
+  if(t.dataset.rkpj){ const ids=new Set(r.d.ifc.pids); t.checked?ids.add(t.dataset.rkpj):ids.delete(t.dataset.rkpj); r.d.ifc.pids=[...ids]; rkEdRender(); } }
+async function rkEdClick(e){ const t=e.target, E=RK.ed; if(!E) return; const r=E.r;
+  const tb=t.closest('[data-rket]'); if(tb){ RK.edTab=tb.dataset.rket; rkEdRender(); return; }
+  const st=t.closest('[data-rkstrat]'); if(st){ r.d.resp.strat=r.d.resp.strat===st.dataset.rkstrat?'':st.dataset.rkstrat; rkEdRender(); return; }
+  const ad=t.closest('[data-rkadel]'); if(ad){ r.d.actions.splice(+ad.dataset.rkadel,1); rkEdRender(); return; }
+  const go=t.closest('[data-rkgo]'); if(go){ const x=rkById(go.dataset.rkgo); if(x){ if(rkDirty()&&!confirmIn(go,'Unsaved changes — click again to leave')) return; rkOpen(x,'links'); } return; }
+  const b=t.closest('[data-rke]'); if(!b) return; const k=b.dataset.rke;
+  if(k==='close'){ if(b.classList.contains('fx')) rkEdAsk(); else if(!rkDirty()||confirmIn(b,'Discard changes?')) rkEdClose(); return; }
+  if(k==='addact'){ r.d.actions.push({id:'a'+Math.random().toString(36).slice(2,8),t:'',owner:r.d.resp.owner||r.d.owner||'',due:rkToday()+14*DAY,status:'todo',cost:''}); rkEdRender(); const ins=document.querySelectorAll('#rkSheet [data-ai$=".t"]'); if(ins.length) ins[ins.length-1].focus(); return; }
+  if(k==='copyq'){ r.d.q.cur=rkClone(r.d.q.pre); rkEdRender(); return; }
+  if(k==='suggest'){ const c=rkCfg(), x=rkQt(r), cd=c.dims.find(d=>d.kind==='cost'), td=c.dims.find(d=>d.kind==='time'), cu=r.d.q.cur; cu.p=rkProbScore(x.p)||cu.p; cu.i=cu.i||{};
+    const ml=t2=>{ const v=t2&&t2.ml!==''&&t2.ml!=null?+t2.ml:null; return v; }; if(cd){ const v=ml(r.d.qt.cost); if(v!=null) cu.i[cd.id]=rkImpactFromValue(cd,v); } if(td){ const v=ml(r.d.qt.time); if(v!=null) cu.i[td.id]=rkImpactFromValue(td,v); }
+    rkEdRender(); perToast('Current probability and impacts set from the most likely values.'); return; }
+  if(k==='save'||k==='reviewed'){ if(!r.title.trim()){ RK.edTab='det'; rkEdRender(); const ti=document.querySelector('#rkSheet [data-e="title"]'); if(ti){ ti.focus(); ti.setCustomValidity('Give the risk a title.'); ti.reportValidity(); setTimeout(()=>ti.setCustomValidity(''),2000); } return; }
+    if(r.parentId&&!rkParentOptions(r).some(p=>p.id===r.parentId)) r.parentId=null;
+    r.d.actions=r.d.actions.filter(a=>String(a.t||'').trim());
+    if(k==='reviewed'){ r.d.review=rkToday()+rkCfg().review*DAY; r.d.lastReview=Date.now(); r.d._reviewed=true; }
+    b.disabled=true;
+    try{ if(E.isNew){ const id=await rkCreate(r); perToast(`Added ${r.ref||'the risk'}.`); } else { await rkUpdate(r); perToast(k==='reviewed'?`Review recorded. Next review ${fmtD(r.d.review)}.`:'Risk saved.'); } rkEdClose(); }
+    catch(er){ b.disabled=false; perToast(perErr(er),'err'); } return; }
+  if(k==='del'){ if(!confirmIn(b,rkKids(r).length?`Delete? ${rkKids(r).length} child risk${rkKids(r).length===1?'':'s'} will be unlinked`:'Click again to delete')) return; try{ await rkDelete(r); perToast(`Deleted ${r.ref}.`); rkEdClose(); }catch(er){ perToast(perErr(er),'err'); } return; }
+  if(k==='child'){ if(rkDirty()&&!confirmIn(b,'Save first? Click again to discard')) return; const p=rkById(r.id); rkEdClose(); setTimeout(()=>rkNewChild(p),220); return; }
+  if(k.startsWith('esc:')){ if(rkDirty()) { try{ await rkUpdate(r); }catch(er){ perToast(perErr(er),'err'); return; } } const lv=k.slice(4), x=rkById(r.id)||r; rkEdClose(); rkEscalate(x,lv); return; }
+}
+
+/* ================= Register configuration (admin) ================= */
+function rkCfgOpen(){ if(!rkAdmin()) return; if(PER.mode==='supa'){ admGo('co-risk'); return; }
+  RK.ce=rkClone(rkCfg()); const d=coModal('rkCfgM','wide rk-cfgm'); d.querySelector('.mcard').innerHTML=`<div class="mh"><h2>Risk register settings</h2><button class="fx" data-cox aria-label="Close">×</button></div>${rkCfgHtml('modal')}`; d.querySelector('.fx').focus(); }
+function rkCfgRefresh(){ const el=document.getElementById('rkCfg'); if(!el) return; const y=el.closest('.modal')?el.closest('.modal').scrollTop:window.scrollY; el.outerHTML=rkCfgHtml(el.dataset.ctx); const m=document.getElementById('rkCfg').closest('.modal'); if(m) m.scrollTop=y; else window.scrollTo(0,y); }
+function rkColChooser(path,cols){ const defs=rkColDefs(), shown=(cols||[]).filter(k=>k in defs), avail=Object.keys(defs).filter(k=>!shown.includes(k));
+  return `<div class="rk-cc"><div><div class="fh">Shown, in order</div>${shown.map((k,i)=>`<div class="rk-cci"><span>${esc(defs[k])}</span><span class="sp"></span>${RCOL_REQ.includes(k)?'<span class="muted">always</span>':`<button type="button" class="fx" data-rkc="up" data-p="${path}" data-k="${esc(k)}" ${i===0?'disabled':''} aria-label="Move up">↑</button><button type="button" class="fx" data-rkc="dn" data-p="${path}" data-k="${esc(k)}" ${i===shown.length-1?'disabled':''} aria-label="Move down">↓</button><button type="button" class="fx" data-rkc="rm" data-p="${path}" data-k="${esc(k)}" aria-label="Hide ${esc(defs[k])}">×</button>`}</div>`).join('')}</div>
+    <div><div class="fh">Available</div><div class="rk-cca">${avail.map(k=>`<button type="button" class="rk-ccb" data-rkc="add" data-p="${path}" data-k="${esc(k)}">+ ${esc(defs[k])}</button>`).join('')||'<span class="muted">Everything is shown.</span>'}</div></div></div>`; }
+function rkCfgHtml(ctx){ const c=RK.ce||(RK.ce=rkClone(rkCfg())), G=PER.programmes||[];
+  const al=[['aligned','Aligned','Every register — portfolio, programme and project — uses the same format. Easiest to compare and roll up.'],['tiered','Tiered','Portfolio, programme and project registers each have their own format, so each level shows what matters at that level.'],['cascade','Programme-led','The portfolio has its own format. Each programme can tailor its register, and its projects follow their programme’s format.']];
+  let tabs=c.align==='aligned'?[['all','All registers']]:c.align==='tiered'?[['portfolio','Portfolio'],['programme','Programme'],['project','Project']]:[['portfolio','Portfolio'],['programme','Programme default'],['project','Project default']].concat(RK.ceProg?[]:[]);
+  if(!tabs.some(t=>t[0]===RK.ceLv)&&!(c.align==='cascade'&&RK.ceLv==='prog')) RK.ceLv=tabs[0][0];
+  const path=RK.ceLv==='prog'?'progCols.'+RK.ceProg:'cols.'+RK.ceLv, cur=RK.ceLv==='prog'?(c.progCols[RK.ceProg]||c.cols.programme).slice():c.cols[RK.ceLv];
+  const progList=c.align==='cascade'?`<div class="rk-progf"><div class="fh">Programme formats</div>${G.map(g=>`<div class="rk-cci${RK.ceLv==='prog'&&RK.ceProg===g.id?' on':''}"><span>${esc(g.name)}</span><span class="sp"></span><span class="muted">${c.progCols[g.id]?'Tailored':'Uses the default'}</span><button type="button" class="link" data-rkc="prog" data-k="${esc(g.id)}">${c.progCols[g.id]?'Edit':'Tailor'}</button>${c.progCols[g.id]?`<button type="button" class="link" data-rkc="progreset" data-k="${esc(g.id)}">Reset</button>`:''}</div>`).join('')||'<p class="muted">No programmes yet.</p>'}<p class="muted">A tailored programme’s projects use its format.</p></div>`:'';
+  const prevMax=[0].concat(c.prob.map(p=>p.max));
+  const fields=`<div class="rk-fl">${c.fields.map((f,i)=>`<div class="rk-fli"><input data-rkc-v="fields.${i}.l" value="${esc(f.l)}" aria-label="Field name"><select data-rkc-v="fields.${i}.type" aria-label="Field type">${[['text','Text'],['number','Number'],['date','Date'],['choice','Choice']].map(([v,l])=>`<option value="${v}"${f.type===v?' selected':''}>${l}</option>`).join('')}</select>${f.type==='choice'?`<input data-rkc-v="fields.${i}.opts" data-list="1" value="${esc((f.opts||[]).join(', '))}" placeholder="Options, separated by commas" aria-label="Options">`:'<span></span>'}<button type="button" class="fx" data-rkc="frm" data-k="${i}" aria-label="Remove field">×</button></div>`).join('')}<button type="button" class="btn sm" data-rkc="fadd">Add a field</button></div>`;
+  const dims=c.dims.map((d,i)=>`<div class="rk-dim"><div class="rk-dimh"><input data-rkc-v="dims.${i}.l" value="${esc(d.l)}" aria-label="Impact name"><span class="muted">${d.kind==='cost'?`cost thresholds (${esc(c.cur)})`:d.kind==='time'?'schedule thresholds (days)':'descriptions'}</span>${d.kind==='text'?`<button type="button" class="fx" data-rkc="drm" data-k="${i}" aria-label="Remove impact">×</button>`:''}</div>
+      <div class="rk-dimv">${d.kind==='text'?(d.d||[]).map((x,j)=>`<label><span>${j+1}</span><input data-rkc-v="dims.${i}.d.${j}" value="${esc(x)}"></label>`).join(''):(d.b||[]).map((x,j)=>`<label><span>${j+1}→${j+2} above</span><input type="number" step="any" data-rkc-v="dims.${i}.b.${j}" data-n="1" value="${esc(x)}"></label>`).join('')}</div></div>`).join('');
+  const save=`<div class="adm-acts rk-cfga"><button type="button" class="btn primary" data-rkc="save">Save settings</button>${ctx==='modal'?'<button type="button" class="btn" data-cox>Cancel</button>':''}<button type="button" class="link danger" data-rkc="reset">Reset to defaults</button></div>`;
+  return `<div id="rkCfg" class="rk-cfg" data-ctx="${ctx}">
+    <section><h3>How registers line up</h3><div class="rk-al">${al.map(([k,l,dsc])=>`<label class="rk-alo${c.align===k?' on':''}"><input type="radio" name="rkal" data-rkc-v="align" value="${k}" ${c.align===k?'checked':''}><b>${l}</b><span class="muted">${dsc}</span></label>`).join('')}</div>
+      <p class="muted">Whatever the format, every register shares the scoring matrix and categories below, so risks can be escalated, rolled up and compared.</p></section>
+    <section><h3>Columns</h3><div class="ptabs">${tabs.map(([k,l])=>`<button type="button" aria-selected="${RK.ceLv===k}" data-rkc="lv" data-k="${k}">${l}</button>`).join('')}${RK.ceLv==='prog'?`<button type="button" aria-selected="true">${esc((rkProg(RK.ceProg)||{}).name||'Programme')}</button>`:''}</div>
+      <div class="rk-ccw">${rkColChooser(path,cur)}${progList}</div></section>
+    <section><h3>Your own fields</h3><p class="muted">Extra fields appear on the risk form and can be added as columns.</p>${fields}</section>
+    <section><h3>Scoring matrix</h3><p class="muted">Score = probability × the highest impact across the dimensions.</p>
+      <div class="rk-g2"><div><div class="fh">Probability (upper bound %)</div>${c.prob.map((p,i)=>`<div class="rk-pb"><b>${i+1}</b><input data-rkc-v="prob.${i}.l" value="${esc(p.l)}" aria-label="Probability ${i+1} name"><span class="muted">${prevMax[i]}% to</span><input type="number" min="1" max="100" data-n="1" data-rkc-v="prob.${i}.max" value="${p.max}" ${i===4?'disabled':''} aria-label="Upper bound"><span class="muted">%</span></div>`).join('')}</div>
+        <div><div class="fh">Rating bands (highest score)</div>${c.bands.map((b,i)=>`<div class="rk-pb"><input type="color" data-rkc-v="bands.${i}.c" value="${esc(b.c)}" aria-label="Colour"><input data-rkc-v="bands.${i}.l" value="${esc(b.l)}" aria-label="Band name"><span class="muted">up to</span><input type="number" min="1" max="25" data-n="1" data-rkc-v="bands.${i}.max" value="${b.max}" ${i===3?'disabled':''} aria-label="Highest score"></div>`).join('')}
+          <div class="fh">Impact labels</div><div class="rk-il">${c.ilab.map((l,i)=>`<input data-rkc-v="ilab.${i}" value="${esc(l)}" aria-label="Impact ${i+1} label">`).join('')}</div></div></div>
+      <div class="fh">Impact dimensions</div>${dims}<button type="button" class="btn sm" data-rkc="dadd">Add an impact dimension</button>
+      <div class="fh">Preview</div><div class="rk-prev">${(()=>{ const o=RK.cfg; RK.cfg=c; const h=rkHeat([],'cur',{}); RK.cfg=o; return h.replace(/<button/g,'<div').replace(/<\/button>/g,'</div>'); })()}</div></section>
+    <section><h3>Categories, review and escalation</h3><div class="rk-g2"><label class="pfl"><span>Categories, one per line</span><textarea rows="8" data-rkc-v="cats" data-lines="1">${esc(c.cats.join('\n'))}</textarea></label>
+      <div><div class="rk-g2">${`<label class="pfl"><span>Review every (days)</span><input type="number" min="1" data-n="1" data-rkc-v="review" value="${c.review}"></label><label class="pfl"><span>Currency symbol</span><input maxlength="4" data-rkc-v="cur" value="${esc(c.cur)}"></label>`}</div>
+        <div class="fh">Suggest escalation when a risk reaches</div>${['programme','portfolio'].map(lv=>`<div class="rk-pb"><b>${RLV_L[lv]}</b><span class="muted">score ≥</span><input type="number" min="1" max="25" data-n="1" data-rkc-v="esc.${lv}.score" value="${c.esc[lv].score}"><span class="muted">or cost exposure ≥</span><input type="number" step="any" data-n="1" data-rkc-v="esc.${lv}.cost" value="${c.esc[lv].cost}"></div>`).join('')}</div></div></section>
+    ${save}</div>`; }
+function rkCfgClick(e){ const b=e.target.closest('[data-rkc]'); if(!b||!document.getElementById('rkCfg')||!b.closest('#rkCfg')) return; const c=RK.ce, k=b.dataset.rkc, key=b.dataset.k;
+  const arr=p=>{ const ks=p.split('.'); let o=c; ks.slice(0,-1).forEach(x=>o=o[x]=o[x]||{}); if(!Array.isArray(o[ks[ks.length-1]])) o[ks[ks.length-1]]=(p.startsWith('progCols.')?c.cols.programme:[]).slice(); return o[ks[ks.length-1]]; };
+  if(k==='add'){ arr(b.dataset.p).push(key); } else if(k==='rm'){ const a=arr(b.dataset.p); a.splice(a.indexOf(key),1); }
+  else if(k==='up'||k==='dn'){ const a=arr(b.dataset.p), i=a.indexOf(key), j=k==='up'?i-1:i+1; if(j>=0&&j<a.length){ [a[i],a[j]]=[a[j],a[i]]; } }
+  else if(k==='lv'){ RK.ceLv=key; } else if(k==='prog'){ if(!c.progCols[key]) c.progCols[key]=c.cols.programme.slice(); RK.ceLv='prog'; RK.ceProg=key; } else if(k==='progreset'){ delete c.progCols[key]; if(RK.ceProg===key) RK.ceLv='programme'; }
+  else if(k==='fadd'){ c.fields.push({id:'f'+Date.now().toString(36),l:'New field',type:'text'}); } else if(k==='frm'){ const f=c.fields.splice(+key,1)[0]; if(f){ const id='f:'+f.id; ['all','portfolio','programme','project'].forEach(l=>c.cols[l]=c.cols[l].filter(x=>x!==id)); Object.keys(c.progCols).forEach(g=>c.progCols[g]=c.progCols[g].filter(x=>x!==id)); } }
+  else if(k==='dadd'){ c.dims.push({id:'d'+Date.now().toString(36),l:'New impact',kind:'text',d:['','','','','']}); } else if(k==='drm'){ c.dims.splice(+key,1); }
+  else if(k==='reset'){ if(!confirmIn(b,'Click again to reset')) return; RK.ce=rkDefaultCfg(); RK.ceLv='all'; }
+  else if(k==='save'){ b.disabled=true; const cfg=rkClone(RK.ce); for(let i=1;i<cfg.prob.length;i++) if(cfg.prob[i].max<=cfg.prob[i-1].max) cfg.prob[i].max=Math.min(100,cfg.prob[i-1].max+1); cfg.prob[4].max=100;
+      for(let i=1;i<cfg.bands.length;i++) if(cfg.bands[i].max<=cfg.bands[i-1].max) cfg.bands[i].max=Math.min(25,cfg.bands[i-1].max+1); cfg.bands[3].max=25; cfg.cats=cfg.cats.map(s=>String(s).trim()).filter(Boolean);
+      rkSaveCfg(cfg).then(()=>{ perToast('Risk register settings saved.'); const m=document.getElementById('rkCfgM'); if(m) m.remove(); else { RK.ce=rkClone(rkCfg()); rkCfgRefresh(); } rkRender(); }).catch(er=>{ b.disabled=false; perToast(perErr(er),'err'); }); return; }
+  rkCfgRefresh(); }
+function rkCfgChange(e){ const t=e.target; if(!t.dataset||t.dataset.rkcV==null||!t.closest('#rkCfg')) return; const c=RK.ce; let v=t.value;
+  if(t.dataset.n) v=+v; if(t.dataset.lines) v=v.split('\n'); if(t.dataset.list) v=v.split(',').map(s=>s.trim()).filter(Boolean);
+  rkSet(c,t.dataset.rkcV,v); if(t.dataset.rkcV==='align'||/\.type$/.test(t.dataset.rkcV)||/^(prob|bands)\./.test(t.dataset.rkcV)||/^ilab/.test(t.dataset.rkcV)) rkCfgRefresh(); }
+
+/* ================= Sample risks across the sample portfolio ================= */
+// q: [p, cost, time, hs, rep] for inherent, current, target · qt: [p%, cost min/ml/max, days min/ml/max]
+const RK_SAMPLE=[
+  {k:'P1',lv:'portfolio',t:'Construction cost inflation above the portfolio allowance',cat:'Commercial',own:'Portfolio Director',kids:1,q:[[4,4,2,0,2],[4,4,1,0,2],[3,3,1,0,1]],cause:'Steel, concrete and MEP equipment indices are running above the 3% a year allowed in the estimates',ev:'outturn costs exceed the portfolio inflation allowance',eff:'contingency drawdown and pressure to descope',strat:'reduce',plan:'Index-linked fluctuation clauses on long packages; early procurement of steel; quarterly inflation review at portfolio board.',acts:[['Quarterly inflation forecast to portfolio board','Head of Cost',-10,'doing'],['Agree indexation approach for remaining packages','Commercial Director',25,'todo']]},
+  {k:'P2',lv:'portfolio',t:'Shortage of skilled MEP and systems trades',cat:'Supply chain',own:'Portfolio Director',kids:1,q:[[4,3,4,0,1],[4,3,4,0,1],[3,2,3,0,1]],cause:'Data centre and metro work in the region compete for the same electricians and commissioning engineers',ev:'contractors cannot staff MEP and systems work to plan',eff:'later energisation and commissioning across several programmes',strat:'reduce',plan:'Portfolio labour forecast shared with the supply chain; regional skills partnership.',acts:[['Publish 18-month portfolio labour histogram to tier-1s','PMO Lead',-3,'todo'],['Set up regional skills partnership with colleges','Portfolio Director',60,'doing']]},
+  {k:'P3',lv:'portfolio',t:'Grid connection capacity delays energisation',cat:'Third parties & utilities',own:'Head of Utilities',kids:1,q:[[3,3,5,0,3],[3,3,4,0,3],[2,2,3,0,2]],cause:'The distribution network operator has limited capacity at the Northfield and Northgate substations',ev:'permanent power connections are later than the programmes need',eff:'temporary generation costs and late commissioning',strat:'reduce',plan:'Single portfolio-level relationship with the network operator; agreed connection sequence.',acts:[['Monthly connections forum with the network operator','Head of Utilities',7,'doing']]},
+  {k:'P4',lv:'portfolio',t:'Changes to building safety regulation',cat:'Stakeholder & consents',own:'Head of Assurance',q:[[2,3,3,0,3],[2,3,3,0,2],[2,2,2,0,2]],qt:[25,500000,1500000,4000000,20,45,120],cause:'Draft building safety rules are out for consultation',ev:'new gateway requirements apply to residential and station buildings',eff:'redesign and approval delays',strat:'accept',plan:'Monitor consultation; hold design contingency.',acts:[['Brief design teams on consultation outcome','Head of Assurance',40,'todo']]},
+  {k:'P5',lv:'portfolio',t:'Framework procurement for M&E packages across programmes',type:'opp',cat:'Commercial',own:'Commercial Director',q:[[3,3,2,0,0],[3,3,2,0,0],[4,3,2,0,0]],qt:[50,-3000000,-1500000,-500000,-30,-15,0],cause:'Several programmes are buying similar M&E packages in the next 18 months',ev:'a single framework secures volume discounts and earlier supplier commitment',eff:'lower prices and faster mobilisation',strat:'exploit',plan:'Business case for a portfolio M&E framework.',acts:[['Business case to investment committee','Commercial Director',30,'doing']]},
+  {k:'G1',lv:'programme',g:'NXR',t:'Fleet arrives before the depot is ready',cat:'Operational readiness',own:'NXR Programme Director',q:[[3,2,4,0,3],[3,2,3,0,3],[2,2,2,0,2]],qt:[40,300000,800000,1500000,15,35,70],cause:'Rolling stock is on schedule but depot works have slipped',ev:'new vehicles arrive with nowhere to stable or commission them',eff:'off-site storage costs and late trial running',strat:'reduce',plan:'Interim stabling at the existing yard; staged depot handover.',acts:[['Agree interim stabling with the operator','Operations Readiness Lead',-6,'todo']],hist:12},
+  {k:'G2',lv:'programme',g:'WSQ',t:'Site access road late for Residential Block A',cat:'Interfaces',own:'WSQ Interface Manager',ifc:['WSQ-PR','WSQ-A'],ifcId:'IF-WS-01',q:[[4,3,4,0,2],[4,3,4,0,2],[2,2,2,0,1]],qt:[60,200000,450000,900000,10,28,60],cause:'Utility diversions on the highway have uncovered unrecorded services',ev:'the access road isn’t open when Block A needs it',eff:'Block A frame start delayed and double handling of deliveries',strat:'reduce',plan:'Temporary haul road from the east gate; weekly interface review.',acts:[['Design temporary haul road from east gate','Highways Package Manager',-12,'doing'],['Weekly interface review WSQ-PR / WSQ-A','WSQ Interface Manager',3,'doing']],hist:-1},
+  {k:'G3',lv:'programme',g:'WSQ',t:'Planning conditions for Station Square not discharged',cat:'Stakeholder & consents',own:'WSQ Programme Director',q:[[3,2,3,0,3],[3,2,3,0,2],[2,1,2,0,2]],qt:[35,50000,120000,300000,10,25,60],cause:'Landscape and drainage conditions need the council’s sign-off',ev:'conditions aren’t discharged before landscaping starts',eff:'Station Square opening slips',strat:'reduce',plan:'Pre-application meetings; submit landscape details early.',acts:[['Submit landscape conditions pack','Planning Lead',14,'todo']]},
+  {k:'G4',lv:'programme',g:'HLM',t:'Tunnel handover to rail systems slips',cat:'Interfaces',own:'HLM Interface Manager',ifc:['HLM-TS','HLM-RS'],ifcId:'IF-HL-30',q:[[4,3,5,0,3],[4,3,5,0,3],[3,3,3,0,2]],qt:[55,1000000,2500000,6000000,20,45,100],cause:'Tunnelling progress is behind and the systems contractor is mobilised to the original date',ev:'tunnels aren’t handed over for track and systems installation',eff:'systems contractor standing time and a later entry into service',strat:'reduce',plan:'Sectional handover by tunnel drive; joint access plan.',acts:[['Agree sectional handover plan','HLM Interface Manager',-4,'doing'],['Price systems contractor acceleration options','HLM Commercial Lead',21,'todo']],hist:1},
+  {k:'G5',lv:'programme',g:'HLM',parent:'P1',kids:1,t:'Tunnelling cost escalation',cat:'Construction',own:'HLM Programme Director',q:[[4,4,3,0,2],[4,4,3,0,2],[3,3,2,0,1]],cause:'Mixed ground and groundwater are harder than the ground model assumed',ev:'tunnelling and station box costs overrun',eff:'programme contingency eroded',strat:'reduce',plan:'Rolls up the project tunnelling risks.',acts:[]},
+  {k:'G6',lv:'programme',g:'NDC',parent:'P3',t:'Permanent power not available for commissioning',cat:'Interfaces',own:'NDC Interface Manager',ifc:['NDC-SC','NDC-ME'],ifcId:'IF-DC-03',q:[[4,3,5,0,4],[3,3,4,0,4],[2,2,2,0,2]],qt:[45,800000,1600000,3500000,15,40,90],cause:'Substation works depend on the network operator’s outage windows',ev:'permanent power isn’t energised for integrated systems testing',eff:'temporary generators and late handover to the client',strat:'reduce',plan:'Rent temporary generation as a fallback; lock in outage windows.',fallback:'Temporary 4 MW generation for IST',acts:[['Book temporary generation option','NDC MEP Manager',-2,'todo'],['Confirm outage windows with network operator','Head of Utilities',10,'doing']],hist:-1},
+  {k:'G7',lv:'programme',g:'NDC',parent:'P1',kids:1,t:'MEP equipment price escalation',cat:'Supply chain',own:'NDC Commercial Lead',q:[[4,3,2,0,1],[4,3,2,0,1],[3,2,2,0,1]],cause:'Generators, UPS and chillers are on long lead times with volatile prices',ev:'equipment prices rise before orders are placed',eff:'MEP package overruns',strat:'transfer',plan:'Rolls up project equipment risks.',acts:[]},
+  {k:'D1',lv:'project',p:'NXR-DP2',t:'Contaminated ground in the depot yard',cat:'Environmental',own:'S. Ahmed',q:[[3,3,3,2,2],[3,3,3,2,2],[2,2,2,1,1]],qt:[35,150000,400000,900000,5,15,40],cause:'Former railway sidings with historic fuel storage',ev:'contaminated material is found during earthworks',eff:'disposal costs and earthworks delay',strat:'reduce',plan:'Targeted intrusive investigation ahead of earthworks.',acts:[['Intrusive ground investigation in zone D','Geotechnical Lead',-20,'done'],['Agree disposal route with landfill','S. Ahmed',5,'doing']],hist:-1},
+  {k:'D2',lv:'project',p:'NXR-DP2',t:'Roof sheeting supplier insolvency',cat:'Supply chain',own:'S. Ahmed',status:'occurred',q:[[2,2,3,0,1],[5,2,3,0,1],[3,2,2,0,1]],qt:[100,80000,150000,250000,14,28,45],cause:'The specialist roofing supplier entered administration',ev:'roof sheeting must be re-procured',eff:'shed weathertight date slips',strat:'reduce',plan:'Re-procure through an alternative framework supplier.',acts:[['Re-procure roof sheeting package','Procurement Lead',-15,'done'],['Install temporary weathering to the shed','Site Manager',-1,'doing']]},
+  {k:'D3',lv:'project',p:'NXR-DP2',parent:'P3',t:'Depot traction power energisation late',cat:'Third parties & utilities',own:'S. Ahmed',q:[[3,2,4,0,2],[3,2,3,0,2],[2,1,2,0,1]],qt:[30,100000,250000,600000,10,25,50],cause:'Traction supply depends on the grid connection',ev:'depot OLE can’t be energised for testing',eff:'depot testing and commissioning delayed',strat:'reduce',plan:'Sequence depot energisation with the network operator.',acts:[['Confirm energisation date with the network operator','Head of Utilities',12,'todo']]},
+  {k:'W1',lv:'project',p:'WSQ-PR',t:'Unrecorded utilities during highway works',cat:'Third parties & utilities',own:'R. Okafor',q:[[4,2,3,2,1],[3,2,3,2,1],[2,1,2,1,1]],qt:[50,100000,250000,500000,10,20,45],cause:'Utility records are incomplete around the old station forecourt',ev:'unknown services are struck or found',eff:'redesign of diversions and delay',strat:'reduce',plan:'Ground-penetrating radar survey ahead of each excavation.',acts:[['GPR survey of zones 2 and 3','Highways Package Manager',-30,'done']],hist:-1},
+  {k:'W2',lv:'project',p:'WSQ-PR',t:'Road closure permits refused for peak season',cat:'Stakeholder & consents',own:'R. Okafor',status:'monitor',q:[[2,1,3,0,2],[2,1,2,0,2],[1,1,2,0,1]],qt:[20,20000,50000,120000,5,14,30],cause:'The highway authority restricts closures over the holiday period',ev:'closures for the junction works are refused',eff:'junction works pushed to the new year',strat:'accept',plan:'Plan junction works outside the embargo.',acts:[]},
+  {k:'A1',lv:'project',p:'WSQ-A',t:'Façade design approval late',cat:'Design',own:'K. Lindqvist',q:[[3,2,3,0,2],[3,2,3,0,2],[2,1,2,0,1]],qt:[40,60000,150000,400000,10,21,45],cause:'Planning requires material samples to be approved by the council',ev:'façade approval comes after the procurement date',eff:'façade package and envelope dates slip',strat:'reduce',plan:'Early sample panel; pre-agree materials palette.',acts:[['Build sample façade panel','Façade Package Manager',-5,'doing']]},
+  {k:'A2',lv:'project',p:'WSQ-A',parent:'P1',t:'Frame package overrun on Block A',cat:'Commercial',own:'K. Lindqvist',q:[[3,3,1,0,1],[3,3,1,0,1],[2,2,1,0,1]],qt:[40,300000,700000,1500000,0,5,15],cause:'Frame tender came in above the cost plan',ev:'the frame package outturn exceeds its budget',eff:'Block A cost overrun',strat:'reduce',plan:'Value engineering on the transfer structure.',acts:[['Value engineering workshop on transfer slab','Cost Manager',8,'todo']]},
+  {k:'A3',lv:'project',p:'WSQ-A',type:'opp',t:'Modular bathroom pods shorten fit-out',cat:'Construction',own:'K. Lindqvist',q:[[3,2,3,0,0],[3,2,3,0,0],[4,2,3,0,0]],qt:[50,-200000,-100000,0,-30,-20,-10],cause:'The fit-out contractor has a pod supplier with capacity',ev:'pods replace wet trades in the bathrooms',eff:'fit-out shortened by three to four weeks',strat:'enhance',plan:'Confirm the pod design freeze date.',acts:[['Pod design freeze','Design Manager',18,'todo']]},
+  {k:'T1',lv:'project',p:'HLM-TS',parent:'G5',t:'TBM breakdown in mixed ground',cat:'Construction',own:'M. Rossi',q:[[3,4,4,2,2],[3,4,4,2,2],[2,3,3,2,1]],qt:[35,1000000,2500000,6000000,15,40,90],cause:'Boulders and abrasive ground in the central section',ev:'the TBM cutterhead is damaged',eff:'tunnelling stops for repairs',strat:'reduce',plan:'Spare cutterhead held on site; probe drilling ahead of the face.',acts:[['Order spare cutterhead','TBM Manager',-25,'done'],['Probe drilling in the central section','Tunnelling Lead',4,'doing']],hist:1},
+  {k:'T2',lv:'project',p:'HLM-TS',parent:'G5',t:'Groundwater ingress at the station boxes',cat:'Construction',own:'M. Rossi',q:[[3,3,3,2,2],[3,3,3,2,2],[2,2,2,1,1]],qt:[30,400000,1000000,2500000,10,25,60],cause:'Groundwater levels higher than the investigation showed',ev:'water ingress through the diaphragm walls',eff:'grouting, pumping and delays to the base slab',strat:'reduce',plan:'Additional dewatering wells; pre-grouting.',acts:[['Install additional dewatering wells','Station Box Manager',-8,'doing']]},
+  {k:'S1',lv:'project',p:'HLM-RS',t:'Signalling software safety assurance takes longer',cat:'Design',own:'D. Nakamura',q:[[4,2,4,0,3],[4,2,4,0,3],[3,2,3,0,2]],qt:[50,300000,800000,2000000,20,45,120],cause:'The CBTC software is a new version for this railway',ev:'the safety case isn’t accepted on time',eff:'trial running starts late',strat:'reduce',plan:'Early engagement with the independent safety assessor.',acts:[['Agree safety case plan with the ISA','Systems Assurance Lead',15,'doing']]},
+  {k:'S2',lv:'project',p:'HLM-RS',parent:'P2',t:'Systems integration engineers not available',cat:'Supply chain',own:'D. Nakamura',q:[[3,2,3,0,1],[3,2,3,0,1],[2,2,2,0,1]],qt:[40,150000,300000,700000,10,20,45],cause:'The integrator’s staff are committed to another metro',ev:'the integration team is under-resourced',eff:'integration testing slips',strat:'transfer',plan:'Contractual resourcing commitments with key-person clauses.',acts:[]},
+  {k:'C1',lv:'project',p:'NDC-SC',t:'Steel frame deliveries late',cat:'Supply chain',own:'P. Moreau',q:[[3,2,3,1,1],[2,2,3,1,1],[2,1,2,1,1]],qt:[30,50000,150000,300000,5,15,30],cause:'The fabricator is at capacity',ev:'steel deliveries fall behind the erection sequence',eff:'frame completion slips',strat:'reduce',plan:'Second fabricator for secondary steel.',acts:[['Appoint second fabricator for secondary steel','Package Manager',-14,'done']],hist:-1},
+  {k:'M1',lv:'project',p:'NDC-ME',parent:'G7',t:'Generator lead times extend beyond 60 weeks',cat:'Supply chain',own:'T. Adeyemi',q:[[4,3,4,0,2],[4,3,4,0,2],[2,2,2,0,1]],qt:[55,400000,900000,2000000,20,40,80],cause:'Global demand for large generators',ev:'generators arrive after the installation window',eff:'late integrated systems testing',strat:'reduce',plan:'Early order; reserve manufacturing slots.',acts:[['Place early order for generators','Procurement Lead',-35,'done'],['Monthly factory progress visits','T. Adeyemi',20,'doing']],hist:-1},
+  {k:'M2',lv:'project',p:'NDC-ME',parent:'P2',t:'Commissioning labour shortage',cat:'Supply chain',own:'T. Adeyemi',q:[[4,2,4,0,2],[4,2,4,0,2],[3,2,3,0,1]],qt:[45,200000,500000,1000000,10,25,50],cause:'Commissioning engineers are in demand across the region',ev:'too few commissioning engineers to run tests in parallel',eff:'commissioning takes longer',strat:'reduce',plan:'Early commissioning contractor appointment.',acts:[['Appoint commissioning contractor','T. Adeyemi',-1,'todo']]},
+  {k:'M3',lv:'project',p:'NDC-ME',t:'Chiller performance below specification in testing',cat:'Operational readiness',own:'T. Adeyemi',status:'closed',q:[[2,2,2,0,2],[1,1,1,0,1],[1,1,1,0,1]],qt:[5,20000,50000,100000,2,5,10],cause:'New chiller model',ev:'factory tests show lower capacity',eff:'retesting and modifications',strat:'transfer',plan:'Factory witness testing — passed.',acts:[['Factory witness test','Mechanical Lead',-40,'done']]}
+];
+async function rkSample(){ if(!rkCanEdit()) return; if(RK.risks.some(r=>r.d&&r.d.sample)){ perToast('The sample risks are already loaded.'); return; }
+  await perRun('Loading sample risks…',async()=>{
+    const gid={}, pid={};
+    for(const key of SP_ORDER){ const D=SP_DEFS[key]; let g=PER.programmes.find(x=>x.code===D.code);
+      gid[key]=g?g.id:await PER.store.createProgramme({name:D.name,code:D.code,client:D.client,description:D.desc,colour:D.colour});
+      for(const pp of Object.values(D.pps)){ const p=PER.projects.find(x=>x.code===pp.code)||PER.projects.find(x=>x.programmeId===gid[key]&&x.name===pp.name); pid[pp.code]=p?p.id:await PER.store.createProject(pp.name,{programmeId:gid[key],code:pp.code,status:'active',manager:pp.manager,description:pp.desc}); } }
+    const c=rkCfg(), dims=c.dims.map(d=>d.id), T=rkToday(), made={}, refs={};
+    const mk=a=>({p:a[0],i:Object.fromEntries(dims.slice(0,4).map((d,i)=>[d,a[i+1]||0]).filter(x=>x[1]))});
+    const order=RK_SAMPLE.slice().sort((a,b)=>rkRank(a.lv)-rkRank(b.lv));
+    for(const s of order){ const sc=s.lv==='portfolio'?{lv:'portfolio'}:s.lv==='programme'?{lv:'programme',id:gid[s.g]}:{lv:'project',id:pid[s.p]};
+      const r=rkBlank(sc); r.title=s.t; r.status=s.status||'open'; r.parentId=s.parent?made[s.parent]||null:null;
+      const code=rkScopeCode(sc), n=(refs[code]=(refs[code]||0)+1); r.ref=`${code}-R${String(n).padStart(3,'0')}`;
+      Object.assign(r.d,{sample:true,type:s.type||'threat',cat:s.cat,owner:s.own,cause:s.cause||'',event:s.ev||'',effect:s.eff||'',raised:T-(60+Math.round(n*7))*DAY,review:T+((n*11)%40-8)*DAY,prox:T+(30+n*9)*DAY});
+      r.d.q={pre:mk(s.q[0]),cur:mk(s.q[1]),tgt:mk(s.q[2])};
+      if(s.qt){ const q=s.qt; r.d.qt=Object.assign(r.d.qt,{p:q[0],cost:{min:q[1],ml:q[2],max:q[3]},time:{min:q[4],ml:q[5],max:q[6]},dist:'tri',post:{p:Math.max(5,Math.round(q[0]*.55)),cost:{min:Math.round(q[1]*.7),ml:Math.round(q[2]*.6),max:Math.round(q[3]*.6)},time:{min:Math.round(q[4]*.6),ml:Math.round(q[5]*.6),max:Math.round(q[6]*.6)}}}); }
+      if(s.kids) r.d.qt.fromKids=true;
+      r.d.resp=Object.assign(r.d.resp,{strat:s.strat||'',owner:s.own,plan:s.plan||'',fallback:s.fallback||''});
+      r.d.actions=(s.acts||[]).map((a,i)=>({id:'a'+i,t:a[0],owner:a[1],due:T+a[2]*DAY,status:a[3],cost:'',doneAt:a[3]==='done'?T+a[2]*DAY:null}));
+      if(s.ifc){ r.d.ifc={on:true,pids:s.ifc.map(cd=>pid[cd]).filter(Boolean),code:s.ifcId||''}; }
+      if(s.hist){ const cs=rkScore(r.d.q.cur); r.d.hist=[{at:T-35*DAY,by:'Sample',cur:cs-(s.hist>0?3:-3),tgt:rkScore(r.d.q.tgt),ev:0,evt:0,st:'open'}]; }
+      made[s.k]=await rkCreate(r); }
+    perToast(`Loaded ${RK_SAMPLE.length} sample risks across the portfolio, its four programmes and seven projects.`);
+  });
+}
 function init(){
   readTheme(); loadPrefs(); exLoad(); ifcLoad(); bLoad(); try{ const cp=JSON.parse(localStorage.getItem('pacer.cp')||'null'); if(cp&&['off','hi','only'].includes(cp.mode)) S.cp={...S.cp,...cp}; }catch(_){} try{ const tl=JSON.parse(localStorage.getItem('pacer.tilos')||'null'); if(tl){ const {styles,...rest}=tl; Object.assign(S.tld,rest); S.styles=styles||{}; } const st=JSON.parse(localStorage.getItem('pacer.site')||'null'); if(st&&Array.isArray(st.marks)) S.site=st; }catch(_){} try{ S.chmap=JSON.parse(localStorage.getItem('pacer.chmap')||'{}')||{}; const cf=JSON.parse(localStorage.getItem('pacer.chfmt')||'null'); if(cf&&FMT[cf.fmt]) S.tld.fmt=cf.fmt; }catch(_){} try{ const lg=localStorage.getItem('pacer.logic'); if(['off','sel','all'].includes(lg)) S.logic=lg; }catch(_){} wire();
   S.files=(B.st&&B.st.sync&&B.res&&!B.res.loops.length)?bToFiles():sampleFiles(); if(!S.site.marks.length&&!S.site.profile.length) S.site=sampleSite(); if(!Object.keys(S.styles).length) S.styles=sampleStyles();
@@ -6389,7 +7345,7 @@ function init(){
   if(tab!=='gantt') setTab(tab);
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ drawProfile(); redraw(); });
   if(window.claude&&window.claude.hosted) document.querySelectorAll('#aiWrap .note').forEach(n=>{ n.textContent=n.textContent.replace('Uses your own Claude usage.','Uses the workbench’s Anthropic API key.'); });
-  authStart();
+  wireRk(); authStart();
 }
 if(typeof document!=='undefined'&&document.getElementById('ganttWrap')) init();
 </script>

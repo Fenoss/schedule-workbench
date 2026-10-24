@@ -22,14 +22,14 @@ function perRenderAll(){ renderPer(); if(typeof renderPort==='function') renderP
 function perSubscribe(){
   if(PER.unP) PER.unP(); if(PER.unR) PER.unR(); if(PER.unG) PER.unG(); PER.unR=PER.unG=null; PER.periods=[]; PER.projects=[]; PER.programmes=[]; PER.schemaOld=false;
   if(!PER.store){ perRenderAll(); return; }
-  PER.unG=PER.store.watchProgrammes(list=>{ PER.programmes=list.sort((a,b)=>(a.sort||0)-(b.sort||0)||String(a.name).localeCompare(b.name)); PER.schemaOld=false; if(typeof renderPort==='function') renderPort(); renderMeta(); },
+  PER.unG=PER.store.watchProgrammes(list=>{ PER.programmes=list.sort((a,b)=>(a.sort||0)-(b.sort||0)||String(a.name).localeCompare(b.name)); PER.schemaOld=false; if(typeof renderPort==='function') renderPort(); renderMeta(); if(typeof rkRender==='function') rkRender(); },
     e=>{ if(/programmes|schema cache|does not exist|42P01|PGRST20/i.test((e&&(e.message||e.code))||'')){ PER.schemaOld=true; if(typeof renderPort==='function') renderPort(); } else perToast(perErr(e),'err'); });
-  PER.unP=PER.store.watchProjects(list=>{ PER.projects=list.map(p=>Object.assign({programmeId:null,code:'',status:'active',manager:'',description:'',summary:null},p)).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)); if(typeof renderPort==='function') renderPort(); renderMeta();
+  PER.unP=PER.store.watchProjects(list=>{ PER.projects=list.map(p=>Object.assign({programmeId:null,code:'',status:'active',manager:'',description:'',summary:null},p)).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)); if(typeof renderPort==='function') renderPort(); renderMeta(); if(typeof rkRender==='function') rkRender();
       let want=PER.pid; if(!want){ try{ want=localStorage.getItem('pacer.proj.'+PER.space); }catch(_){} }
       if(!PER.projects.some(p=>p.id===want)) want=PER.projects[0]?PER.projects[0].id:null;
       if(want!==PER.pid||!PER.unR) perPick(want); else renderPer(); },
     e=>{ perToast(perErr(e),'err'); perRenderAll(); });
-  perRenderAll();
+  perRenderAll(); if(typeof rkSubscribe==='function') rkSubscribe();
 }
 function perPick(pid){
   if(PER.unR) PER.unR(); PER.unR=null; PER.pid=pid; PER.periods=[]; PER.cmp={a:null,b:null,tab:PER.cmp.tab,manual:false}; PER.ms=null;
@@ -372,7 +372,7 @@ function wirePer(){
   document.addEventListener('click',e=>{ if(!menu.hidden&&!menu.contains(e.target)&&e.target!==chip){ menu.hidden=true; chip.setAttribute('aria-expanded','false'); } });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!menu.hidden){ menu.hidden=true; chip.setAttribute('aria-expanded','false'); chip.focus(); } });
   menu.addEventListener('click',e=>{ const s=e.target.closest('[data-space]'); if(s){ PER.space=s.dataset.space; try{ localStorage.setItem('pacer.space',PER.space); }catch(_){} PER.pid=null; perCmpCache.clear(); renderUserChip(); perSubscribe(); return; }
-    const u=e.target.closest('[data-um]'); if(!u) return; menu.hidden=true; if(u.dataset.um==='out') signOut(); else if(u.dataset.um==='users') admGo('co-overview'); else if(u.dataset.um==='owner') admGo('wb-overview'); else setTab('port'); });
+    const u=e.target.closest('[data-um]'); if(!u) return; menu.hidden=true; if(u.dataset.um==='out') signOut(); else if(u.dataset.um==='users') admGo('co-overview'); else if(u.dataset.um==='owner') admGo('wb-overview'); else { if(RK.app==='risk') rkApp('schedule'); setTab('port'); } });
   menu.addEventListener('change',e=>{ if(e.target.id==='umCo'&&e.target.value){ menu.hidden=true; coSwitch(e.target.value); } });
   wirePort();
   const w=document.getElementById('perWrap');

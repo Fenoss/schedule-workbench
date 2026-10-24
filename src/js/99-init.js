@@ -6,6 +6,6 @@ function init(){
   if(tab!=='gantt') setTab(tab);
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ drawProfile(); redraw(); });
   if(window.claude&&window.claude.hosted) document.querySelectorAll('#aiWrap .note').forEach(n=>{ n.textContent=n.textContent.replace('Uses your own Claude usage.','Uses the workbench’s Anthropic API key.'); });
-  authStart();
+  wireRk(); authStart();
 }
 if(typeof document!=='undefined'&&document.getElementById('ganttWrap')) init();
