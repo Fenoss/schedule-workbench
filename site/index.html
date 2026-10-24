@@ -4886,6 +4886,7 @@ async function portSample(){
     perToast(`Sample portfolio ready: four programmes, ${n+1} projects, six monthly updates each.`); });
 }
 function wirePort(){
+  addEventListener('beforeunload',e=>{ if(PER.busy){ e.preventDefault(); e.returnValue='Saving is still in progress. Leave anyway?'; return e.returnValue; } });
   const w=document.getElementById('portWrap');
   w.addEventListener('input',e=>{ if(e.target.id==='portQ'){ PORT.q=e.target.value; const pos=e.target.selectionStart; renderPort(); const q=document.getElementById('portQ'); if(q){ q.focus(); try{ q.setSelectionRange(pos,pos); }catch(_){} } } });
   w.addEventListener('change',e=>{ if(e.target.id==='portStatus'){ PORT.status=e.target.value; renderPort(); } });
@@ -5223,6 +5224,7 @@ async function spPopulate(known){
   return plan.length;
 }
 async function portSampleMore(){
+  perToast('Adding sample programmes. Keep this tab open until it finishes.');
   await perRun('Adding sample programmes…',async()=>{ const n=await spPopulate(); perToast(n?`Added ${n} project${n===1?'':'s'} with six monthly updates each.`:'The sample programmes are already complete.'); });
 }
 
