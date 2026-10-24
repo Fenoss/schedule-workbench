@@ -740,6 +740,11 @@ select.bin{padding:0 2px}
 .top-actions{position:relative}
 .uchip{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 10px 0 4px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
 .uchip:hover{border-color:var(--ink3)}
+.uchip.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.um-adm{padding-bottom:4px}
+.um-adm .um-b{display:flex;align-items:center;gap:8px;border-top:0;border-radius:8px;padding:8px 10px;margin:0 -10px}
+.um-adm .um-b:hover{background:var(--surface2,rgba(0,0,0,.05))}
+.um-adm .um-b svg{flex:none;color:var(--ink3)}
 .uc-t{display:flex;flex-direction:column;line-height:1.1;text-align:left;max-width:140px}
 .uc-t b{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .uc-t em{font-style:normal;font-size:11px;color:var(--ink2)}

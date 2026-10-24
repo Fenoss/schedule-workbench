@@ -6,8 +6,9 @@ const SETUP = "__DB.companies.push({id:'co-a',name:'First Co',status:'active',br
 test("owner creates a company, invites its admin and places people", async ({ page }) => {
   const w = watchErrors(page);
   await hostedAs(page, OWNER, "admin", SETUP);
-  await expect(page.locator("#tabAdmin")).toBeVisible();
-  await page.click("#tabAdmin");
+  await page.click("#userChip");
+  await expect(page.locator('#userMenu [data-um="owner"]')).toBeVisible();
+  await page.click('#userMenu [data-um="owner"]');
   await page.click('[data-adm="wb-companies"]');
   await page.fill('[data-admform="newco"] [name=name]', "Acme Build");
   await page.fill('[data-admform="newco"] [name=admin]', "ann@acme.com");
@@ -24,7 +25,9 @@ test("owner creates a company, invites its admin and places people", async ({ pa
 test("company admin sets branding and switches AI off", async ({ page }) => {
   const w = watchErrors(page);
   await hostedAs(page, { id: "u-b", email: "boss@first.com", name: "Boss", company_id: "co-a" }, "admin", SETUP);
-  await page.click("#tabAdmin");
+  await page.click("#userChip");
+  await expect(page.locator('#userMenu [data-um="owner"]')).toHaveCount(0);
+  await page.click('#userMenu [data-um="users"]');
   await expect(page.locator('[data-adm="wb-overview"]')).toHaveCount(0);
   await page.click('[data-adm="co-brand"]');
   await page.fill('[data-admform="brand"] [name=title]', "First Controls");

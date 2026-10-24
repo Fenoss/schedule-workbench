@@ -118,7 +118,7 @@ const PROJ_TABS=['dash','gantt','tld','dq','ifc','per','exec'];
 function setTab(t){
   if(t==='ai'){ t=S.lastProj||'dash'; setTimeout(()=>aiPanel(true),0); }
   S.tab=t; if(t==='admin'&&!admAllowed()) t='port';
-  const TABS={port:'tabPort',dash:'tabDash',per:'tabPer',gantt:'tabGantt',tld:'tabTld',dq:'tabDq',ifc:'tabIfc',exec:'tabExec',build:'tabBuild',admin:'tabAdmin'}; Object.entries(TABS).forEach(([x,id])=>document.getElementById(id).setAttribute('aria-selected',t===x));
+  const TABS={port:'tabPort',dash:'tabDash',per:'tabPer',gantt:'tabGantt',tld:'tabTld',dq:'tabDq',ifc:'tabIfc',exec:'tabExec',build:'tabBuild'}; Object.entries(TABS).forEach(([x,id])=>{ const b=document.getElementById(id); if(b) b.setAttribute('aria-selected',t===x); }); const uc=document.getElementById('userChip'); if(uc) uc.classList.toggle('on',t==='admin');
   const inProj=PROJ_TABS.includes(t); document.getElementById('navProj').setAttribute('aria-selected',inProj); document.getElementById('nav2').hidden=!inProj;
   if(inProj) S.lastProj=t; else if(!document.getElementById('aiWrap').hidden) aiPanel(false);
   gWrap.hidden=t!=='gantt'; tWrap.hidden=t!=='tld'; document.getElementById('dqWrap').hidden=t!=='dq'; document.getElementById('dashWrap').hidden=t!=='dash'; document.getElementById('execWrap').hidden=t!=='exec'; document.getElementById('ifcWrap').hidden=t!=='ifc'; document.getElementById('buildWrap').hidden=t!=='build'; document.getElementById('perWrap').hidden=t!=='per'; document.getElementById('portWrap').hidden=t!=='port'; document.getElementById('adminWrap').hidden=t!=='admin'; if(t!=='build') document.getElementById('bAi').hidden=true; if(t!=='exec'){ const pk=document.getElementById('exPick'); if(pk) pk.hidden=true; }
@@ -147,7 +147,7 @@ function wire(){
   document.getElementById('aiWrap').addEventListener('keydown',e=>{ if(e.key==='Escape'){ e.stopPropagation(); aiPanel(false); document.getElementById('btnAi').focus(); } });
   addEventListener('resize',()=>{ if(!document.getElementById('aiWrap').hidden) aiPlace(); });
   document.getElementById('tabBuild').onclick=()=>setTab('build');
-  document.getElementById('tabPer').onclick=()=>setTab('per'); document.getElementById('tabPort').onclick=()=>{ PORT.prog=null; setTab('port'); }; document.getElementById('tabAdmin').onclick=()=>setTab('admin'); wirePer();
+  document.getElementById('tabPer').onclick=()=>setTab('per'); document.getElementById('tabPort').onclick=()=>{ PORT.prog=null; setTab('port'); }; wirePer();
   wireBuild(); wireBa();
   wireAi();
   wireIfc();

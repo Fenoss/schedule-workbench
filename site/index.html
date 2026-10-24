@@ -750,6 +750,11 @@ select.bin{padding:0 2px}
 .top-actions{position:relative}
 .uchip{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 10px 0 4px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
 .uchip:hover{border-color:var(--ink3)}
+.uchip.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.um-adm{padding-bottom:4px}
+.um-adm .um-b{display:flex;align-items:center;gap:8px;border-top:0;border-radius:8px;padding:8px 10px;margin:0 -10px}
+.um-adm .um-b:hover{background:var(--surface2,rgba(0,0,0,.05))}
+.um-adm .um-b svg{flex:none;color:var(--ink3)}
 .uc-t{display:flex;flex-direction:column;line-height:1.1;text-align:left;max-width:140px}
 .uc-t b{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .uc-t em{font-style:normal;font-size:11px;color:var(--ink2)}
@@ -1059,7 +1064,6 @@ body.no-ai #btnAi,body.no-ai .bai-btn,body.no-ai [data-bnew="ai"],body.no-build 
       <button class="n1t" role="tab" id="tabPort" aria-selected="false">Portfolio</button>
       <button class="n1t" role="tab" id="navProj" aria-selected="false">Project<span class="n1p" id="navProjName"></span></button>
       <button class="n1t" role="tab" id="tabBuild" aria-selected="false">Build</button>
-      <button class="n1t" role="tab" id="tabAdmin" aria-selected="false" hidden>Admin</button>
     </nav>
     <div class="ctxw"><button class="ctx" id="meta" aria-haspopup="true" aria-expanded="false" aria-label="Select Schedule" title="Select Schedule"></button><div class="card ctxmenu" id="ctxMenu" hidden></div></div>
     <div class="top-actions">
@@ -4418,7 +4422,7 @@ const PROJ_TABS=['dash','gantt','tld','dq','ifc','per','exec'];
 function setTab(t){
   if(t==='ai'){ t=S.lastProj||'dash'; setTimeout(()=>aiPanel(true),0); }
   S.tab=t; if(t==='admin'&&!admAllowed()) t='port';
-  const TABS={port:'tabPort',dash:'tabDash',per:'tabPer',gantt:'tabGantt',tld:'tabTld',dq:'tabDq',ifc:'tabIfc',exec:'tabExec',build:'tabBuild',admin:'tabAdmin'}; Object.entries(TABS).forEach(([x,id])=>document.getElementById(id).setAttribute('aria-selected',t===x));
+  const TABS={port:'tabPort',dash:'tabDash',per:'tabPer',gantt:'tabGantt',tld:'tabTld',dq:'tabDq',ifc:'tabIfc',exec:'tabExec',build:'tabBuild'}; Object.entries(TABS).forEach(([x,id])=>{ const b=document.getElementById(id); if(b) b.setAttribute('aria-selected',t===x); }); const uc=document.getElementById('userChip'); if(uc) uc.classList.toggle('on',t==='admin');
   const inProj=PROJ_TABS.includes(t); document.getElementById('navProj').setAttribute('aria-selected',inProj); document.getElementById('nav2').hidden=!inProj;
   if(inProj) S.lastProj=t; else if(!document.getElementById('aiWrap').hidden) aiPanel(false);
   gWrap.hidden=t!=='gantt'; tWrap.hidden=t!=='tld'; document.getElementById('dqWrap').hidden=t!=='dq'; document.getElementById('dashWrap').hidden=t!=='dash'; document.getElementById('execWrap').hidden=t!=='exec'; document.getElementById('ifcWrap').hidden=t!=='ifc'; document.getElementById('buildWrap').hidden=t!=='build'; document.getElementById('perWrap').hidden=t!=='per'; document.getElementById('portWrap').hidden=t!=='port'; document.getElementById('adminWrap').hidden=t!=='admin'; if(t!=='build') document.getElementById('bAi').hidden=true; if(t!=='exec'){ const pk=document.getElementById('exPick'); if(pk) pk.hidden=true; }
@@ -4447,7 +4451,7 @@ function wire(){
   document.getElementById('aiWrap').addEventListener('keydown',e=>{ if(e.key==='Escape'){ e.stopPropagation(); aiPanel(false); document.getElementById('btnAi').focus(); } });
   addEventListener('resize',()=>{ if(!document.getElementById('aiWrap').hidden) aiPlace(); });
   document.getElementById('tabBuild').onclick=()=>setTab('build');
-  document.getElementById('tabPer').onclick=()=>setTab('per'); document.getElementById('tabPort').onclick=()=>{ PORT.prog=null; setTab('port'); }; document.getElementById('tabAdmin').onclick=()=>setTab('admin'); wirePer();
+  document.getElementById('tabPer').onclick=()=>setTab('per'); document.getElementById('tabPort').onclick=()=>{ PORT.prog=null; setTab('port'); }; wirePer();
   wireBuild(); wireBa();
   wireAi();
   wireIfc();
@@ -4904,8 +4908,7 @@ function renderUserChip(){
     <p class="muted">${PER.space==='team'?(PER.mode==='supa'&&PER.company?`Projects everyone at ${esc(PER.company.name)} can see.`:'Projects everyone with access to this workbench can see.'):'Projects only you can see.'}</p></div>`:''}
     <div class="um-s"><div class="sl">Your access</div><p class="muted">${esc(roleBlurb())}</p></div>
     ${PER.mode==='supa'&&PER.platform?`<div class="um-s"><div class="sl">Company</div><select id="umCo" class="um-co" aria-label="Switch company">${(PER.companies||[]).map(c=>`<option value="${esc(c.id)}"${c.id===PER.companyId?' selected':''}>${esc(c.name)}${c.status==='suspended'?' (suspended)':''}</option>`).join('')}${PER.companyId?'':'<option selected value="">Choose a company</option>'}</select><p class="muted">As workbench owner you can work in any company.</p></div>`:''}
-    ${PER.mode==='supa'&&PER.srole==='admin'&&PER.companyId?`<button class="um-b" data-um="users">${esc(PER.company?PER.company.name:'Company')} admin <span class="ucb" id="umBadge" hidden></span></button>`:''}
-    ${PER.mode==='supa'&&PER.platform?'<button class="um-b" data-um="owner">Workbench admin (owner)</button>':''}
+    ${PER.mode==='supa'&&(PER.platform||(PER.srole==='admin'&&PER.companyId))?`<div class="um-s um-adm"><div class="sl">Admin</div>${PER.platform?'<button class="um-b" data-um="owner"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l5.5 2v4c0 3.4-2.4 6-5.5 7-3.1-1-5.5-3.6-5.5-7v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Workbench admin</button>':''}${PER.srole==='admin'&&PER.companyId?`<button class="um-b" data-um="users"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 14V3.5h7V14M9.5 7h4v7M5 6h2M5 9h2M5 12h2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>${esc(PER.company?PER.company.name:'Company')} admin <span class="ucb" id="umBadge" hidden></span></button>`:''}</div>`:''}
     <button class="um-b" data-um="periods">Portfolio</button><button class="um-b" data-um="out">Sign out</button>`;
   m.querySelector('b').textContent=nm;
   if(PER.mode==='supa'&&PER.srole==='admin'&&PER.companyId) PER.sb.from('profiles').select('id',{count:'exact',head:true}).eq('company_id',PER.companyId).eq('role','pending').then(({count})=>{ ['ucBadge','umBadge'].forEach(i=>{ const b=document.getElementById(i); if(b){ b.hidden=!count; b.textContent=count||''; b.title=count?count+' waiting for approval':''; } }); });
@@ -4948,7 +4951,7 @@ function admSections(){ const co=PER.company?PER.company.name:'Company', L=[];
   if(PER.companyId) L.push({g:co,items:[['co-overview','Overview'],['co-people','People'],['co-invites','Invitations'],['co-access','Sign-in & access'],['co-brand','Branding'],['co-features','Features'],['co-quality','Quality checks'],['co-log','Activity log']]});
   return L; }
 function admGo(sec){ ADM.sec=sec; if(S.tab!=='admin') setTab('admin'); else renderAdmin(); }
-function renderAdminTab(){ const b=document.getElementById('tabAdmin'); if(b) b.hidden=!admAllowed(); }
+function renderAdminTab(){ /* Admin lives in the account menu now */ }
 async function renderAdmin(){
   const el=document.getElementById('adminWrap'); if(!el||el.hidden) return;
   if(!admAllowed()){ el.innerHTML='<div class="card pempty big"><h3>Admin</h3><p class="muted">Only company admins and the workbench owner can open this page.</p></div>'; return; }

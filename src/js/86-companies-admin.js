@@ -31,7 +31,7 @@ function admSections(){ const co=PER.company?PER.company.name:'Company', L=[];
   if(PER.companyId) L.push({g:co,items:[['co-overview','Overview'],['co-people','People'],['co-invites','Invitations'],['co-access','Sign-in & access'],['co-brand','Branding'],['co-features','Features'],['co-quality','Quality checks'],['co-log','Activity log']]});
   return L; }
 function admGo(sec){ ADM.sec=sec; if(S.tab!=='admin') setTab('admin'); else renderAdmin(); }
-function renderAdminTab(){ const b=document.getElementById('tabAdmin'); if(b) b.hidden=!admAllowed(); }
+function renderAdminTab(){ /* Admin lives in the account menu now */ }
 async function renderAdmin(){
   const el=document.getElementById('adminWrap'); if(!el||el.hidden) return;
   if(!admAllowed()){ el.innerHTML='<div class="card pempty big"><h3>Admin</h3><p class="muted">Only company admins and the workbench owner can open this page.</p></div>'; return; }
