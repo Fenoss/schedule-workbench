@@ -814,3 +814,32 @@ revoke execute on function private.audit(text, uuid, text, jsonb), private.audit
 
 -- Structured narrative saved with each update.
 alter table public.periods add column if not exists narrative jsonb not null default '{}'::jsonb;
+
+-- ---------------------------------------------------------------------------
+-- Performance: evaluate sign-in helpers once per query, not once per row,
+-- and index the foreign keys. Safe to run again.
+-- ---------------------------------------------------------------------------
+do $$
+declare r record; q text; c text; f text;
+begin
+  for r in select tablename, policyname, qual, with_check from pg_policies
+           where schemaname='public' and (coalesce(qual,'')||coalesce(with_check,'')) ~ '(?<!select )(auth\.uid\(\)|private\.(my_role|my_company|is_owner)\(\))'
+  loop
+    q := r.qual; c := r.with_check;
+    foreach f in array array['auth.uid()','private.my_role()','private.my_company()','private.is_owner()'] loop
+      q := replace(replace(q, '(select '||f||')', f), f, '(select '||f||')');
+      c := replace(replace(c, '(select '||f||')', f), f, '(select '||f||')');
+    end loop;
+    execute format('alter policy %I on public.%I %s %s', r.policyname, r.tablename,
+      case when q is not null then 'using ('||q||')' else '' end,
+      case when c is not null then 'with check ('||c||')' else '' end);
+  end loop;
+end $$;
+create index if not exists companies_created_by_idx on public.companies(created_by);
+create index if not exists company_settings_updated_by_idx on public.company_settings(updated_by);
+create index if not exists invitations_invited_by_idx on public.invitations(invited_by);
+create index if not exists periods_saved_by_idx on public.periods(saved_by);
+create index if not exists profiles_active_company_idx on public.profiles(active_company_id);
+create index if not exists programmes_owner_idx on public.programmes(owner);
+create index if not exists projects_owner_idx on public.projects(owner);
+create index if not exists xer_files_created_by_idx on public.xer_files(created_by);
