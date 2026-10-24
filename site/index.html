@@ -761,10 +761,13 @@ select.bin{padding:0 2px}
 
 /* ---- two-level navigation ---- */
 .navs{background:var(--surface);border-bottom:1px solid var(--line)}
-.nav1{display:flex;gap:4px;align-items:flex-end;overflow-x:auto;scrollbar-width:none}
+.navs:has(#nav2[hidden]){display:none}
+.nav1{display:flex;gap:2px;align-items:stretch;align-self:stretch;margin-block:-8px;overflow-x:auto;scrollbar-width:none;flex:none;min-width:0}
 .nav1::-webkit-scrollbar{display:none}
 .n1t{flex:none;background:none;border:0;padding:12px 14px 11px;font-family:var(--fDisplay);font-weight:800;font-size:21px;letter-spacing:.02em;text-transform:uppercase;color:var(--ink3);border-bottom:3px solid transparent;display:inline-flex;align-items:baseline;gap:10px;white-space:nowrap}
-.n1t:first-child{padding-left:0}
+.top .n1t{font-size:18px;padding:0 12px;border-bottom-width:3px;border-top:3px solid transparent;align-items:center}
+@media (max-width:1240px){ .top .bname{display:none} }
+@media (max-width:820px){ .top .nav1{order:5;flex-basis:100%;margin:0 0 -8px;height:44px} .top .n1t:first-child{padding-left:0} }
 .n1t:hover{color:var(--ink2)}
 .n1t[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
 .n1p{font-family:var(--fBody);font-weight:600;font-size:13px;letter-spacing:0;text-transform:none;color:var(--ink2);max-width:240px;overflow:hidden;text-overflow:ellipsis}
@@ -974,6 +977,11 @@ select.bin{padding:0 2px}
       <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="var(--accent)"/><rect x="6" y="6.5" width="11" height="4" rx="2" fill="#fff"/><path d="M6 16h4.5l2.5-3.5 3 7 2.5-3.5H26" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="15" y="21.5" width="11" height="4" rx="2" fill="#fff" opacity=".75"/></svg>
       <span class="bname">Schedule <span>Workbench</span></span>
     </div>
+    <nav class="nav1" role="tablist" aria-label="Area">
+      <button class="n1t" role="tab" id="tabPort" aria-selected="false">Portfolio</button>
+      <button class="n1t" role="tab" id="navProj" aria-selected="false">Project<span class="n1p" id="navProjName"></span></button>
+      <button class="n1t" role="tab" id="tabBuild" aria-selected="false">Build</button>
+    </nav>
     <div class="ctxw"><button class="ctx" id="meta" aria-haspopup="true" aria-expanded="false"></button><div class="card ctxmenu" id="ctxMenu" hidden></div></div>
     <div class="top-actions">
       <button class="btn only-m" id="btnFilters">Filters <span class="cnt" id="fBadge" hidden></span></button>
@@ -985,12 +993,7 @@ select.bin{padding:0 2px}
 </header>
 
 
-<nav class="navs" aria-label="Main">
-  <div class="wrap nav1" role="tablist" aria-label="Area">
-    <button class="n1t" role="tab" id="tabPort" aria-selected="false">Portfolio</button>
-    <button class="n1t" role="tab" id="navProj" aria-selected="false">Project<span class="n1p" id="navProjName"></span></button>
-    <button class="n1t" role="tab" id="tabBuild" aria-selected="false">Build</button>
-  </div>
+<nav class="navs" aria-label="Project views">
   <div class="nav2w" id="nav2"><div class="wrap nav2">
     <div class="n2" role="tablist" aria-label="Project views">
       <div class="n2g"><span class="n2l">Overview</span><div class="n2b"><button class="tab" role="tab" id="tabDash" aria-selected="false">Dashboard</button></div></div>
