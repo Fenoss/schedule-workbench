@@ -6,6 +6,7 @@ async function coLoad(prof){
   if(PER.companyId){ try{ const r=await sb.from('companies').select('*').eq('id',PER.companyId).maybeSingle(); PER.company=r.data||null; }catch(_){} }
   if(PER.platform){ try{ const r=await sb.from('companies').select('id,name,status').order('name'); PER.companies=r.data||[]; }catch(_){} }
   PER.site={}; if(PER.companyId){ try{ const r=await sb.from('company_settings').select('site').eq('company_id',PER.companyId).maybeSingle(); PER.site=(r.data&&r.data.site)||{}; }catch(_){} }
+  PER.coCounts=null; if(PER.companyId&&(PER.platform||prof.role==='admin')){ try{ const [a,b]=await Promise.all([sb.from('profiles').select('id',{count:'exact',head:true}).eq('company_id',PER.companyId),sb.from('invitations').select('id',{count:'exact',head:true}).eq('company_id',PER.companyId).is('accepted_at',null)]); PER.coCounts={people:a.count||0,invites:b.count||0}; }catch(_){} }
   ADM.cache={}; brandApply(); siteApply();
 }
 function coModal(id,cls){ let d=document.getElementById(id); if(d) d.remove(); d=document.createElement('div'); d.className='modal'; d.id=id; d.innerHTML=`<div class="mcard ${cls}" role="dialog" aria-modal="true"></div>`; document.body.appendChild(d);
@@ -40,7 +41,7 @@ async function renderAdmin(){
   if(!el.querySelector('.adm-body')) el.innerHTML=`<div class="adm">${nav}<section class="card adm-body" id="admBody"></section></div>`;
   else el.querySelector('.adm-nav').outerHTML=nav;
   if(!el._wired){ el._wired=true; admWire(el); }
-  const body=document.getElementById('admBody'), tok=++ADM.tok; body.innerHTML='<p class="muted">Loading…</p>';
+  ADM.shown=ADM.sec; const body=document.getElementById('admBody'), tok=++ADM.tok; body.innerHTML='<p class="muted">Loading…</p>';
   try{ const html=await ADM_R[ADM.sec](); if(tok===ADM.tok) body.innerHTML=html; }catch(e){ if(tok===ADM.tok) body.innerHTML=`<p class="late">${esc(perErr(e))}</p>`; }
 }
 const admH=(t,sub)=>`<div class="adm-h"><h2>${esc(t)}</h2>${sub?`<p class="muted">${sub}</p>`:''}</div>`;
@@ -84,6 +85,7 @@ const ADM_R={
     const ppl=admOk(P), pend=ppl.filter(u=>u.role==='pending').length, admins=ppl.filter(u=>u.role==='admin').length;
     return admH(`${c.name||'Company'} admin`,'Configure your company’s workbench: who can get in, what they can do, and how it looks.')+
       `<div class="stats adm-stats">${admStat('People',ppl.length,`${admins} admin${admins===1?'':'s'}`)}${admStat('Waiting for approval',pend,pend?'approve under People':'none waiting',pend?'amber':'')}${admStat('Open invitations',admOk(inv).length,'not signed in yet')}${admStat('Programmes',prog,'team workspace')}${admStat('Projects',proj,'team workspace')}${admStat('Status',c.status==='suspended'?'Suspended':'Active',c.auto_approve_domain?`auto-joins @${esc(c.auto_approve_domain)}`:'invitation only',c.status==='suspended'?'late':'')}</div>
+      ${(PER.coCounts={people:ppl.length,invites:admOk(inv).length},setupCard(true))}
       <div class="adm-acts"><button class="btn primary" data-adm="co-people">${pend?`Approve ${pend} ${pend===1?'person':'people'}`:'Manage people'}</button><button class="btn" data-adm="co-invites">Invite someone</button><button class="btn" data-adm="co-brand">Branding</button><button class="btn" data-adm="co-quality">Quality checks</button></div>`; },
   async 'co-people'(){ const people=admOk(await PER.sb.from('profiles').select('*').eq('company_id',PER.companyId).order('created_at')), pend=people.filter(u=>u.role==='pending').length;
     return admH('People',`${pend?`<b class="amber">${pend} waiting for approval.</b> `:''}Viewers open and compare projects; contributors also create projects and save updates; admins also manage this page.`)+
@@ -114,6 +116,8 @@ const ADM_R={
       `<form class="co-set adm-feat" data-admform="features"><label class="tg"><input type="checkbox" name="ai" ${s.ai!==false?'checked':''}> AI features (Ask AI and AI schedule build)</label>
       <label class="tg"><input type="checkbox" name="build" ${s.build!==false?'checked':''}> Build tab (schedule builder and in-app updates)</label>
       <label class="tg"><input type="checkbox" name="samples" ${s.samples!==false?'checked':''}> Sample portfolio buttons</label>
+      <label class="tg"><input type="checkbox" name="setup" ${!s.hideSetup?'checked':''}> Set-up checklist on the Portfolio (for admins)</label>
+      <label class="pfl" style="max-width:320px"><span>Update cycle: a project is due an update after this many days</span><input type="number" name="cycle" min="7" max="120" value="${+s.cycle||35}"></label>
       <div class="adm-acts"><button class="btn primary">Save features</button></div></form>
       <p class="muted">These change what everyone in your company sees. AI features also need the workbench’s AI service to be set up.</p>`; },
   async 'wb-log'(){ return admLog(true); },
@@ -179,7 +183,7 @@ function admWire(el){
       else if(k==='invite'){ const email=f.email.value.trim().toLowerCase(); const r=await PER.sb.from('invitations').insert({company_id:PER.companyId,email,role:f.role.value,invited_by:PER.uid}); if(r.error) throw (/duplicate|unique/i.test(r.error.message||'')?new Error('That email already has an open invitation.'):r.error); perToast(`Invited ${email}.`+await admEmailInvite(email)); }
       else if(k==='access'){ await admSaveCompany({name:f.name.value.trim(),auto_approve_domain:f.domain.value.trim().replace(/^@/,'').toLowerCase()||null,auto_approve_role:f.role.value}); perToast('Sign-in settings saved.'); }
       else if(k==='brand'){ const br={...((PER.company&&PER.company.branding)||{})}; const t=f.title.value.trim(); if(t) br.title=t; else delete br.title; if(f.dataset.noaccent) delete br.accent; else br.accent=f.accent.value; await admSaveCompany({branding:br}); perToast('Branding saved for everyone in the company.'); }
-      else if(k==='features'){ const site={...(ADM.cache.site||{}),ai:f.ai.checked,build:f.build.checked,samples:f.samples.checked}; admOk(await PER.sb.from('company_settings').upsert({company_id:PER.companyId,site,updated_by:PER.uid,updated_at:new Date().toISOString()})); ADM.cache.site=site; PER.site=site; siteApply(); perToast('Features saved for everyone in the company.'); }
+      else if(k==='features'){ const site={...(ADM.cache.site||{}),ai:f.ai.checked,build:f.build.checked,samples:f.samples.checked,hideSetup:!f.setup.checked,cycle:Math.max(7,Math.min(120,+f.cycle.value||35))}; admOk(await PER.sb.from('company_settings').upsert({company_id:PER.companyId,site,updated_by:PER.uid,updated_at:new Date().toISOString()})); ADM.cache.site=site; PER.site=site; siteApply(); perToast('Features saved for everyone in the company.'); }
       renderAdmin();
     }catch(ex){ perToast(perErr(ex),'err'); if(btn) btn.disabled=false; } });
 }

@@ -200,7 +200,7 @@ async function perLoad(per,pid){
 /* ---- charts (SVG) ---- */
 const perC={live:'var(--accent)',base:'var(--base)',ink:'var(--ink2)',good:'var(--early)',bad:'var(--late)',blue:'var(--active)'};
 function perChart(o){
-  const W=o.w||560, H=o.h||220, m={l:o.yDate?54:42,r:26,t:14,b:28}, iw=W-m.l-m.r, ih=H-m.t-m.b;
+  const W=o.w||560, H=o.h||220, m={l:o.ml||(o.yDate?54:42),r:26,t:14,b:28}, iw=W-m.l-m.r, ih=H-m.t-m.b;
   const xs=o.x, x0=Math.min(...xs), x1=Math.max(...xs), xr=x1-x0||1;
   const X=v=>m.l+(xs.length===1?iw/2:(v-x0)/xr*iw);
   let ys=[]; o.series.forEach(s=>s.pts.forEach(p=>p&&p[1]!=null&&ys.push(p[1]))); (o.refs||[]).forEach(r=>r.y!=null&&ys.push(r.y)); if(o.y0!=null) ys.push(o.y0); if(o.y1!=null) ys.push(o.y1);
@@ -241,7 +241,7 @@ async function renderPer(){
     ${proj?`<button class="btn sm" data-w data-pa="ren" ${perCanDel(proj.createdBy)?'':'disabled'}>Rename</button><button class="btn sm ghostd" data-w data-pa="delp" ${perCanDel(proj.createdBy)?'':'disabled'}>Delete</button>`:''}
     <span class="pspace">${PER.mode!=='local'?(PER.space==='team'?(PER.mode==='supa'&&PER.company?PER.company.name:'Team workspace'):'Private workspace'):'This browser'}</span>
     <span class="sp"></span><span class="pbusy" id="perBusy" ${PER.busy?'':'hidden'}>${esc(PER.busy)}</span>
-    <button class="btn sm" data-pa="files" title="Load XER files and set which is live and which is baseline">Schedule files</button><button class="btn sm" data-w data-pa="imp" ${ro?'disabled':''} title="Turn several past XER updates into periods in one go">Import past updates</button>
+    ${P.length?'<button class="btn sm ghost" data-pa="xls" title="Download every period as an Excel workbook">Excel</button><button class="btn sm ghost" data-pa="print">Print / PDF</button>':''}<button class="btn sm" data-pa="files" title="Load XER files and set which is live and which is baseline">Schedule files</button><button class="btn sm" data-w data-pa="imp" ${ro?'disabled':''} title="Turn several past XER updates into periods in one go">Import past updates</button>
     ${proj&&P.length&&!ro?'<button class="btn sm" data-w data-pa="upd" title="Enter progress for a new data date and edit the programme, then save it as the next period">Update schedule</button>':''}<button class="btn sm primary" data-w data-pa="save" ${ro?'disabled':''}>Save current as period</button></div>`;
   if(!proj){ el.innerHTML=bar+`<div class="card pempty big"><h3>${PER.projects.length?'Pick a project':'Start your period history'}</h3><p class="muted">Create a project, then save each schedule update as a period. The workbench tracks the forecast, progress and changes from one period to the next.</p>
       <div class="prow">${ro?'':'<button class="btn primary" data-w data-pa="new">Create a project</button><button class="btn" data-w data-pa="sample">Load sample history</button>'}</div>${ro?'<p class="muted">You have view-only access, so ask an editor to create a project.</p>':''}</div>`; perBusy(PER.busy); return; }
@@ -285,7 +285,7 @@ function renderPerMain(){
   // cost performance (earned value)
   const cs=st.map(s=>s.cost||null), lc=[...cs].reverse().find(Boolean);
   const costP=lc?(()=>{ const vac=lc.bac-lc.eac, ix=(v,t)=>v==null?'—':`<span class="${v<t?'late':''}">${v.toFixed(2)}</span>`;
-    const ch=perChart({x:xs,xLab:xl,y0:0,yFmt:v=>moneyK(v),label:'Planned value, earned value and actual cost',refs:[{y:lc.bac,c:'var(--ink3)',label:'Budget '+moneyK(lc.bac)}],series:[{name:'Planned value',c:'var(--ink3)',dash:true,hollow:true,tip:p=>moneyK(p[1]),pts:cs.map((c,i)=>[xs[i],c?c.pv:null])},{name:'Earned value',c:perC.blue,tip:p=>moneyK(p[1]),pts:cs.map((c,i)=>[xs[i],c?c.ev:null])},{name:'Actual cost',c:perC.live,tip:p=>moneyK(p[1]),pts:cs.map((c,i)=>[xs[i],c?c.ac:null])}]});
+    const ch=perChart({x:xs,xLab:xl,y0:0,ml:62,yFmt:v=>moneyK(v),label:'Planned value, earned value and actual cost',refs:[{y:lc.bac,c:'var(--ink3)',label:'Budget '+moneyK(lc.bac)}],series:[{name:'Planned value',c:'var(--ink3)',dash:true,hollow:true,tip:p=>moneyK(p[1]),pts:cs.map((c,i)=>[xs[i],c?c.pv:null])},{name:'Earned value',c:perC.blue,tip:p=>moneyK(p[1]),pts:cs.map((c,i)=>[xs[i],c?c.ev:null])},{name:'Actual cost',c:perC.live,tip:p=>moneyK(p[1]),pts:cs.map((c,i)=>[xs[i],c?c.ac:null])}]});
     return `<div class="card dpanel span2"><div class="ph"><span class="sl">Cost performance</span><span class="pn">earned value from resource and expense costs${lc.fromBL?'':' · no baseline costs, so the live budget is used'}</span></div>
       <div class="pev">${[['Budget at completion',moneyK(lc.bac),''],['Planned value',moneyK(lc.pv),'to data date'],['Earned value',moneyK(lc.ev),'work done, at budget'],['Actual cost',moneyK(lc.ac),'spent to date'],['Schedule index (SPI)',ix(lc.spi,.95),'earned ÷ planned'],['Cost index (CPI)',ix(lc.cpi,.95),'earned ÷ actual'],['Estimate at completion',moneyK(lc.eac),`<span class="${vac<0?'late':'early'}">${vac<0?'−':'+'}${moneyK(Math.abs(vac))}</span> vs budget`]].map(([l,v,s])=>`<div><div class="sl">${l}</div><b>${v}</b><div class="ss">${s}</div></div>`).join('')}</div>
       ${ch}${perKeyLeg([['var(--ink3)','Planned value',1],[perC.blue,'Earned value'],[perC.live,'Actual cost']])}</div>`; })():'';
@@ -382,6 +382,8 @@ function wirePer(){
     else if(t.id==='perMsAdd'&&t.value){ PER.ms.add(t.value); renderPerMain(); } });
   w.addEventListener('click',e=>{
     const a=e.target.closest('[data-pa]'); if(a){ const v=a.dataset.pa, proj=PER.projects.find(p=>p.id===PER.pid);
+      if(v==='xls'){ const pj=PER.projects.find(p=>p.id===PER.pid); xlsSave(`${pj?pj.name:'Project'} periods ${new Date().toISOString().slice(0,10)}`,[{name:'Periods',rows:perExportRows()}]); return; }
+      if(v==='print'){ const pj=PER.projects.find(p=>p.id===PER.pid); repPrint(pj?pj.name+' periods':'Periods'); return; }
       if(v==='new') perAskProject(); else if(v==='files') openFilesModal(); else if(v==='save') perAskSave(); else if(v==='imp') perAskImport(); else if(v==='sample') perSampleHistory(); else if(v==='upd') updStart(PER.pid);
       else if(v==='ren'&&proj) perDialog('Rename project',`<label class="pfl"><span>Project name</span><input id="pdName" maxlength="80" value="${esc(proj.name)}"></label>`,'Rename',async d=>{ const n=d.querySelector('#pdName').value.trim(); if(!n) return false; await perRun('Renaming…',()=>PER.store.renameProject(proj.id,n)); });
       else if(v==='delp'&&proj) perDialog('Delete project?',`<p>This permanently deletes <b>${esc(proj.name)}</b> and its ${PER.periods.length} saved period${PER.periods.length===1?'':'s'} for everyone. This can’t be undone.</p>`,'Delete project',async()=>{ await perRun('Deleting project…',async()=>{ await perDeleteProject(proj); PER.pid=null; perToast('Project deleted.'); }); });

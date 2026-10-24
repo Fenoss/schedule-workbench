@@ -1,8 +1,8 @@
 /* ================= Portfolio: programmes and project slots ================= */
-const PORT={q:'',status:'all',collapsed:new Set(),sel:new Set()};
+const PORT={q:'',status:'all',collapsed:new Set(),sel:new Set(),prog:null};
 const PSTAT={planned:'Planned',active:'Active',on_hold:'On hold',complete:'Complete'};
 const PCOL=['#FC4C02','#3B6FE0','#14A37F','#9B5DE5','#D99A00','#E04F8C','#1BA1C4','#6DAA1A'];
-const STALE_DAYS=35;
+const staleDays=()=>(typeof PER!=='undefined'&&PER.mode==='supa'&&PER.site&&+PER.site.cycle)||35;
 try{ const c=JSON.parse(localStorage.getItem('pacer.port.collapsed')||'[]'); if(Array.isArray(c)) c.forEach(x=>PORT.collapsed.add(x)); }catch(_){}
 
 function portProjectOptions(sel){
@@ -19,7 +19,7 @@ function portFig(p){
   const vb=s.finish!=null&&s.blFinish!=null?day(s.finish-s.blFinish):null, mv=s.finish!=null&&s.prevFinish!=null?day(s.finish-s.prevFinish):null;
   const age=s.dd!=null?Math.floor((Date.now()-s.dd)/DAY):null;
   const rag=vb==null?'':vb<=0?'g':vb<=20?'a':'r';
-  return {slot:false,s,vb,mv,age,stale:age!=null&&age>STALE_DAYS&&p.status==='active',rag};
+  return {slot:false,s,vb,mv,age,stale:age!=null&&age>staleDays()&&p.status==='active',rag};
 }
 function portMatch(p){
   if(PORT.status!=='all'&&p.status!==PORT.status) return false;
@@ -31,16 +31,17 @@ const portCanEdit=x=>!perRO()&&perCanDel(x&&x.createdBy);
 function renderPort(){
   const el=document.getElementById('portWrap'); if(!el||el.hidden) return;
   if(!PER.mode){ el.innerHTML='<div class="card pempty big"><h3>Sign in to see your portfolio</h3><p class="muted">Your programmes, projects and their latest schedule updates appear here once you’re signed in.</p><button class="btn primary" id="portSignIn">Sign in</button></div>'; document.getElementById('portSignIn').onclick=()=>{ if(!document.getElementById('auth')) authStart(); }; return; }
+  if(PORT.prog&&PER.programmes.some(g=>g.id===PORT.prog)) return renderProgDash(el); PORT.prog=null;
   [...PORT.sel].forEach(id=>{ const p=PER.projects.find(x=>x.id===id); if(!p||!p.summary) PORT.sel.delete(id); });
   const ro=perRO(), G=PER.programmes, P=PER.projects, wsp=PER.mode!=='local'?(PER.space==='team'?(PER.mode==='supa'&&PER.company?PER.company.name:'Team workspace'):'Private workspace'):'This browser';
   const head=`<div class="card porthead">
     <div class="ph-t"><h2>${esc(wsp)}</h2><span class="pspace">${PER.programmes.length} programme${PER.programmes.length===1?'':'s'} · ${PER.projects.length} project${PER.projects.length===1?'':'s'}</span></div>
     <div class="ph-c"><input type="search" id="portQ" placeholder="Search programmes, projects, managers" value="${esc(PORT.q)}" aria-label="Search portfolio">
       <label class="ctl"><span>Status</span><select id="portStatus"><option value="all">All</option>${Object.entries(PSTAT).map(([k,v])=>`<option value="${k}" ${PORT.status===k?'selected':''}>${v}</option>`).join('')}</select></label>
-      <span class="pbusy" id="portBusy" ${PER.busy?'':'hidden'}>${esc(PER.busy)}</span>
+      <span class="pbusy" id="portBusy" ${PER.busy?'':'hidden'}>${esc(PER.busy)}</span>${P.length?'<button class="btn sm ghost" data-pd="portxls" title="Download the portfolio as an Excel workbook">Excel</button><button class="btn sm ghost" data-pd="print" title="Print or save as PDF">Print / PDF</button>':''}
       ${ro?'':`${!PER.schemaOld&&spMissing()?'<button class="btn sm ghost" data-w data-po="samplemore" title="Adds the sample programmes and fills their empty project slots with schedules">Add sample programmes</button>':''}<button class="btn sm" data-w data-po="addprog" ${PER.schemaOld?'disabled':''}>Add programme</button><button class="btn sm primary" data-w data-po="addproj">Add project</button>`}</div></div>`;
   const old=PER.schemaOld?`<div class="card pwarn portold"><b>One database step left.</b> Programmes need the latest <code>supabase/schema.sql</code>. Open Supabase → SQL Editor → New query, paste the whole file from the GitHub repo and click Run. Projects work in the meantime.</div>`:'';
-  if(!P.length&&!G.length){ el.innerHTML=head+old+`<div class="card pempty big"><h3>Build your portfolio</h3><p class="muted">Add a programme, then add a slot for each project in it. A slot holds the project’s name, status and manager until its first schedule update is saved, then shows forecast, variance and progress here. Or load the sample portfolio: four programmes and seven integrated projects with six monthly updates each.</p>
+  if(!P.length&&!G.length){ el.innerHTML=head+old+setupBanner()+`<div class="card pempty big"><h3>Build your portfolio</h3><p class="muted">Add a programme, then add a slot for each project in it. A slot holds the project’s name, status and manager until its first schedule update is saved, then shows forecast, variance and progress here. Or load the sample portfolio: four programmes and seven integrated projects with six monthly updates each.</p>
     <div class="prow">${ro?'':`<button class="btn primary" data-w data-po="addprog" ${PER.schemaOld?'disabled':''}>Add a programme</button><button class="btn" data-w data-po="addproj">Add a project slot</button><button class="btn" data-w data-po="sample" ${PER.schemaOld?'disabled':''}>Load sample portfolio</button>`}</div>${ro?'<p class="muted">You have view-only access, so ask an editor to set up programmes.</p>':''}</div>`; perBusy(PER.busy); return; }
   // KPIs over everything (unfiltered)
   const F=P.map(p=>({p,f:portFig(p)})), withS=F.filter(x=>!x.f.slot), slots=F.length-withS.length;
@@ -52,7 +53,7 @@ function renderPort(){
     <div class="stat"><div class="sl">Behind baseline</div><div class="sv ${behind.length?'late':''}">${behind.length}</div><div class="ss">of ${withS.filter(x=>x.f.vb!=null).length} with a baseline</div></div>
     <div class="stat"><div class="sl">Worst variance</div><div class="sv ${worst?'late':''}">${worst?dS(worst.f.vb):'—'}</div><div class="ss">${worst?esc(worst.p.name):'nothing behind'}</div></div>
     <div class="stat"><div class="sl">Slipped last period</div><div class="sv ${slipped.length?'late':''}">${slipped.length}</div><div class="ss">forecast finish moved later</div></div>
-    <div class="stat"><div class="sl">Updates due</div><div class="sv ${stale.length?'amber':''}">${stale.length}</div><div class="ss">active, none in ${STALE_DAYS} days</div></div></div>`;
+    <div class="stat"><div class="sl">Updates due</div><div class="sv ${stale.length?'amber':''}">${stale.length}</div><div class="ss">active, none in ${staleDays()} days</div></div></div>`;
   const row=p=>{ const f=portFig(p), s=f.s, can=portCanEdit(p);
     const who=[p.code,p.manager].filter(Boolean).map(esc).join(' · ');
     if(f.slot) return `<div class="prow2 slot" data-pid="${esc(p.id)}">
@@ -81,14 +82,14 @@ function renderPort(){
         <div class="prog-t"><div class="prog-n">${g?esc(g.name):'Not in a programme'}${g&&g.code?`<span class="pcode">${esc(g.code)}</span>`:''}</div>
           <div class="prog-m">${g&&g.client?esc(g.client)+' · ':''}${list.length} project${list.length===1?'':'s'}${list.length-F2.length?` (${list.length-F2.length} slot${list.length-F2.length===1?'':'s'})`:''}${g&&g.description?` · ${esc(g.description)}`:''}</div></div>
         <div class="prog-k"><div><span class="pl">Programme finish</span><b>${fin.length?fmtD(Math.max(...fin)):'—'}</b></div><div><span class="pl">Worst variance</span><b class="${dCls(worstV)}">${dS(worstV)}</b></div><i class="rag ${rag}" aria-hidden="true"></i></div>
-        <div class="prog-a">${g&&F2.length>1?`<button class="btn sm primary" data-w data-po="openprog" data-id="${esc(g.id)}" title="Open the latest update of every project in this programme together">Open programme</button>`:''}${!ro&&g?`<button class="btn sm" data-w data-po="addproj" data-g="${esc(g.id)}">Add project</button>`:''}${can?`<button class="btn sm ghost" data-w data-po="editprog" data-id="${esc(g.id)}">Edit</button>`:''}</div>
+        <div class="prog-a">${g&&F2.length?`<button class="btn sm" data-pd="open" data-id="${esc(g.id)}" title="Programme dashboard: trends, earned value and narrative across its projects">Dashboard</button>`:''}${g&&F2.length>1?`<button class="btn sm primary" data-w data-po="openprog" data-id="${esc(g.id)}" title="Open the latest update of every project in this programme together">Open programme</button>`:''}${!ro&&g?`<button class="btn sm" data-w data-po="addproj" data-g="${esc(g.id)}">Add project</button>`:''}${can?`<button class="btn sm ghost" data-w data-po="editprog" data-id="${esc(g.id)}">Edit</button>`:''}</div>
       </header>
       <div class="prog-b">${shown.length?`<div class="prow2 hd" aria-hidden="true"><div>Project</div><div>Status</div><div>Latest update</div><div>Forecast finish</div><div>Vs baseline</div><div>Progress</div><div>BEI</div><div></div></div>${shown.map(row).join('')}`:`<div class="pempty sm">${list.length?'No projects match the filters.':`No projects yet.${!ro&&g?' Add a project slot to start.':''}`}</div>`}</div></section>`; };
   const un=P.filter(p=>!p.programmeId||!G.some(g=>g.id===p.programmeId));
   const body=G.map((g,i)=>sect(g,P.filter(p=>p.programmeId===g.id),i)).join('')+(un.length?sect(null,un,0):'');
-  el.innerHTML=head+old+tiles+`<div class="portlist">${body||'<div class="card pempty">Nothing matches your search.</div>'}</div>
+  el.innerHTML=head+old+setupBanner()+tiles+`<div class="portlist">${body||'<div class="card pempty">Nothing matches your search.</div>'}</div>
     ${PORT.sel.size?`<div class="selbar card" role="region" aria-label="Selected projects"><b>${PORT.sel.size} project${PORT.sel.size===1?'':'s'} selected</b><span class="muted">${esc([...PORT.sel].map(id=>(PER.projects.find(p=>p.id===id)||{}).name).filter(Boolean).join(', '))}</span><button class="btn sm primary" data-w data-po="opensel">${PORT.sel.size>1?'Open together':'Open'}</button><button class="btn sm" data-po="clearsel">Clear</button></div>`:''}
-    <div class="note">Tick projects to open several together, or use Open programme. Rows are coloured by forecast finish against baseline: green on or ahead, amber up to 20 days late, red beyond that. “Updates due” counts active projects with no update in the last ${STALE_DAYS} days.</div>`;
+    <div class="note">Tick projects to open several together, or use Open programme. Rows are coloured by forecast finish against baseline: green on or ahead, amber up to 20 days late, red beyond that. “Updates due” counts active projects with no update in the last ${staleDays()} days.</div>`;
   perBusy(PER.busy);
 }
 
@@ -174,6 +175,8 @@ function wirePort(){
   w.addEventListener('change',e=>{ if(e.target.id==='portStatus'){ PORT.status=e.target.value; renderPort(); }
     else if(e.target.dataset.sel){ const id=e.target.dataset.sel; e.target.checked?PORT.sel.add(id):PORT.sel.delete(id); const y=scrollY; renderPort(); scrollTo(0,y); } });
   w.addEventListener('click',e=>{
+    const pdb=e.target.closest('[data-pd]'); if(pdb){ const v=pdb.dataset.pd;
+      if(v==='open') pdOpen(pdb.dataset.id); else if(v==='back'){ PORT.prog=null; renderPort(); } else if(v==='xls') pdExport(); else if(v==='portxls') xlsSave(`Portfolio ${new Date().toISOString().slice(0,10)}`,[{name:'Projects',rows:portExportRows()}]); else if(v==='print') repPrint(PORT.prog?(PER.programmes.find(g=>g.id===PORT.prog)||{}).name:'Portfolio'); return; }
     const b=e.target.closest('[data-po]'); if(!b) return; const v=b.dataset.po, id=b.dataset.id;
     if(v==='addprog') portProgDialog(null);
     else if(v==='addproj') portProjectDialog(null,{programmeId:b.dataset.g||null});

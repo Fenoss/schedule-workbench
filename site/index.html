@@ -1024,6 +1024,29 @@ body.no-ai #btnAi,body.no-ai .bai-btn,body.no-ai [data-bnew="ai"],body.no-build 
 .pev{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px 16px;margin:4px 0 10px}
 .pev b{font-family:var(--fDisplay);font-size:24px;font-weight:700;display:block;margin-top:2px}
 .pev .ss{font-size:12px}
+
+/* programme dashboard, set-up checklist, phone list, print */
+.pdb2{display:flex;flex-direction:column;gap:14px}
+.pdk{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;vertical-align:0}
+.pdn{border-top:1px solid var(--grid);padding:10px 0} .pdn:first-of-type{border-top:0} .pdn-h{display:flex;gap:10px;align-items:baseline} .pdn .sl{margin-top:8px} .pdn p{margin:2px 0 0;white-space:pre-wrap;font-size:13.5px}
+.dgrid .span3{grid-column:1/-1}
+.setup{padding:14px 16px;margin-bottom:14px} .setup.full{margin:0}
+.su-h{display:flex;align-items:center;gap:14px;flex-wrap:wrap} .su-h>div{display:flex;flex-direction:column} .su-h b{font-size:15px}
+.su-bar{flex:1;min-width:120px;height:8px;border-radius:4px;background:var(--band);position:relative;overflow:hidden} .su-bar i{position:absolute;inset:0 auto 0 0;background:var(--early);border-radius:4px}
+.su-l{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:12px}
+.su-i{display:flex;gap:10px;align-items:flex-start;text-align:left;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:10px 12px;cursor:pointer}
+.su-i:hover{border-color:var(--accent)} .su-i b{display:block;font-size:13.5px} .su-i em{font-style:normal;font-size:12.5px;color:var(--ink2)}
+.su-c{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff}
+.su-i.ok .su-c{background:var(--early);border-color:var(--early)} .su-i.ok b{color:var(--ink2);text-decoration:line-through}
+.mlist{display:flex;flex-direction:column;gap:6px} .chart.m-hide{display:none!important}
+.ml-h{display:flex;flex-direction:column;gap:2px;font-size:13px;margin-bottom:4px}
+.ml-i{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;text-align:left;border:1px solid var(--line);border-left:4px solid var(--line);border-radius:8px;background:var(--surface);padding:8px 10px}
+.ml-i.crit{border-left-color:var(--accent)} .ml-c{font-weight:700;font-variant-numeric:tabular-nums} .ml-n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .ml-d,.ml-s{grid-column:1/-1;font-size:12.5px;color:var(--ink2)} .ml-more{align-self:center;margin-top:6px}
+@media print{
+  .top,.navs,.side,#auth,.ptoast,.btn,.plink,.pbusy,.selbar,.note,.aipanel,#userMenu,#ctxMenu,.perbar .ctl,.pmsel select,.setup{display:none!important}
+  body{background:#fff} .main{display:block!important;padding:0!important} .card{box-shadow:none!important;break-inside:avoid} .dpanel,.prog,.pitem{break-inside:avoid}
+  .pergrid{display:block!important} .perlist{display:none!important} .wrap{max-width:none!important;padding:0 8px!important}
+}
 </style>
 
 <header class="top">
@@ -1079,6 +1102,7 @@ body.no-ai #btnAi,body.no-ai .bai-btn,body.no-ai [data-bnew="ai"],body.no-build 
       </div>
     </div>
     <div class="legend" id="legend"></div>
+    <div class="mlist" id="mList" hidden></div>
     <div class="chart" id="ganttWrap">
       <canvas id="ganttCv"></canvas>
       <div class="scroller" id="ganttSc"><div class="spacer" id="ganttSp"></div></div>
@@ -4287,7 +4311,7 @@ function renderAvail(q){
 }
 
 /* ---------------- orchestration ---------------- */
-function redraw(){ if(S.tab==='gantt') drawGantt(); else if(S.tab==='tld') drawTLD(); else if(S.tab==='dq') renderDQ(); else if(S.tab==='exec') renderExec(); else if(S.tab==='ifc') renderIfc(); else if(S.tab==='ai') renderAi(); else if(S.tab==='build') renderBuild(); else if(S.tab==='per') renderPer(); else if(S.tab==='port') renderPort(); else if(S.tab==='admin') renderAdmin(); else renderDash(); }
+function redraw(){ if(typeof mobileList==='function') mobileList(); if(S.tab==='gantt') drawGantt(); else if(S.tab==='tld') drawTLD(); else if(S.tab==='dq') renderDQ(); else if(S.tab==='exec') renderExec(); else if(S.tab==='ifc') renderIfc(); else if(S.tab==='ai') renderAi(); else if(S.tab==='build') renderBuild(); else if(S.tab==='per') renderPer(); else if(S.tab==='port') renderPort(); else if(S.tab==='admin'){ if(!document.getElementById('admBody')||ADM.shown!==ADM.sec||!admAllowed()) renderAdmin(); } else renderDash(); }
 function applyFilters(){ S.rows=filtered(); buildItems(); renderLegend(); updateBadge(); if(S.tab==='tld') T.view=null; redraw(); }
 function pickTldDefaults(){
   const u=M.udfs; const sU=u.find(x=>/chain|km|mile|station|loc|ch\b/i.test(x)&&/start|from|begin/i.test(x))||u.find(x=>/start|from/i.test(x));
@@ -4419,7 +4443,7 @@ function wire(){
   document.getElementById('aiWrap').addEventListener('keydown',e=>{ if(e.key==='Escape'){ e.stopPropagation(); aiPanel(false); document.getElementById('btnAi').focus(); } });
   addEventListener('resize',()=>{ if(!document.getElementById('aiWrap').hidden) aiPlace(); });
   document.getElementById('tabBuild').onclick=()=>setTab('build');
-  document.getElementById('tabPer').onclick=()=>setTab('per'); document.getElementById('tabPort').onclick=()=>setTab('port'); document.getElementById('tabAdmin').onclick=()=>setTab('admin'); wirePer();
+  document.getElementById('tabPer').onclick=()=>setTab('per'); document.getElementById('tabPort').onclick=()=>{ PORT.prog=null; setTab('port'); }; document.getElementById('tabAdmin').onclick=()=>setTab('admin'); wirePer();
   wireBuild(); wireBa();
   wireAi();
   wireIfc();
@@ -4895,6 +4919,7 @@ async function coLoad(prof){
   if(PER.companyId){ try{ const r=await sb.from('companies').select('*').eq('id',PER.companyId).maybeSingle(); PER.company=r.data||null; }catch(_){} }
   if(PER.platform){ try{ const r=await sb.from('companies').select('id,name,status').order('name'); PER.companies=r.data||[]; }catch(_){} }
   PER.site={}; if(PER.companyId){ try{ const r=await sb.from('company_settings').select('site').eq('company_id',PER.companyId).maybeSingle(); PER.site=(r.data&&r.data.site)||{}; }catch(_){} }
+  PER.coCounts=null; if(PER.companyId&&(PER.platform||prof.role==='admin')){ try{ const [a,b]=await Promise.all([sb.from('profiles').select('id',{count:'exact',head:true}).eq('company_id',PER.companyId),sb.from('invitations').select('id',{count:'exact',head:true}).eq('company_id',PER.companyId).is('accepted_at',null)]); PER.coCounts={people:a.count||0,invites:b.count||0}; }catch(_){} }
   ADM.cache={}; brandApply(); siteApply();
 }
 function coModal(id,cls){ let d=document.getElementById(id); if(d) d.remove(); d=document.createElement('div'); d.className='modal'; d.id=id; d.innerHTML=`<div class="mcard ${cls}" role="dialog" aria-modal="true"></div>`; document.body.appendChild(d);
@@ -4929,7 +4954,7 @@ async function renderAdmin(){
   if(!el.querySelector('.adm-body')) el.innerHTML=`<div class="adm">${nav}<section class="card adm-body" id="admBody"></section></div>`;
   else el.querySelector('.adm-nav').outerHTML=nav;
   if(!el._wired){ el._wired=true; admWire(el); }
-  const body=document.getElementById('admBody'), tok=++ADM.tok; body.innerHTML='<p class="muted">Loading…</p>';
+  ADM.shown=ADM.sec; const body=document.getElementById('admBody'), tok=++ADM.tok; body.innerHTML='<p class="muted">Loading…</p>';
   try{ const html=await ADM_R[ADM.sec](); if(tok===ADM.tok) body.innerHTML=html; }catch(e){ if(tok===ADM.tok) body.innerHTML=`<p class="late">${esc(perErr(e))}</p>`; }
 }
 const admH=(t,sub)=>`<div class="adm-h"><h2>${esc(t)}</h2>${sub?`<p class="muted">${sub}</p>`:''}</div>`;
@@ -4973,6 +4998,7 @@ const ADM_R={
     const ppl=admOk(P), pend=ppl.filter(u=>u.role==='pending').length, admins=ppl.filter(u=>u.role==='admin').length;
     return admH(`${c.name||'Company'} admin`,'Configure your company’s workbench: who can get in, what they can do, and how it looks.')+
       `<div class="stats adm-stats">${admStat('People',ppl.length,`${admins} admin${admins===1?'':'s'}`)}${admStat('Waiting for approval',pend,pend?'approve under People':'none waiting',pend?'amber':'')}${admStat('Open invitations',admOk(inv).length,'not signed in yet')}${admStat('Programmes',prog,'team workspace')}${admStat('Projects',proj,'team workspace')}${admStat('Status',c.status==='suspended'?'Suspended':'Active',c.auto_approve_domain?`auto-joins @${esc(c.auto_approve_domain)}`:'invitation only',c.status==='suspended'?'late':'')}</div>
+      ${(PER.coCounts={people:ppl.length,invites:admOk(inv).length},setupCard(true))}
       <div class="adm-acts"><button class="btn primary" data-adm="co-people">${pend?`Approve ${pend} ${pend===1?'person':'people'}`:'Manage people'}</button><button class="btn" data-adm="co-invites">Invite someone</button><button class="btn" data-adm="co-brand">Branding</button><button class="btn" data-adm="co-quality">Quality checks</button></div>`; },
   async 'co-people'(){ const people=admOk(await PER.sb.from('profiles').select('*').eq('company_id',PER.companyId).order('created_at')), pend=people.filter(u=>u.role==='pending').length;
     return admH('People',`${pend?`<b class="amber">${pend} waiting for approval.</b> `:''}Viewers open and compare projects; contributors also create projects and save updates; admins also manage this page.`)+
@@ -5003,6 +5029,8 @@ const ADM_R={
       `<form class="co-set adm-feat" data-admform="features"><label class="tg"><input type="checkbox" name="ai" ${s.ai!==false?'checked':''}> AI features (Ask AI and AI schedule build)</label>
       <label class="tg"><input type="checkbox" name="build" ${s.build!==false?'checked':''}> Build tab (schedule builder and in-app updates)</label>
       <label class="tg"><input type="checkbox" name="samples" ${s.samples!==false?'checked':''}> Sample portfolio buttons</label>
+      <label class="tg"><input type="checkbox" name="setup" ${!s.hideSetup?'checked':''}> Set-up checklist on the Portfolio (for admins)</label>
+      <label class="pfl" style="max-width:320px"><span>Update cycle: a project is due an update after this many days</span><input type="number" name="cycle" min="7" max="120" value="${+s.cycle||35}"></label>
       <div class="adm-acts"><button class="btn primary">Save features</button></div></form>
       <p class="muted">These change what everyone in your company sees. AI features also need the workbench’s AI service to be set up.</p>`; },
   async 'wb-log'(){ return admLog(true); },
@@ -5068,7 +5096,7 @@ function admWire(el){
       else if(k==='invite'){ const email=f.email.value.trim().toLowerCase(); const r=await PER.sb.from('invitations').insert({company_id:PER.companyId,email,role:f.role.value,invited_by:PER.uid}); if(r.error) throw (/duplicate|unique/i.test(r.error.message||'')?new Error('That email already has an open invitation.'):r.error); perToast(`Invited ${email}.`+await admEmailInvite(email)); }
       else if(k==='access'){ await admSaveCompany({name:f.name.value.trim(),auto_approve_domain:f.domain.value.trim().replace(/^@/,'').toLowerCase()||null,auto_approve_role:f.role.value}); perToast('Sign-in settings saved.'); }
       else if(k==='brand'){ const br={...((PER.company&&PER.company.branding)||{})}; const t=f.title.value.trim(); if(t) br.title=t; else delete br.title; if(f.dataset.noaccent) delete br.accent; else br.accent=f.accent.value; await admSaveCompany({branding:br}); perToast('Branding saved for everyone in the company.'); }
-      else if(k==='features'){ const site={...(ADM.cache.site||{}),ai:f.ai.checked,build:f.build.checked,samples:f.samples.checked}; admOk(await PER.sb.from('company_settings').upsert({company_id:PER.companyId,site,updated_by:PER.uid,updated_at:new Date().toISOString()})); ADM.cache.site=site; PER.site=site; siteApply(); perToast('Features saved for everyone in the company.'); }
+      else if(k==='features'){ const site={...(ADM.cache.site||{}),ai:f.ai.checked,build:f.build.checked,samples:f.samples.checked,hideSetup:!f.setup.checked,cycle:Math.max(7,Math.min(120,+f.cycle.value||35))}; admOk(await PER.sb.from('company_settings').upsert({company_id:PER.companyId,site,updated_by:PER.uid,updated_at:new Date().toISOString()})); ADM.cache.site=site; PER.site=site; siteApply(); perToast('Features saved for everyone in the company.'); }
       renderAdmin();
     }catch(ex){ perToast(perErr(ex),'err'); if(btn) btn.disabled=false; } });
 }
@@ -5283,7 +5311,7 @@ async function perLoad(per,pid){
 /* ---- charts (SVG) ---- */
 const perC={live:'var(--accent)',base:'var(--base)',ink:'var(--ink2)',good:'var(--early)',bad:'var(--late)',blue:'var(--active)'};
 function perChart(o){
-  const W=o.w||560, H=o.h||220, m={l:o.yDate?54:42,r:26,t:14,b:28}, iw=W-m.l-m.r, ih=H-m.t-m.b;
+  const W=o.w||560, H=o.h||220, m={l:o.ml||(o.yDate?54:42),r:26,t:14,b:28}, iw=W-m.l-m.r, ih=H-m.t-m.b;
   const xs=o.x, x0=Math.min(...xs), x1=Math.max(...xs), xr=x1-x0||1;
   const X=v=>m.l+(xs.length===1?iw/2:(v-x0)/xr*iw);
   let ys=[]; o.series.forEach(s=>s.pts.forEach(p=>p&&p[1]!=null&&ys.push(p[1]))); (o.refs||[]).forEach(r=>r.y!=null&&ys.push(r.y)); if(o.y0!=null) ys.push(o.y0); if(o.y1!=null) ys.push(o.y1);
@@ -5324,7 +5352,7 @@ async function renderPer(){
     ${proj?`<button class="btn sm" data-w data-pa="ren" ${perCanDel(proj.createdBy)?'':'disabled'}>Rename</button><button class="btn sm ghostd" data-w data-pa="delp" ${perCanDel(proj.createdBy)?'':'disabled'}>Delete</button>`:''}
     <span class="pspace">${PER.mode!=='local'?(PER.space==='team'?(PER.mode==='supa'&&PER.company?PER.company.name:'Team workspace'):'Private workspace'):'This browser'}</span>
     <span class="sp"></span><span class="pbusy" id="perBusy" ${PER.busy?'':'hidden'}>${esc(PER.busy)}</span>
-    <button class="btn sm" data-pa="files" title="Load XER files and set which is live and which is baseline">Schedule files</button><button class="btn sm" data-w data-pa="imp" ${ro?'disabled':''} title="Turn several past XER updates into periods in one go">Import past updates</button>
+    ${P.length?'<button class="btn sm ghost" data-pa="xls" title="Download every period as an Excel workbook">Excel</button><button class="btn sm ghost" data-pa="print">Print / PDF</button>':''}<button class="btn sm" data-pa="files" title="Load XER files and set which is live and which is baseline">Schedule files</button><button class="btn sm" data-w data-pa="imp" ${ro?'disabled':''} title="Turn several past XER updates into periods in one go">Import past updates</button>
     ${proj&&P.length&&!ro?'<button class="btn sm" data-w data-pa="upd" title="Enter progress for a new data date and edit the programme, then save it as the next period">Update schedule</button>':''}<button class="btn sm primary" data-w data-pa="save" ${ro?'disabled':''}>Save current as period</button></div>`;
   if(!proj){ el.innerHTML=bar+`<div class="card pempty big"><h3>${PER.projects.length?'Pick a project':'Start your period history'}</h3><p class="muted">Create a project, then save each schedule update as a period. The workbench tracks the forecast, progress and changes from one period to the next.</p>
       <div class="prow">${ro?'':'<button class="btn primary" data-w data-pa="new">Create a project</button><button class="btn" data-w data-pa="sample">Load sample history</button>'}</div>${ro?'<p class="muted">You have view-only access, so ask an editor to create a project.</p>':''}</div>`; perBusy(PER.busy); return; }
@@ -5368,7 +5396,7 @@ function renderPerMain(){
   // cost performance (earned value)
   const cs=st.map(s=>s.cost||null), lc=[...cs].reverse().find(Boolean);
   const costP=lc?(()=>{ const vac=lc.bac-lc.eac, ix=(v,t)=>v==null?'—':`<span class="${v<t?'late':''}">${v.toFixed(2)}</span>`;
-    const ch=perChart({x:xs,xLab:xl,y0:0,yFmt:v=>moneyK(v),label:'Planned value, earned value and actual cost',refs:[{y:lc.bac,c:'var(--ink3)',label:'Budget '+moneyK(lc.bac)}],series:[{name:'Planned value',c:'var(--ink3)',dash:true,hollow:true,tip:p=>moneyK(p[1]),pts:cs.map((c,i)=>[xs[i],c?c.pv:null])},{name:'Earned value',c:perC.blue,tip:p=>moneyK(p[1]),pts:cs.map((c,i)=>[xs[i],c?c.ev:null])},{name:'Actual cost',c:perC.live,tip:p=>moneyK(p[1]),pts:cs.map((c,i)=>[xs[i],c?c.ac:null])}]});
+    const ch=perChart({x:xs,xLab:xl,y0:0,ml:62,yFmt:v=>moneyK(v),label:'Planned value, earned value and actual cost',refs:[{y:lc.bac,c:'var(--ink3)',label:'Budget '+moneyK(lc.bac)}],series:[{name:'Planned value',c:'var(--ink3)',dash:true,hollow:true,tip:p=>moneyK(p[1]),pts:cs.map((c,i)=>[xs[i],c?c.pv:null])},{name:'Earned value',c:perC.blue,tip:p=>moneyK(p[1]),pts:cs.map((c,i)=>[xs[i],c?c.ev:null])},{name:'Actual cost',c:perC.live,tip:p=>moneyK(p[1]),pts:cs.map((c,i)=>[xs[i],c?c.ac:null])}]});
     return `<div class="card dpanel span2"><div class="ph"><span class="sl">Cost performance</span><span class="pn">earned value from resource and expense costs${lc.fromBL?'':' · no baseline costs, so the live budget is used'}</span></div>
       <div class="pev">${[['Budget at completion',moneyK(lc.bac),''],['Planned value',moneyK(lc.pv),'to data date'],['Earned value',moneyK(lc.ev),'work done, at budget'],['Actual cost',moneyK(lc.ac),'spent to date'],['Schedule index (SPI)',ix(lc.spi,.95),'earned ÷ planned'],['Cost index (CPI)',ix(lc.cpi,.95),'earned ÷ actual'],['Estimate at completion',moneyK(lc.eac),`<span class="${vac<0?'late':'early'}">${vac<0?'−':'+'}${moneyK(Math.abs(vac))}</span> vs budget`]].map(([l,v,s])=>`<div><div class="sl">${l}</div><b>${v}</b><div class="ss">${s}</div></div>`).join('')}</div>
       ${ch}${perKeyLeg([['var(--ink3)','Planned value',1],[perC.blue,'Earned value'],[perC.live,'Actual cost']])}</div>`; })():'';
@@ -5465,6 +5493,8 @@ function wirePer(){
     else if(t.id==='perMsAdd'&&t.value){ PER.ms.add(t.value); renderPerMain(); } });
   w.addEventListener('click',e=>{
     const a=e.target.closest('[data-pa]'); if(a){ const v=a.dataset.pa, proj=PER.projects.find(p=>p.id===PER.pid);
+      if(v==='xls'){ const pj=PER.projects.find(p=>p.id===PER.pid); xlsSave(`${pj?pj.name:'Project'} periods ${new Date().toISOString().slice(0,10)}`,[{name:'Periods',rows:perExportRows()}]); return; }
+      if(v==='print'){ const pj=PER.projects.find(p=>p.id===PER.pid); repPrint(pj?pj.name+' periods':'Periods'); return; }
       if(v==='new') perAskProject(); else if(v==='files') openFilesModal(); else if(v==='save') perAskSave(); else if(v==='imp') perAskImport(); else if(v==='sample') perSampleHistory(); else if(v==='upd') updStart(PER.pid);
       else if(v==='ren'&&proj) perDialog('Rename project',`<label class="pfl"><span>Project name</span><input id="pdName" maxlength="80" value="${esc(proj.name)}"></label>`,'Rename',async d=>{ const n=d.querySelector('#pdName').value.trim(); if(!n) return false; await perRun('Renaming…',()=>PER.store.renameProject(proj.id,n)); });
       else if(v==='delp'&&proj) perDialog('Delete project?',`<p>This permanently deletes <b>${esc(proj.name)}</b> and its ${PER.periods.length} saved period${PER.periods.length===1?'':'s'} for everyone. This can’t be undone.</p>`,'Delete project',async()=>{ await perRun('Deleting project…',async()=>{ await perDeleteProject(proj); PER.pid=null; perToast('Project deleted.'); }); });
@@ -5502,10 +5532,10 @@ function qScoreFiles(files,k){ const sf=S.files, sm=M, sr=S.dq.role, ss=S.dq.sco
     return {p,w,f:a.length-p-w,n:a.length,score:a.length?(p+w*.5)/a.length:null}; }
   finally{ S.files=sf; M=sm; S.dq.role=sr; S.dq.scope=ss; Q.noPrev=false; DQ.ctx=ctx; } }
 /* ================= Portfolio: programmes and project slots ================= */
-const PORT={q:'',status:'all',collapsed:new Set(),sel:new Set()};
+const PORT={q:'',status:'all',collapsed:new Set(),sel:new Set(),prog:null};
 const PSTAT={planned:'Planned',active:'Active',on_hold:'On hold',complete:'Complete'};
 const PCOL=['#FC4C02','#3B6FE0','#14A37F','#9B5DE5','#D99A00','#E04F8C','#1BA1C4','#6DAA1A'];
-const STALE_DAYS=35;
+const staleDays=()=>(typeof PER!=='undefined'&&PER.mode==='supa'&&PER.site&&+PER.site.cycle)||35;
 try{ const c=JSON.parse(localStorage.getItem('pacer.port.collapsed')||'[]'); if(Array.isArray(c)) c.forEach(x=>PORT.collapsed.add(x)); }catch(_){}
 
 function portProjectOptions(sel){
@@ -5522,7 +5552,7 @@ function portFig(p){
   const vb=s.finish!=null&&s.blFinish!=null?day(s.finish-s.blFinish):null, mv=s.finish!=null&&s.prevFinish!=null?day(s.finish-s.prevFinish):null;
   const age=s.dd!=null?Math.floor((Date.now()-s.dd)/DAY):null;
   const rag=vb==null?'':vb<=0?'g':vb<=20?'a':'r';
-  return {slot:false,s,vb,mv,age,stale:age!=null&&age>STALE_DAYS&&p.status==='active',rag};
+  return {slot:false,s,vb,mv,age,stale:age!=null&&age>staleDays()&&p.status==='active',rag};
 }
 function portMatch(p){
   if(PORT.status!=='all'&&p.status!==PORT.status) return false;
@@ -5534,16 +5564,17 @@ const portCanEdit=x=>!perRO()&&perCanDel(x&&x.createdBy);
 function renderPort(){
   const el=document.getElementById('portWrap'); if(!el||el.hidden) return;
   if(!PER.mode){ el.innerHTML='<div class="card pempty big"><h3>Sign in to see your portfolio</h3><p class="muted">Your programmes, projects and their latest schedule updates appear here once you’re signed in.</p><button class="btn primary" id="portSignIn">Sign in</button></div>'; document.getElementById('portSignIn').onclick=()=>{ if(!document.getElementById('auth')) authStart(); }; return; }
+  if(PORT.prog&&PER.programmes.some(g=>g.id===PORT.prog)) return renderProgDash(el); PORT.prog=null;
   [...PORT.sel].forEach(id=>{ const p=PER.projects.find(x=>x.id===id); if(!p||!p.summary) PORT.sel.delete(id); });
   const ro=perRO(), G=PER.programmes, P=PER.projects, wsp=PER.mode!=='local'?(PER.space==='team'?(PER.mode==='supa'&&PER.company?PER.company.name:'Team workspace'):'Private workspace'):'This browser';
   const head=`<div class="card porthead">
     <div class="ph-t"><h2>${esc(wsp)}</h2><span class="pspace">${PER.programmes.length} programme${PER.programmes.length===1?'':'s'} · ${PER.projects.length} project${PER.projects.length===1?'':'s'}</span></div>
     <div class="ph-c"><input type="search" id="portQ" placeholder="Search programmes, projects, managers" value="${esc(PORT.q)}" aria-label="Search portfolio">
       <label class="ctl"><span>Status</span><select id="portStatus"><option value="all">All</option>${Object.entries(PSTAT).map(([k,v])=>`<option value="${k}" ${PORT.status===k?'selected':''}>${v}</option>`).join('')}</select></label>
-      <span class="pbusy" id="portBusy" ${PER.busy?'':'hidden'}>${esc(PER.busy)}</span>
+      <span class="pbusy" id="portBusy" ${PER.busy?'':'hidden'}>${esc(PER.busy)}</span>${P.length?'<button class="btn sm ghost" data-pd="portxls" title="Download the portfolio as an Excel workbook">Excel</button><button class="btn sm ghost" data-pd="print" title="Print or save as PDF">Print / PDF</button>':''}
       ${ro?'':`${!PER.schemaOld&&spMissing()?'<button class="btn sm ghost" data-w data-po="samplemore" title="Adds the sample programmes and fills their empty project slots with schedules">Add sample programmes</button>':''}<button class="btn sm" data-w data-po="addprog" ${PER.schemaOld?'disabled':''}>Add programme</button><button class="btn sm primary" data-w data-po="addproj">Add project</button>`}</div></div>`;
   const old=PER.schemaOld?`<div class="card pwarn portold"><b>One database step left.</b> Programmes need the latest <code>supabase/schema.sql</code>. Open Supabase → SQL Editor → New query, paste the whole file from the GitHub repo and click Run. Projects work in the meantime.</div>`:'';
-  if(!P.length&&!G.length){ el.innerHTML=head+old+`<div class="card pempty big"><h3>Build your portfolio</h3><p class="muted">Add a programme, then add a slot for each project in it. A slot holds the project’s name, status and manager until its first schedule update is saved, then shows forecast, variance and progress here. Or load the sample portfolio: four programmes and seven integrated projects with six monthly updates each.</p>
+  if(!P.length&&!G.length){ el.innerHTML=head+old+setupBanner()+`<div class="card pempty big"><h3>Build your portfolio</h3><p class="muted">Add a programme, then add a slot for each project in it. A slot holds the project’s name, status and manager until its first schedule update is saved, then shows forecast, variance and progress here. Or load the sample portfolio: four programmes and seven integrated projects with six monthly updates each.</p>
     <div class="prow">${ro?'':`<button class="btn primary" data-w data-po="addprog" ${PER.schemaOld?'disabled':''}>Add a programme</button><button class="btn" data-w data-po="addproj">Add a project slot</button><button class="btn" data-w data-po="sample" ${PER.schemaOld?'disabled':''}>Load sample portfolio</button>`}</div>${ro?'<p class="muted">You have view-only access, so ask an editor to set up programmes.</p>':''}</div>`; perBusy(PER.busy); return; }
   // KPIs over everything (unfiltered)
   const F=P.map(p=>({p,f:portFig(p)})), withS=F.filter(x=>!x.f.slot), slots=F.length-withS.length;
@@ -5555,7 +5586,7 @@ function renderPort(){
     <div class="stat"><div class="sl">Behind baseline</div><div class="sv ${behind.length?'late':''}">${behind.length}</div><div class="ss">of ${withS.filter(x=>x.f.vb!=null).length} with a baseline</div></div>
     <div class="stat"><div class="sl">Worst variance</div><div class="sv ${worst?'late':''}">${worst?dS(worst.f.vb):'—'}</div><div class="ss">${worst?esc(worst.p.name):'nothing behind'}</div></div>
     <div class="stat"><div class="sl">Slipped last period</div><div class="sv ${slipped.length?'late':''}">${slipped.length}</div><div class="ss">forecast finish moved later</div></div>
-    <div class="stat"><div class="sl">Updates due</div><div class="sv ${stale.length?'amber':''}">${stale.length}</div><div class="ss">active, none in ${STALE_DAYS} days</div></div></div>`;
+    <div class="stat"><div class="sl">Updates due</div><div class="sv ${stale.length?'amber':''}">${stale.length}</div><div class="ss">active, none in ${staleDays()} days</div></div></div>`;
   const row=p=>{ const f=portFig(p), s=f.s, can=portCanEdit(p);
     const who=[p.code,p.manager].filter(Boolean).map(esc).join(' · ');
     if(f.slot) return `<div class="prow2 slot" data-pid="${esc(p.id)}">
@@ -5584,14 +5615,14 @@ function renderPort(){
         <div class="prog-t"><div class="prog-n">${g?esc(g.name):'Not in a programme'}${g&&g.code?`<span class="pcode">${esc(g.code)}</span>`:''}</div>
           <div class="prog-m">${g&&g.client?esc(g.client)+' · ':''}${list.length} project${list.length===1?'':'s'}${list.length-F2.length?` (${list.length-F2.length} slot${list.length-F2.length===1?'':'s'})`:''}${g&&g.description?` · ${esc(g.description)}`:''}</div></div>
         <div class="prog-k"><div><span class="pl">Programme finish</span><b>${fin.length?fmtD(Math.max(...fin)):'—'}</b></div><div><span class="pl">Worst variance</span><b class="${dCls(worstV)}">${dS(worstV)}</b></div><i class="rag ${rag}" aria-hidden="true"></i></div>
-        <div class="prog-a">${g&&F2.length>1?`<button class="btn sm primary" data-w data-po="openprog" data-id="${esc(g.id)}" title="Open the latest update of every project in this programme together">Open programme</button>`:''}${!ro&&g?`<button class="btn sm" data-w data-po="addproj" data-g="${esc(g.id)}">Add project</button>`:''}${can?`<button class="btn sm ghost" data-w data-po="editprog" data-id="${esc(g.id)}">Edit</button>`:''}</div>
+        <div class="prog-a">${g&&F2.length?`<button class="btn sm" data-pd="open" data-id="${esc(g.id)}" title="Programme dashboard: trends, earned value and narrative across its projects">Dashboard</button>`:''}${g&&F2.length>1?`<button class="btn sm primary" data-w data-po="openprog" data-id="${esc(g.id)}" title="Open the latest update of every project in this programme together">Open programme</button>`:''}${!ro&&g?`<button class="btn sm" data-w data-po="addproj" data-g="${esc(g.id)}">Add project</button>`:''}${can?`<button class="btn sm ghost" data-w data-po="editprog" data-id="${esc(g.id)}">Edit</button>`:''}</div>
       </header>
       <div class="prog-b">${shown.length?`<div class="prow2 hd" aria-hidden="true"><div>Project</div><div>Status</div><div>Latest update</div><div>Forecast finish</div><div>Vs baseline</div><div>Progress</div><div>BEI</div><div></div></div>${shown.map(row).join('')}`:`<div class="pempty sm">${list.length?'No projects match the filters.':`No projects yet.${!ro&&g?' Add a project slot to start.':''}`}</div>`}</div></section>`; };
   const un=P.filter(p=>!p.programmeId||!G.some(g=>g.id===p.programmeId));
   const body=G.map((g,i)=>sect(g,P.filter(p=>p.programmeId===g.id),i)).join('')+(un.length?sect(null,un,0):'');
-  el.innerHTML=head+old+tiles+`<div class="portlist">${body||'<div class="card pempty">Nothing matches your search.</div>'}</div>
+  el.innerHTML=head+old+setupBanner()+tiles+`<div class="portlist">${body||'<div class="card pempty">Nothing matches your search.</div>'}</div>
     ${PORT.sel.size?`<div class="selbar card" role="region" aria-label="Selected projects"><b>${PORT.sel.size} project${PORT.sel.size===1?'':'s'} selected</b><span class="muted">${esc([...PORT.sel].map(id=>(PER.projects.find(p=>p.id===id)||{}).name).filter(Boolean).join(', '))}</span><button class="btn sm primary" data-w data-po="opensel">${PORT.sel.size>1?'Open together':'Open'}</button><button class="btn sm" data-po="clearsel">Clear</button></div>`:''}
-    <div class="note">Tick projects to open several together, or use Open programme. Rows are coloured by forecast finish against baseline: green on or ahead, amber up to 20 days late, red beyond that. “Updates due” counts active projects with no update in the last ${STALE_DAYS} days.</div>`;
+    <div class="note">Tick projects to open several together, or use Open programme. Rows are coloured by forecast finish against baseline: green on or ahead, amber up to 20 days late, red beyond that. “Updates due” counts active projects with no update in the last ${staleDays()} days.</div>`;
   perBusy(PER.busy);
 }
 
@@ -5677,6 +5708,8 @@ function wirePort(){
   w.addEventListener('change',e=>{ if(e.target.id==='portStatus'){ PORT.status=e.target.value; renderPort(); }
     else if(e.target.dataset.sel){ const id=e.target.dataset.sel; e.target.checked?PORT.sel.add(id):PORT.sel.delete(id); const y=scrollY; renderPort(); scrollTo(0,y); } });
   w.addEventListener('click',e=>{
+    const pdb=e.target.closest('[data-pd]'); if(pdb){ const v=pdb.dataset.pd;
+      if(v==='open') pdOpen(pdb.dataset.id); else if(v==='back'){ PORT.prog=null; renderPort(); } else if(v==='xls') pdExport(); else if(v==='portxls') xlsSave(`Portfolio ${new Date().toISOString().slice(0,10)}`,[{name:'Projects',rows:portExportRows()}]); else if(v==='print') repPrint(PORT.prog?(PER.programmes.find(g=>g.id===PORT.prog)||{}).name:'Portfolio'); return; }
     const b=e.target.closest('[data-po]'); if(!b) return; const v=b.dataset.po, id=b.dataset.id;
     if(v==='addprog') portProgDialog(null);
     else if(v==='addproj') portProjectDialog(null,{programmeId:b.dataset.g||null});
@@ -6223,6 +6256,111 @@ function portUpdateChoice(pid){
     const v=d.querySelector('[name=ucM]:checked').value; setTimeout(()=>v==='edit'?updStart(pid):portUpload(pid),0); });
 }
 
+/* ================= Reports: programme dashboard, exports, set-up checklist, phone activity list ================= */
+
+/* ---- exports: Excel (SheetJS, loaded on first use) with CSV fallback, and print / save as PDF ---- */
+let XLSXP=null;
+function xlsxLib(){ if(window.XLSX) return Promise.resolve(window.XLSX); if(XLSXP) return XLSXP;
+  XLSXP=new Promise((res,rej)=>{ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; s.onload=()=>res(window.XLSX); s.onerror=()=>{ XLSXP=null; rej(new Error('Excel export could not load')); }; document.head.appendChild(s); }); return XLSXP; }
+// sheets: [{name, rows:[[...header],[...]...], widths?}]
+async function xlsSave(base,sheets){
+  const safe=base.replace(/[^\w\- ]+/g,'').trim()||'export';
+  try{ const X=await xlsxLib(), wb=X.utils.book_new();
+    sheets.forEach(sh=>{ const ws=X.utils.aoa_to_sheet(sh.rows); ws['!cols']=(sh.widths||sh.rows[0].map((h,i)=>Math.min(60,Math.max(10,...sh.rows.slice(0,200).map(r=>String(r[i]??'').length))+2))).map(w=>({wch:w})); X.utils.book_append_sheet(wb,ws,sh.name.slice(0,31)); });
+    const out=X.write(wb,{bookType:'xlsx',type:'array'});
+    await repSave(safe+'.xlsx',new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  }catch(e){ console.warn(e); const sh=sheets[0], q=v=>`"${String(v??'').replace(/"/g,'""')}"`; await repSave(safe+'.csv',sh.rows.map(r=>r.map(q).join(',')).join('\n')); perToast('Excel export wasn’t available here, so this was saved as a CSV file.'); }
+}
+async function repSave(fn,data){
+  try{ const dl=window.claude?await window.claude.use('downloads'):null; if(dl){ await dl.save({filename:fn,data}); return; } }catch(e){ if(e&&e.code==='declined') return; }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(data instanceof Blob?data:new Blob([data])); a.download=fn; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+}
+function repPrint(title){ const t=document.title; if(title) document.title=title; document.body.classList.add('printing'); setTimeout(()=>{ window.print(); document.body.classList.remove('printing'); document.title=t; },60); }
+const xD=t=>t==null?'':new Date(t).toISOString().slice(0,10), xN=(v,d=2)=>v==null||!isFinite(v)?'':Math.round(v*10**d)/10**d, xP=v=>v==null?'':Math.round(v*1000)/10;
+
+function portExportRows(list){ const P=list||PER.projects;
+  const head=['Programme','Project','Code','Status','Manager','Latest update','Data date','Forecast finish','Baseline finish','Variance (d)','Moved this period (d)','Actual %','Planned %','BEI','Critical','Negative float','Updates saved'];
+  return [head].concat(P.map(p=>{ const s=p.summary||{}, g=PER.programmes.find(x=>x.id===p.programmeId), vb=s.finish!=null&&s.blFinish!=null?Math.round((s.finish-s.blFinish)/DAY):'', mv=s.finish!=null&&s.prevFinish!=null?Math.round((s.finish-s.prevFinish)/DAY):'';
+    return [g?g.name:'',p.name,p.code||'',PSTAT[p.status]||p.status||'',p.manager||'',s.label||'',xD(s.dd),xD(s.finish),xD(s.blFinish),vb,mv,xP(s.pctA),xP(s.pctP),xN(s.bei),s.crit??'',s.neg??'',s.count||0]; })); }
+function perExportRows(){ const P=PER.periods;
+  const head=['Update','Data date','Forecast finish','Baseline finish','Variance (d)','Moved (d)','Actual %','Planned %','BEI','Hit rate %','Critical','Negative float','Open ends','Budget','Planned value','Earned value','Actual cost','SPI','CPI','Estimate at completion','Notes','What changed','Causes','Recovery','Risks'];
+  return [head].concat(P.map((p,i)=>{ const s=p.stats||{}, pr=i?P[i-1].stats||{}:{}, c=s.cost||{}, n=p.narrative||{}, rel=s.rel&&s.rel.pf?s.rel.hf/s.rel.pf:null;
+    return [p.label,xD(p.dd),xD(s.finish),xD(s.blFinish),s.finish!=null&&s.blFinish!=null?Math.round((s.finish-s.blFinish)/DAY):'',i&&s.finish!=null&&pr.finish!=null?Math.round((s.finish-pr.finish)/DAY):'',xP(s.pctA),xP(s.pctP),xN(s.bei),xP(rel),s.crit??'',s.neg??'',s.open??'',xN(c.bac,0),xN(c.pv,0),xN(c.ev,0),xN(c.ac,0),xN(c.spi),xN(c.cpi),xN(c.eac,0),p.notes||'',n.changed||'',n.cause||'',n.recovery||'',n.risks||'']; })); }
+
+/* ---- programme dashboard ---- */
+const PD={cache:new Map()};
+async function pdPeriods(p){ const k=p.id+'|'+(p.updatedAt||0)+'|'+((p.summary||{}).count||0); if(PD.cache.has(k)) return PD.cache.get(k);
+  const L=(await PER.store.listPeriods(p.id)).sort((a,b)=>(a.dd||0)-(b.dd||0)||(a.savedAt||0)-(b.savedAt||0)); PD.cache.set(k,L); return L; }
+function pdOpen(gid){ PORT.prog=gid; renderPort(); scrollTo(0,0); }
+async function renderProgDash(el){
+  const g=PER.programmes.find(x=>x.id===PORT.prog); if(!g){ PORT.prog=null; return renderPort(); }
+  const projs=PER.projects.filter(p=>p.programmeId===g.id), withS=projs.filter(p=>p.summary);
+  el.innerHTML=`<div class="card porthead"><div class="ph-t"><button class="btn sm ghost" data-pd="back">← Portfolio</button><h2>${esc(g.name)}</h2><span class="pspace">${esc([g.client,`${projs.length} project${projs.length===1?'':'s'}`].filter(Boolean).join(' · '))}</span></div>
+    <div class="ph-c">${withS.length>1?`<button class="btn sm primary" data-w data-po="openprog" data-id="${esc(g.id)}">Open all in workbench</button>`:''}<button class="btn sm" data-pd="xls">Excel</button><button class="btn sm" data-pd="print">Print / PDF</button></div></div><div id="pdBody" class="pdb2"><div class="card pempty">Loading the programme’s updates…</div></div>`;
+  const tok=(PD.tok=(PD.tok||0)+1);
+  let per; try{ per=await Promise.all(withS.map(pdPeriods)); }catch(e){ document.getElementById('pdBody').innerHTML=`<div class="card pempty">${esc(perErr(e))}</div>`; return; }
+  if(tok!==PD.tok||!document.getElementById('pdBody')) return;
+  const PAL=['var(--accent)','#3B6FE0','#14A37F','#9B5DE5','#D99A00','#E04F8C','#1BA1C4','#6DAA1A'];
+  const xs=[...new Set(per.flat().map(p=>p.dd).filter(x=>x!=null))].sort((a,b)=>a-b), xl=v=>fmtD(v).slice(3);
+  const at=(L,d)=>{ let r=null; for(const p of L){ if(p.dd!=null&&p.dd<=d) r=p; } return r; };
+  const roll=d=>{ let n=0,a=0,pl=0,np=0,done=0,due=0,c=null; per.forEach(L=>{ const p=at(L,d); if(!p) return; const s=p.stats||{}, w=s.n||1; n+=w; a+=(s.pctA||0)*w; if(s.pctP!=null){ pl+=s.pctP*w; np+=w; } done+=s.done||0; due+=s.due||0; if(s.cost){ c=c||{pv:0,ev:0,ac:0,bac:0,eac:0}; ['pv','ev','ac','bac','eac'].forEach(k=>c[k]+=s.cost[k]||0); } }); return {a:n?a/n:null,p:np?pl/np:null,bei:due?done/due:null,c}; };
+  const R=xs.map(roll), last=R[R.length-1]||{}, fins=withS.map(p=>p.summary.finish).filter(x=>x!=null), bls=withS.map(p=>p.summary.blFinish).filter(x=>x!=null);
+  const pf=fins.length?Math.max(...fins):null, pbl=bls.length?Math.max(...bls):null, pv=pf!=null&&pbl!=null?Math.round((pf-pbl)/DAY):null;
+  const stale=projs.filter(p=>p.status==='active'&&(!p.summary||(Date.now()-(p.summary.dd||0))/DAY>staleDays())).length;
+  const tiles=`<div class="card stats">
+    <div class="stat"><div class="sl">Programme finish</div><div class="sv">${fmtD(pf)}</div><div class="ss">${pv!=null?`<span class="${dCls(pv)}">${dS(pv)}</span> vs baseline`:'no baseline'}</div></div>
+    <div class="stat"><div class="sl">Progress</div><div class="sv">${pctS(last.a)}</div><div class="ss">planned ${pctS(last.p)} · activity-weighted</div></div>
+    <div class="stat"><div class="sl">BEI</div><div class="sv ${last.bei!=null&&last.bei<.95?'late':''}">${last.bei!=null?last.bei.toFixed(2):'—'}</div><div class="ss">all projects</div></div>
+    <div class="stat"><div class="sl">Cost (CPI · SPI)</div><div class="sv">${last.c&&last.c.ac?(last.c.ev/last.c.ac).toFixed(2):'—'} · ${last.c&&last.c.pv?(last.c.ev/last.c.pv).toFixed(2):'—'}</div><div class="ss">${last.c?`EAC ${moneyK(last.c.eac)} of ${moneyK(last.c.bac)}`:'no costs in the schedules'}</div></div>
+    <div class="stat"><div class="sl">Projects behind</div><div class="sv ${withS.some(p=>p.summary.finish>p.summary.blFinish)?'late':''}">${withS.filter(p=>p.summary.blFinish!=null&&p.summary.finish>p.summary.blFinish).length}</div><div class="ss">of ${withS.length} with updates</div></div>
+    <div class="stat"><div class="sl">Updates due</div><div class="sv ${stale?'amber':''}">${stale}</div><div class="ss">none in ${staleDays()} days</div></div></div>`;
+  const c1=perChart({x:xs,yDate:true,xLab:xl,h:260,label:'Forecast finish by project',series:withS.map((p,i)=>({name:p.name,c:PAL[i%PAL.length],pts:xs.map(d=>{ const r=per[i].find(q=>q.dd===d); return [d,r&&r.stats?r.stats.finish:null]; })}))});
+  const c2=perChart({x:xs,xLab:xl,y0:0,y1:1,yFmt:v=>Math.round(v*100)+'%',label:'Programme progress',series:[{name:'Planned',c:'var(--ink3)',dash:true,hollow:true,pts:R.map((r,i)=>[xs[i],r.p])},{name:'Actual',c:perC.live,pts:R.map((r,i)=>[xs[i],r.a])}]});
+  const hasC=R.some(r=>r.c);
+  const c3=hasC?perChart({x:xs,xLab:xl,y0:0,ml:62,yFmt:v=>moneyK(v),label:'Programme earned value',series:[{name:'Planned value',c:'var(--ink3)',dash:true,hollow:true,tip:p=>moneyK(p[1]),pts:R.map((r,i)=>[xs[i],r.c?r.c.pv:null])},{name:'Earned value',c:perC.blue,tip:p=>moneyK(p[1]),pts:R.map((r,i)=>[xs[i],r.c?r.c.ev:null])},{name:'Actual cost',c:perC.live,tip:p=>moneyK(p[1]),pts:R.map((r,i)=>[xs[i],r.c?r.c.ac:null])}]}):'';
+  const tbl=`<div class="card dpanel span3"><div class="ph"><span class="sl">Projects</span><span class="pn">latest update of each</span></div><div class="tw"><table class="rt"><thead><tr><th>Project</th><th>Latest update</th><th class="n">Forecast finish</th><th class="n">Vs baseline</th><th class="n">This period</th><th class="n">Progress</th><th class="n">BEI</th><th class="n">CPI</th><th>Status</th></tr></thead><tbody>
+    ${projs.map((p,i)=>{ const s=p.summary, j=withS.indexOf(p), L=j>=0?per[j]:[], lp=L[L.length-1], c=lp&&lp.stats&&lp.stats.cost, vb=s&&s.finish!=null&&s.blFinish!=null?Math.round((s.finish-s.blFinish)/DAY):null, mv=s&&s.finish!=null&&s.prevFinish!=null?Math.round((s.finish-s.prevFinish)/DAY):null;
+      return `<tr><td><i class="pdk" style="background:${j>=0?PAL[j%PAL.length]:'var(--line)'}"></i><b>${esc(p.name)}</b>${p.manager?`<div class="muted">${esc(p.manager)}</div>`:''}</td><td>${s?esc(s.label||fmtD(s.dd)):'<span class="muted">No update yet</span>'}</td><td class="n">${s?fmtD(s.finish):'—'}</td><td class="n ${dCls(vb)}">${dS(vb)}</td><td class="n ${dCls(mv)}">${s?dS(mv):'—'}</td><td class="n">${s?pctS(s.pctA)+' / '+pctS(s.pctP):'—'}</td><td class="n">${s&&s.bei!=null?(+s.bei).toFixed(2):'—'}</td><td class="n">${c&&c.cpi!=null?c.cpi.toFixed(2):'—'}</td><td>${esc(PSTAT[p.status]||'')}</td></tr>`; }).join('')}</tbody></table></div></div>`;
+  const nar=withS.map((p,i)=>{ const L=per[i], lp=L[L.length-1]; return lp&&narHas(lp.narrative)?`<div class="pdn"><div class="pdn-h"><b>${esc(p.name)}</b><span class="muted">${esc(lp.label)}</span></div>${NAR.filter(([k])=>lp.narrative[k]).map(([k,l])=>`<div class="sl">${l}</div><p>${esc(lp.narrative[k])}</p>`).join('')}</div>`:''; }).join('');
+  document.getElementById('pdBody').innerHTML=tiles+`<div class="dgrid pgrid">
+    <div class="card dpanel span2"><div class="ph"><span class="sl">Forecast finish by project</span><span class="pn">at each data date</span></div>${c1}${perKeyLeg(withS.map((p,i)=>[PAL[i%PAL.length],p.name]))}</div>
+    <div class="card dpanel"><div class="ph"><span class="sl">Programme progress</span><span class="pn">activity-weighted</span></div>${c2}${perKeyLeg([['var(--ink3)','Planned',1],[perC.live,'Actual']])}</div>
+    ${hasC?`<div class="card dpanel span3"><div class="ph"><span class="sl">Programme earned value</span><span class="pn">all projects’ resource and expense costs</span></div>${c3}${perKeyLeg([['var(--ink3)','Planned value',1],[perC.blue,'Earned value'],[perC.live,'Actual cost']])}</div>`:''}
+    ${tbl}
+    <div class="card dpanel span3"><div class="ph"><span class="sl">Latest narrative</span><span class="pn">from each project’s most recent update</span></div>${nar||'<div class="pempty">No narratives yet. Add one when saving an update, or from a period on the Periods tab.</div>'}</div></div>`;
+  PD.last={g,projs,per,withS};
+}
+function pdExport(){ const d=PD.last; if(!d) return; const rows=portExportRows(d.projs);
+  const nar=[['Project','Update','Data date','What changed','Causes','Recovery','Risks']].concat(d.withS.map((p,i)=>{ const L=d.per[i], lp=L[L.length-1]||{}, n=lp.narrative||{}; return [p.name,lp.label||'',xD(lp.dd),n.changed||'',n.cause||'',n.recovery||'',n.risks||'']; }));
+  const hist=[['Project','Update','Data date','Forecast finish','Baseline finish','Actual %','Planned %','BEI','Earned value','Actual cost','CPI','SPI']].concat(d.withS.flatMap((p,i)=>d.per[i].map(q=>{ const s=q.stats||{}, c=s.cost||{}; return [p.name,q.label,xD(q.dd),xD(s.finish),xD(s.blFinish),xP(s.pctA),xP(s.pctP),xN(s.bei),xN(c.ev,0),xN(c.ac,0),xN(c.cpi),xN(c.spi)]; })));
+  xlsSave(`${d.g.name} programme ${new Date().toISOString().slice(0,10)}`,[{name:'Projects',rows},{name:'History',rows:hist},{name:'Narrative',rows:nar,widths:[28,24,12,50,50,50,50]}]); }
+
+/* ---- set-up checklist for a company's admins ---- */
+function setupSteps(){ const c=PER.company||{}, b=c.branding||{}, k=PER.coCounts||{};
+  return [
+    ['name','Name your company',!!c.name&&c.name!=='My company','co-access','Company name and sign-in rules'],
+    ['brand','Add your branding',!!(b.title||b.accent||b.logo),'co-brand','Title, colour and logo'],
+    ['people','Invite your team',(k.people||0)>1||(k.invites||0)>0||!!c.auto_approve_domain,'co-invites','Invitations or an auto-join email domain'],
+    ['quality','Choose your quality checks',!!(Q.cfg&&Q.cfg.at),'co-quality','DCMA, AACE or your own set'],
+    ['programme','Create a programme',PER.programmes.length>0,'port','Group your projects on the Portfolio'],
+    ['update','Save the first schedule update',PER.projects.some(p=>p.summary),'port','Upload XER files to a project']]; }
+function setupCard(full){ const S2=setupSteps(), done=S2.filter(s=>s[2]).length; if(done===S2.length&&!full) return '';
+  return `<div class="card setup${full?' full':''}"><div class="su-h"><div><b>${done===S2.length?'Your workbench is set up':'Get your workbench ready'}</b><span class="muted">${done} of ${S2.length} done</span></div><span class="su-bar"><i style="width:${(done/S2.length*100).toFixed(0)}%"></i></span>${!full?'<button class="link" data-su="hide">Hide</button>':''}</div>
+    <div class="su-l">${S2.map(([k,l,ok,go,sub])=>`<button class="su-i${ok?' ok':''}" data-su="${go}"><span class="su-c" aria-hidden="true">${ok?'✓':''}</span><span><b>${l}</b><em>${sub}</em></span></button>`).join('')}</div></div>`; }
+function setupBanner(){ if(PER.mode!=='supa'||!PER.companyId||PER.srole!=='admin'||(PER.site&&PER.site.hideSetup)) return ''; return setupCard(false); }
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-su]'); if(!b) return; const v=b.dataset.su;
+  if(v==='hide'){ PER.site={...(PER.site||{}),hideSetup:true}; PER.sb.from('company_settings').upsert({company_id:PER.companyId,site:PER.site,updated_by:PER.uid,updated_at:new Date().toISOString()}).then(()=>{}); renderPort(); return; }
+  if(v==='port') setTab('port'); else admGo(v); });
+
+/* ---- phone: an activity list instead of the Gantt chart ---- */
+const ML={n:150};
+function mobileList(){ const host=document.getElementById('mList'); if(!host) return; const on=S.tab==='gantt'&&innerWidth<=600&&M; host.hidden=!on; gWrap.classList.toggle('m-hide',!!on); if(!on) return;
+  const rows=(S.rows||[]).slice(0,ML.n);
+  host.innerHTML=`<div class="ml-h"><b>${(S.rows||[]).length} activities</b><span class="muted">Turn your phone sideways or use a larger screen for the Gantt chart.</span></div>${rows.map(r=>{ const st=stat(r);
+    return `<button class="ml-i ${r.crit?'crit':''}" data-k="${esc(r.k)}"><span class="ml-c">${esc(r.code)}</span><span class="ml-n">${esc(r.name)}</span><span class="ml-d">${fmtD(r.s)} → ${fmtD(r.f)}</span><span class="ml-s">${st==='cp'?'Complete':st==='ip'?'In progress':st==='ns'?'Not started':'Removed'}${r.tf!=null&&st!=='cp'?` · TF ${Math.round(r.tf)}d`:''}${r.varF!=null?` · <span class="${dCls(r.varF)}">${dS(r.varF)}</span>`:''}</span></button>`; }).join('')}
+    ${(S.rows||[]).length>ML.n?`<button class="btn sm ml-more" data-ml-more>Show ${Math.min(150,(S.rows||[]).length-ML.n)} more</button>`:''}`; }
+document.addEventListener('click',e=>{ const m=e.target.closest('#mList [data-ml-more]'); if(m){ ML.n+=150; mobileList(); return; } const i=e.target.closest('#mList .ml-i'); if(i) openDrawer(i.dataset.k); });
+addEventListener('resize',()=>{ if(S.tab==='gantt') mobileList(); });
 function init(){
   readTheme(); loadPrefs(); exLoad(); ifcLoad(); bLoad(); try{ const cp=JSON.parse(localStorage.getItem('pacer.cp')||'null'); if(cp&&['off','hi','only'].includes(cp.mode)) S.cp={...S.cp,...cp}; }catch(_){} try{ const tl=JSON.parse(localStorage.getItem('pacer.tilos')||'null'); if(tl){ const {styles,...rest}=tl; Object.assign(S.tld,rest); S.styles=styles||{}; } const st=JSON.parse(localStorage.getItem('pacer.site')||'null'); if(st&&Array.isArray(st.marks)) S.site=st; }catch(_){} try{ S.chmap=JSON.parse(localStorage.getItem('pacer.chmap')||'{}')||{}; const cf=JSON.parse(localStorage.getItem('pacer.chfmt')||'null'); if(cf&&FMT[cf.fmt]) S.tld.fmt=cf.fmt; }catch(_){} try{ const lg=localStorage.getItem('pacer.logic'); if(['off','sel','all'].includes(lg)) S.logic=lg; }catch(_){} wire();
   S.files=(B.st&&B.st.sync&&B.res&&!B.res.loops.length)?bToFiles():sampleFiles(); if(!S.site.marks.length&&!S.site.profile.length) S.site=sampleSite(); if(!Object.keys(S.styles).length) S.styles=sampleStyles();

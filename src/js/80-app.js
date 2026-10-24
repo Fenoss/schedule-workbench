@@ -15,7 +15,7 @@ function renderAvail(q){
 }
 
 /* ---------------- orchestration ---------------- */
-function redraw(){ if(S.tab==='gantt') drawGantt(); else if(S.tab==='tld') drawTLD(); else if(S.tab==='dq') renderDQ(); else if(S.tab==='exec') renderExec(); else if(S.tab==='ifc') renderIfc(); else if(S.tab==='ai') renderAi(); else if(S.tab==='build') renderBuild(); else if(S.tab==='per') renderPer(); else if(S.tab==='port') renderPort(); else if(S.tab==='admin') renderAdmin(); else renderDash(); }
+function redraw(){ if(typeof mobileList==='function') mobileList(); if(S.tab==='gantt') drawGantt(); else if(S.tab==='tld') drawTLD(); else if(S.tab==='dq') renderDQ(); else if(S.tab==='exec') renderExec(); else if(S.tab==='ifc') renderIfc(); else if(S.tab==='ai') renderAi(); else if(S.tab==='build') renderBuild(); else if(S.tab==='per') renderPer(); else if(S.tab==='port') renderPort(); else if(S.tab==='admin'){ if(!document.getElementById('admBody')||ADM.shown!==ADM.sec||!admAllowed()) renderAdmin(); } else renderDash(); }
 function applyFilters(){ S.rows=filtered(); buildItems(); renderLegend(); updateBadge(); if(S.tab==='tld') T.view=null; redraw(); }
 function pickTldDefaults(){
   const u=M.udfs; const sU=u.find(x=>/chain|km|mile|station|loc|ch\b/i.test(x)&&/start|from|begin/i.test(x))||u.find(x=>/start|from/i.test(x));
@@ -147,7 +147,7 @@ function wire(){
   document.getElementById('aiWrap').addEventListener('keydown',e=>{ if(e.key==='Escape'){ e.stopPropagation(); aiPanel(false); document.getElementById('btnAi').focus(); } });
   addEventListener('resize',()=>{ if(!document.getElementById('aiWrap').hidden) aiPlace(); });
   document.getElementById('tabBuild').onclick=()=>setTab('build');
-  document.getElementById('tabPer').onclick=()=>setTab('per'); document.getElementById('tabPort').onclick=()=>setTab('port'); document.getElementById('tabAdmin').onclick=()=>setTab('admin'); wirePer();
+  document.getElementById('tabPer').onclick=()=>setTab('per'); document.getElementById('tabPort').onclick=()=>{ PORT.prog=null; setTab('port'); }; document.getElementById('tabAdmin').onclick=()=>setTab('admin'); wirePer();
   wireBuild(); wireBa();
   wireAi();
   wireIfc();
