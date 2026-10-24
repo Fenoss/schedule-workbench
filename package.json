@@ -1,0 +1,14 @@
+{
+  "name": "schedule-workbench",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node build.mjs --check",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.0",
+    "axe-core": "4.10.2"
+  }
+}

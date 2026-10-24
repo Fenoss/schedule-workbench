@@ -1,0 +1,147 @@
+
+<header class="top">
+  <div class="wrap top-in">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="var(--accent)"/><rect x="6" y="6.5" width="11" height="4" rx="2" fill="#fff"/><path d="M6 16h4.5l2.5-3.5 3 7 2.5-3.5H26" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="15" y="21.5" width="11" height="4" rx="2" fill="#fff" opacity=".75"/></svg>
+      <span class="bname">Schedule <span>Workbench</span></span>
+    </div>
+    <nav class="nav1" role="tablist" aria-label="Area">
+      <button class="n1t" role="tab" id="tabPort" aria-selected="false">Portfolio</button>
+      <button class="n1t" role="tab" id="navProj" aria-selected="false">Project<span class="n1p" id="navProjName"></span></button>
+      <button class="n1t" role="tab" id="tabBuild" aria-selected="false">Build</button>
+      <button class="n1t" role="tab" id="tabAdmin" aria-selected="false" hidden>Admin</button>
+    </nav>
+    <div class="ctxw"><button class="ctx" id="meta" aria-haspopup="true" aria-expanded="false" aria-label="Select Schedule" title="Select Schedule"></button><div class="card ctxmenu" id="ctxMenu" hidden></div></div>
+    <div class="top-actions">
+      <button class="btn only-m" id="btnFilters">View &amp; filters <span class="cnt" id="fBadge" hidden></span></button>
+      <button class="btn" id="btnFiles" hidden>Files <span class="cnt" id="fileCnt">0</span></button>
+      <button class="uchip" id="userChip" aria-haspopup="true" aria-expanded="false" aria-label="Account" hidden></button>
+      <div class="card umenu" id="userMenu" hidden></div>
+    </div>
+  </div>
+</header>
+
+
+<nav class="navs" aria-label="Project views">
+  <div class="nav2w" id="nav2"><div class="wrap nav2">
+    <div class="n2" role="tablist" aria-label="Project views">
+      <div class="n2g"><span class="n2l">Overview</span><div class="n2b"><button class="tab" role="tab" id="tabDash" aria-selected="false">Dashboard</button></div></div>
+      <div class="n2g"><span class="n2l">Schedule</span><div class="n2b"><button class="tab" role="tab" id="tabGantt" aria-selected="true">Gantt</button><button class="tab" role="tab" id="tabTld" aria-selected="false">Time–location</button></div></div>
+      <div class="n2g"><span class="n2l">Assurance</span><div class="n2b"><button class="tab" role="tab" id="tabDq" aria-selected="false">Quality</button><button class="tab" role="tab" id="tabIfc" aria-selected="false">Interfaces</button></div></div>
+      <div class="n2g"><span class="n2l">Reporting</span><div class="n2b"><button class="tab" role="tab" id="tabPer" aria-selected="false">Periods</button><button class="tab" role="tab" id="tabExec" aria-selected="false">Plan on a Page</button></div></div>
+    </div>
+    <button class="btn aibtn" id="btnAi" aria-expanded="false" aria-controls="aiWrap"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" fill="currentColor"/><circle cx="18.5" cy="17.5" r="1.8" fill="currentColor"/><circle cx="6" cy="18" r="1.2" fill="currentColor"/></svg><span>Ask AI</span></button>
+  </div></div>
+</nav>
+
+<main class="wrap main">
+  <aside class="card side" id="side">
+    <section class="sbox" id="sbView"><div class="sbh"><button class="sbt" data-sb="view" aria-expanded="true" aria-controls="sbViewB"><svg class="sbc" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>View</span></button></div><div class="sbb" id="sbViewB"><div class="controls" id="controls"></div></div></section>
+    <section class="sbox" id="sbFilt"><div class="sbh"><button class="sbt" data-sb="filt" aria-expanded="true" aria-controls="sideF"><svg class="sbc" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>Filters</span><span class="cnt" id="sbFiltN" hidden></span></button><button class="link" id="fClear">Clear all</button></div><div class="sbb" id="sideF"></div></section>
+  </aside>
+  <section class="stage">
+    <div class="colpanel card chpanel" id="chPanel" role="dialog" aria-label="Chainage map" hidden></div>
+    <div class="colpanel card tpanel" id="tvPanel" role="dialog" aria-label="Display options" hidden></div>
+    <div class="colpanel card tpanel" id="stylePanel" role="dialog" aria-label="Activity styles" hidden></div>
+    <div class="colpanel card chpanel" id="sitePanel" role="dialog" aria-label="Site band" hidden></div>
+    <div class="colpanel card" id="colPanel" role="dialog" aria-label="Choose columns" hidden>
+      <div class="cph"><strong>Table columns</strong><span class="sp"></span><button class="link" id="cpReset">Reset</button><button class="fx" id="cpClose" aria-label="Close">×</button></div>
+      <div class="cpb">
+        <div class="cps"><div class="fh">Shown, in order</div><div id="cpShown"></div></div>
+        <div class="cpv"><input id="cpq" type="search" placeholder="Search fields, e.g. late start, free float" autocomplete="off"><div id="cpAvail"></div></div>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="chart" id="ganttWrap">
+      <canvas id="ganttCv"></canvas>
+      <div class="scroller" id="ganttSc"><div class="spacer" id="ganttSp"></div></div>
+    </div>
+    <div class="card dock" id="dock" hidden></div>
+    <div class="chart" id="tldWrap" hidden>
+      <canvas id="tldCv"></canvas>
+    </div>
+    <div class="card clashes" id="clashList" hidden></div>
+    <div class="card dq" id="dqWrap" hidden></div>
+    <div class="ifc" id="ifcWrap" hidden></div>
+    <div class="card bai" id="bAi" hidden></div>
+    <div class="build" id="buildWrap" hidden></div>
+    <div class="exec" id="execWrap" hidden>
+      <div class="exbar">
+        <div class="exbar-l"><button class="btn sm" id="exEdit" aria-expanded="false">Edit plan</button><button class="btn sm" id="exAddRow">Add row</button><label class="tg"><input type="checkbox" id="exCp"> Critical path</label><span id="exCpOpt"></span><span class="muted" id="exInfo"></span></div>
+        <div class="exbar-r"><label class="ctl"><span>Page</span><select id="exSize">
+          <optgroup label="PowerPoint"><option value="ppt169">Slide 16:9 (widescreen)</option><option value="ppt43">Slide 4:3</option></optgroup>
+          <optgroup label="Word (page inside margins)"><option value="wa4p">A4 portrait</option><option value="wa4l">A4 landscape</option><option value="wltp">US Letter portrait</option><option value="wltl">US Letter landscape</option></optgroup>
+          <optgroup label="Print (full sheet)"><option value="a3l">A3 landscape</option><option value="a4l">A4 landscape</option><option value="tabl">Tabloid 11 × 17 landscape</option></optgroup>
+          <optgroup label="Screen"><option value="fit">Fit to screen</option></optgroup></select></label>
+          <button class="btn sm" id="exCopy">Copy as image</button><button class="btn sm" id="exFull">Present</button></div>
+      </div>
+      <div class="extl" id="exTl">
+        <span class="ctl">Timeline</span>
+        <label class="ctl"><span>From</span><input type="date" id="exFrom"></label>
+        <label class="ctl"><span>To</span><input type="date" id="exTo"></label>
+        <label class="ctl"><span>Scale</span><select id="exScale"><option value="auto">Auto</option><option value="years">Years</option><option value="quarters">Quarters</option><option value="months">Months</option><option value="weeks">Weeks</option></select></label>
+        <div class="sg" role="group" aria-label="Timeline presets"><button data-extl="fit">Fit to plan</button><button data-extl="next12">Next 12 months</button><button data-extl="year">This year</button><button data-extl="done">Data date → completion</button></div>
+        <span class="muted" id="exTlNote"></span>
+      </div>
+      <div class="card exbuild" id="exBuild" hidden></div>
+      <div class="card expick" id="exPick" hidden></div>
+      <div class="card expage" id="exPage"></div>
+      <div class="note" id="exMsg"></div>
+    </div>
+    <div class="port" id="portWrap" hidden></div>
+    <div class="adminw" id="adminWrap" hidden></div>
+    <div class="per" id="perWrap" hidden></div>
+    <div class="dash" id="dashWrap" hidden>
+      <div class="card stats" id="stats"></div>
+      <div class="dgrid">
+        <div class="card dpanel span2 profile">
+          <div class="ph"><span class="sl">Cumulative finishes</span><span class="pn" id="profNote"></span></div>
+          <canvas id="prof"></canvas>
+          <div class="pk"><span><i style="background:var(--base)"></i>Baseline</span><span><i style="background:var(--accent)"></i>Live</span><span><i style="background:var(--accent);height:10px;width:2px"></i>Data date</span></div>
+        </div>
+        <div class="card dpanel"><div class="ph"><span class="sl">Finish variance spread</span><span class="pn">click a bar to list</span></div><div id="dHist"></div></div>
+        <div class="card dpanel span2"><div class="ph"><span class="sl">Key milestones</span><span class="pn" id="dMsN"></span></div><div id="dMs"></div></div>
+        <div class="card dpanel"><div class="ph"><span class="sl">Biggest slips</span><span class="pn">finish vs baseline</span></div><div id="dTop"></div></div>
+        <div class="card dpanel span3"><div class="ph"><span class="sl">Slip by WBS</span><span class="pn">click to filter</span></div><div id="dWbs"></div></div>
+      </div>
+    </div>
+    <div class="note" id="note"></div>
+  </section>
+</main>
+
+
+<aside class="aipanel" id="aiWrap" aria-label="Ask AI" hidden>
+  <div class="aip-h"><div class="aibadge" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" fill="currentColor"/><circle cx="18.5" cy="17.5" r="1.8" fill="currentColor"/><circle cx="6" cy="18" r="1.2" fill="currentColor"/></svg></div>
+    <div class="aip-t"><h3>Ask AI</h3><span class="muted" id="aiCtx"></span></div>
+    <button class="fx" id="aiClose" aria-label="Close AI panel">×</button></div>
+  <div class="aiopts">
+    <div class="sg" role="group" aria-label="Scope"><button data-ais="all" class="on">Whole schedule</button><button data-ais="filt">Current filters</button></div>
+    <div class="sg" role="group" aria-label="Depth"><button data-aid="default" class="on">Standard</button><button data-aid="complex">Deep</button></div>
+    <button class="btn sm" id="aiNew">New chat</button>
+  </div>
+  <div class="aiquick" id="aiQuick"></div>
+  <div class="aichat" id="aiChat" aria-live="polite"></div>
+  <form class="aiform" id="aiForm"><textarea id="aiQ" rows="2" placeholder="Ask about this schedule, e.g. What is driving the slip to Entry into Service?" aria-label="Question"></textarea><div class="aifb"><span class="muted" id="aiStatus"></span><button type="button" class="btn sm" id="aiStop" hidden>Stop</button><button type="submit" class="btn sm primary" id="aiAsk">Ask</button></div></form>
+  <div class="note">Uses your own Claude usage. Answers come from the loaded XER data and may contain mistakes, so check key figures in P6.</div>
+</aside>
+<aside class="drawer" id="drawer" aria-label="Activity detail" hidden></aside>
+<div class="tip" id="tip" hidden></div>
+
+<div class="modal" id="modal" hidden>
+  <div class="mcard" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div class="mh"><h2 id="mTitle">Schedule files</h2><button class="fx" id="mClose" aria-label="Close">×</button></div>
+    <p>Add an XER for each project. Files with the same role are merged into one schedule, and relationships between projects are resolved across files. Set the version you're measuring against to Baseline.</p>
+    <label class="drop" id="drop"><input type="file" id="fileIn" multiple accept=".xer,.XER"><strong>Drop XER files here</strong><span>or click to browse · Primavera P6 export</span></label>
+    <div class="flist" id="flist"></div>
+    <div class="lsum" id="lsum"></div>
+    <div class="mrow">
+      <label class="ctl"><span>Match activities by</span>
+        <select id="matchSel"><option value="code">Activity ID</option><option value="proj">Project + Activity ID</option></select></label>
+      <span class="sp"></span>
+      <button class="btn" id="loadSample">Load sample</button>
+      <button class="btn" id="clearFiles">Remove all</button>
+      <button class="btn primary" id="mDone">Done</button>
+    </div>
+  </div>
+</div>
+

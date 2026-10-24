@@ -5,7 +5,10 @@ A browser-based workbench for Primavera P6 schedules. Load XER exports to compar
 The app is a single web page (`site/index.html`). In this repo it is hosted on **GitHub Pages**, with **Supabase** for sign-in, the database and file storage. An optional **Supabase Edge Function** calls Claude for the AI features.
 
 ```
-site/index.html                      the app
+src/                                 the app's source: head.html, styles.css, body.html and js/ in load order
+build.mjs                            builds site/index.html (and dist/workbench.html) from src/
+tests/                               browser tests (Playwright), run on every push by .github/workflows/test.yml
+site/index.html                      the built app
 site/config.js                       your Supabase settings (public values only)
 supabase/schema.sql                  tables, file bucket and access rules — run once in Supabase
 supabase/functions/ai-proxy/index.ts AI proxy that keeps your Anthropic key on the server
@@ -108,6 +111,16 @@ Only signed-in, approved users can call the function. Edge functions have a time
   - AACE describes what to review but sets no pass marks, so the AACE limits are starting points to agree for each project.
 - **Account menu (top right):** switch between **Team** and **Private** workspaces, manage users (admins) and sign out.
 - **Offline:** the app still works offline. Choose **Work offline on this device** and data stays in that browser only.
+
+## Changing the app
+Edit the files in `src/` (the scripts in `src/js/` are joined in name order into one page), then:
+```bash
+npm install            # once
+node build.mjs         # rebuilds site/index.html — commit it with your change
+npx playwright install chromium   # once
+npm test               # runs the browser tests
+```
+The **Tests** workflow fails if `site/index.html` wasn't rebuilt or a test fails.
 
 ## Running locally
 ```bash

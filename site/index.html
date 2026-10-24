@@ -1015,6 +1015,15 @@ body.no-ai #btnAi,body.no-ai .bai-btn,body.no-ai [data-bnew="ai"],body.no-build 
 @media (max-width:860px){ .pergrid{grid-template-columns:minmax(0,1fr)} .perlist{position:static;max-height:none} .pgrid{grid-template-columns:minmax(0,1fr)} .pgrid .span2{grid-column:auto} }
 @media (max-width:560px){ .pstats,.pcsum{grid-template-columns:repeat(2,minmax(0,1fr))} .pstats .stat,.pcsum>div{border-left:1px solid var(--line)!important;border-top:1px solid var(--line)} .pstats .stat:nth-child(odd),.pcsum>div:nth-child(odd){border-left:0!important} .pstats .stat:nth-child(-n+2),.pcsum>div:nth-child(-n+2){border-top:0} }
 @media (prefers-reduced-motion:reduce){ .auth-spin{animation:none} .ptoast,.auth{transition:none} }
+.pnar{margin-top:12px;border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.pnar summary{cursor:pointer;font-weight:600;font-size:13.5px}
+.pnar .pfl{margin-top:10px}
+.pnar textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit;font-size:13.5px;background:var(--surface)}
+.pnar-b{display:block;margin-top:4px;text-align:left;font-size:12.5px}
+.pnar-v .sl{margin-top:10px} .pnar-v p{margin:4px 0 0;white-space:pre-wrap}
+.pev{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px 16px;margin:4px 0 10px}
+.pev b{font-family:var(--fDisplay);font-size:24px;font-weight:700;display:block;margin-top:2px}
+.pev .ss{font-size:12px}
 </style>
 
 <header class="top">
@@ -1378,7 +1387,9 @@ function buildRole(files){
       set.acts.set(a.id,a); byFile.set(fi+':'+t.task_id,a); if(!byGlobal.has(t.task_id)) byGlobal.set(t.task_id,a);
     });
     (T.TASKACTV||[]).forEach(r=>{ const a=byFile.get(fi+':'+r.task_id), c=codes[r.actv_code_id]; if(a&&c) a.codes[c.type]=c.short; });
-    (T.TASKRSRC||[]).forEach(r=>{ set.hasRsrc=true; const a=byFile.get(fi+':'+r.task_id); if(a) a.rsrc=true; });
+    const addCost=(a,bc,ac,rc)=>{ if(!a) return; const c=a.cost||(a.cost={bc:0,ac:0,rc:0}); c.bc+=bc; c.ac+=ac; c.rc+=rc; if(bc||ac||rc) set.hasCost=true; };
+    (T.TASKRSRC||[]).forEach(r=>{ set.hasRsrc=true; const a=byFile.get(fi+':'+r.task_id); if(a){ a.rsrc=true; addCost(a,+r.target_cost||0,(+r.act_reg_cost||0)+(+r.act_ot_cost||0),+r.remain_cost||0); } });
+    (T.PROJCOST||[]).forEach(r=>addCost(byFile.get(fi+':'+r.task_id),+r.target_cost||0,+r.act_cost||0,+r.remain_cost||0));
     (T.UDFVALUE||[]).forEach(r=>{ const lab=udft[r.udf_type_id]; if(!lab) return; const a=byFile.get(fi+':'+r.fk_id); if(!a) return;
       a.udf[lab]=r.udf_number!==''&&r.udf_number!=null?+r.udf_number:(r.udf_text||r.udf_date||''); });
   });
@@ -4134,7 +4145,7 @@ function qCtx(){
 }
 // The previous saved update of the open project, for the change checks.
 function qPrev(isL){
-  const L=typeof PER!=='undefined'&&PER.loaded; if(!isL) return {why:'Runs on the live schedule only'};
+  const L=typeof PER!=='undefined'&&PER.loaded; if(!isL) return {why:'Runs on the live schedule only'}; if(Q.noPrev) return {why:'Not scored in the trend'};
   if(!L||L.multi) return {why:'Open a saved project to compare with its previous update'};
   if(L.pid!==PER.pid||!PER.periods.length) return {why:'Loading the project’s updates…'};
   const P=PER.periods, i=P.findIndex(p=>p.id===L.id); if(i<1) return {why:i<0?'Open a saved update to compare it with the previous one':'This is the project’s first saved update'};
@@ -4675,6 +4686,7 @@ function docStore(db){
     async dropFile(pid,h){ const fr=files(pid).doc(h), ch=await fr.collection('chunks').get(); for(const d of ch.docs) await fr.collection('chunks').doc(d.id).delete(); await fr.delete(); },
     async addPeriod(pid,doc){ const ref=proj(pid).collection('periods').doc(); await ref.set(doc); await this.refreshSummary(pid); return ref.id; },
     async deletePeriod(pid,id){ await proj(pid).collection('periods').doc(id).delete(); await this.refreshSummary(pid); },
+    updatePeriod:(pid,id,f)=>proj(pid).collection('periods').doc(id).update(f),
     async deleteProject(pid){ const pr=proj(pid), ps=await pr.collection('periods').get(), fs=await files(pid).get();
       for(const d of ps.docs) await pr.collection('periods').doc(d.id).delete(); for(const d of fs.docs) await this.dropFile(pid,d.id); await pr.delete(); },
     async getQuality(){ const d=await db.collection('settings').doc('quality').get(); return d.exists?(d.data()||{}).config:null; },
@@ -4690,7 +4702,7 @@ function supaStore(sb){
   const mapG=r=>({id:r.id,name:r.name,code:r.code||'',client:r.client||'',description:r.description||'',colour:r.colour||'',sort:r.sort||0,createdBy:r.owner,updatedAt:Date.parse(r.updated_at)||0});
   const pCols=f=>{ const o={}; if('name' in f) o.name=f.name; if('programmeId' in f) o.programme_id=f.programmeId||null; ['code','status','manager','description'].forEach(k=>{ if(k in f) o[k]=f[k]||(k==='status'?'active':''); }); return o; };
   const gCols=f=>{ const o={}; ['name','code','client','description','colour','sort'].forEach(k=>{ if(k in f) o[k]=f[k]; }); return o; };
-  const mapR=r=>({id:r.id,label:r.label,notes:r.notes||'',dd:r.dd==null?null:Number(r.dd),stats:r.stats||{},files:r.files||[],savedBy:r.saved_by,savedAt:Date.parse(r.saved_at)||0});
+  const mapR=r=>({id:r.id,label:r.label,notes:r.notes||'',dd:r.dd==null?null:Number(r.dd),stats:r.stats||{},files:r.files||[],narrative:r.narrative||{},savedBy:r.saved_by,savedAt:Date.parse(r.saved_at)||0});
   let n=0;
   const watch=(table,filter,load,cb,err)=>{ let alive=true, t=null; const run=()=>load().then(x=>{ if(alive) cb(x); }).catch(e=>{ if(alive&&err) err(e); }); run();
     const ch=sb.channel('sw-'+table+'-'+(++n)+'-'+Date.now()).on('postgres_changes',Object.assign({event:'*',schema:'public',table},filter?{filter}:{}),()=>{ clearTimeout(t); t=setTimeout(run,300); }).subscribe();
@@ -4714,7 +4726,8 @@ function supaStore(sb){
     async getFileText(pid,h,name){ const row=await fileRow(pid,h); if(!row) throw new Error(`The saved copy of ${name} is missing.`);
       const d=await sb.storage.from('xer').download(row.path); if(d.error) throw d.error; return perGunzipBlob(d.data); },
     async dropFile(pid,h){ const row=await fileRow(pid,h); if(row) await sb.storage.from('xer').remove([row.path]); ok(await sb.from('xer_files').delete().eq('project_id',pid).eq('hash',h)); },
-    async addPeriod(pid,doc){ return ok(await sb.from('periods').insert({project_id:pid,label:doc.label,notes:doc.notes,dd:doc.dd,stats:doc.stats,files:doc.files}).select('id').single()).id; },
+    async addPeriod(pid,doc){ return ok(await sb.from('periods').insert({project_id:pid,label:doc.label,notes:doc.notes,dd:doc.dd,stats:doc.stats,files:doc.files,narrative:doc.narrative||{}}).select('id').single()).id; },
+    async updatePeriod(pid,id,f){ const o={}; if('narrative' in f) o.narrative=f.narrative||{}; if('notes' in f) o.notes=f.notes||''; if('label' in f) o.label=f.label; ok(await sb.from('periods').update(o).eq('id',id)); },
     async deletePeriod(pid,id){ ok(await sb.from('periods').delete().eq('id',id)); },
     async deleteProject(pid){ const fs=ok(await sb.from('xer_files').select('path').eq('project_id',pid)); if(fs.length) await sb.storage.from('xer').remove(fs.map(f=>f.path)); ok(await sb.from('projects').delete().eq('id',pid)); },
     async profiles(ids){ ids=[...new Set(ids.filter(Boolean))]; const out={}; if(!ids.length) return out; const rs=ok(await sb.from('profiles').select('id,name,email').in('id',ids));
@@ -5125,7 +5138,17 @@ function perStats(files){
   base.forEach(b=>{ if(b.f!=null&&(blFinish==null||b.f>blFinish)) blFinish=b.f; const d=Math.max(perDur(b),0); wPT+=d;
     if(dd!=null&&b.s!=null&&b.f!=null){ const fr=dd>=b.f?1:dd<=b.s?0:(dd-b.s)/Math.max(1,b.f-b.s); wP+=d*fr; if(b.f<=dd) due++; } });
   const ms=acts.filter(a=>a.ms).sort((x,y)=>(x.f||0)-(y.f||0)).slice(0,160).map(a=>{ const b=bm.get(perKey(a)); return {k:perKey(a),n:a.name.slice(0,90),f:a.f,d:a.status==='TK_Complete'?1:0,bf:b?b.f:null,t:a.type==='TT_FinMile'?1:0}; });
-  return {dd,finish,blFinish,n:acts.length,done,act,ns,pctA:wT?wA/wT:0,pctP:wPT?wP/wPT:null,bei:due?done/due:null,due,crit,neg,minTF,open,hard,links:L.links,projs:[...L.projs],ms,hasBL:base.length>0};
+  return {dd,finish,blFinish,n:acts.length,done,act,ns,pctA:wT?wA/wT:0,pctP:wPT?wP/wPT:null,bei:due?done/due:null,due,crit,neg,minTF,open,hard,links:L.links,projs:[...L.projs],ms,hasBL:base.length>0,cost:perCost(L,B,acts,base,bm,dd)};
+}
+// Earned value from the resource and expense costs in the XERs. Budget and planned value come from the baseline when it carries costs.
+function perCost(L,B,acts,base,bm,dd){
+  if(!L.hasCost&&!B.hasCost) return null;
+  const useB=!!B.hasCost, cb=useB?base:acts; let bac=0,pv=0,ev=0,ac=0,etc=0;
+  cb.forEach(b=>{ const c=b.cost; if(!c) return; bac+=c.bc; if(dd!=null&&b.s!=null&&b.f!=null) pv+=c.bc*(dd>=b.f?1:dd<=b.s?0:(dd-b.s)/Math.max(1,b.f-b.s)); });
+  acts.forEach(a=>{ const c=a.cost; if(!c&&!useB) return; const k=a.status==='TK_Complete'?1:a.status==='TK_Active'?Math.max(0,Math.min(100,a.pct))/100:0, b=useB?bm.get(perKey(a)):null, bud=useB?(b&&b.cost?b.cost.bc:0):c.bc;
+    ev+=bud*k; if(c){ ac+=c.ac; etc+=c.rc; } });
+  const r=v=>Math.round(v*100)/100;
+  return {bac:r(bac),pv:r(pv),ev:r(ev),ac:r(ac),etc:r(etc),eac:r(ac+etc),spi:pv?ev/pv:null,cpi:ac?ev/ac:null,fromBL:useB};
 }
 /* forecast reliability: of the work the earlier update said would finish (or start) by the later data date, how much did */
 function perReliability(fa,fb){
@@ -5189,7 +5212,7 @@ async function perSavePeriod(pid,files,meta){
   const stats=perStats(files);
   const prev=PER.periods.filter(p=>p.dd!=null&&stats.dd!=null&&p.dd<stats.dd).pop();
   if(prev){ try{ stats.rel=perReliability(await perGetFiles(pid,prev),files); stats.relFrom=prev.id; }catch(_){} }
-  const doc={label:meta.label,notes:meta.notes||'',dd:stats.dd,files:refs,stats,savedBy:PER.uid||'local',savedAt:Date.now()};
+  const doc={label:meta.label,notes:meta.notes||'',narrative:meta.narrative||{},dd:stats.dd,files:refs,stats,savedBy:PER.uid||'local',savedAt:Date.now()};
   const id=await PER.store.addPeriod(pid,doc);
   if(pid===PER.pid&&!PER.periods.some(p=>p.id===id)){ PER.periods.push({id,...doc}); PER.periods.sort((a,b)=>(a.dd||0)-(b.dd||0)||(a.savedAt||0)-(b.savedAt||0)); }
   return id;
@@ -5222,9 +5245,9 @@ function perAskSave(){
       <div class="sl" style="margin-top:12px">Files saved with this period</div><ul class="pdfiles">${files.map(f=>`<li><span class="rl ${f.role}">${f.role==='live'?'Live':'Baseline'}</span>${esc(f.name)}</li>`).join('')}</ul>
       ${dupe?`<p class="pwarn">“${esc(dupe.label)}” already has this data date. Saving again keeps both.</p>`:''}
       ${!live.some(f=>!f.sample)&&live.length?'<p class="muted">You’re saving the sample schedule.</p>':''}
-      <label class="pfl"><span>Notes (optional)</span><textarea id="pdNotes" rows="2" maxlength="600" placeholder="e.g. Includes the revised viaduct sequence agreed on site"></textarea></label>`,'Save period',async d=>{
-      const label=d.querySelector('#pdLab').value.trim()||('Period '+n), notes=d.querySelector('#pdNotes').value.trim();
-      await perRun('Saving period…',async()=>{ const id=await perSavePeriod(pid,files,{label,notes}); PER.loaded={pid,id,label}; renderMeta(); perToast(`Saved “${label}”.`); }); }); };
+      <label class="pfl"><span>Notes (optional)</span><textarea id="pdNotes" rows="2" maxlength="600" placeholder="e.g. Includes the revised viaduct sequence agreed on site"></textarea></label>${narFields({})}`,'Save period',async d=>{
+      const label=d.querySelector('#pdLab').value.trim()||('Period '+n), notes=d.querySelector('#pdNotes').value.trim(), narrative=narRead(d);
+      await perRun('Saving period…',async()=>{ const id=await perSavePeriod(pid,files,{label,notes,narrative}); PER.loaded={pid,id,label}; renderMeta(); perToast(`Saved “${label}”.`); }); }); };
   if(PER.pid) go(PER.pid); else perAskProject(go);
 }
 function perAskImport(){
@@ -5311,7 +5334,7 @@ async function renderPer(){
       return `<div class="pitem${cur?' cur':''}${PER.cmp.b===p.id?' isb':''}${PER.cmp.a===p.id?' isa':''}"><div class="pit"><b>${esc(p.label)}</b>${cur?'<span class="pill">Open</span>':''}</div>
         <div class="pim"><span>DD ${fmtD(p.dd)}</span><span>Finish ${fmtD(s.finish)}</span>${mv!=null?`<span class="${dCls(mv)}">${dS(mv)}</span>`:''}</div>
         <div class="pim sub"><span>Saved by <span data-who="${esc(p.savedBy||'')}">${esc(perWho(ps,p.savedBy))}</span> · ${fmtD(p.savedAt)}</span></div>
-        ${p.notes?`<div class="pnote">${esc(p.notes)}</div>`:''}
+        ${p.notes?`<div class="pnote">${esc(p.notes)}</div>`:''}${narHas(p.narrative)?`<button class="plink pnar-b" data-pnar="${esc(p.id)}">Narrative: ${NAR.filter(([k])=>p.narrative[k]).map(([,,s])=>s).join(' · ')}</button>`:perCanDel(p.savedBy)?`<button class="plink pnar-b muted" data-pnar="${esc(p.id)}">+ Add narrative</button>`:''}
         <div class="pia"><button class="btn sm" data-pl="${esc(p.id)}">Open</button><button class="plink" data-pab="a" data-pid="${esc(p.id)}">Set as From</button><button class="plink" data-pab="b" data-pid="${esc(p.id)}">Set as To</button>${perCanDel(p.savedBy)?`<button class="plink danger" data-pd="${esc(p.id)}">Delete</button>`:''}</div></div>`; }).join('')
       :`<div class="pempty"><p class="muted">No periods saved yet.</p>${ro?'':'<button class="btn sm primary" data-w data-pa="save">Save current as period</button>'}</div>`}</aside>`;
   el.innerHTML=bar+`<div class="pergrid">${list}<div class="permain" id="perMain"></div></div>`;
@@ -5342,6 +5365,17 @@ function renderPerMain(){
   const sel=msList.filter(m=>PER.ms.has(m.k)), PAL2=['var(--accent)','#3B6FE0','#14A37F','#9B5DE5','#D99A00','#E04F8C','#1BA1C4','#6DAA1A'];
   const mta=sel.length?perChart({x:xs,yDate:true,diag:true,xLab:xl,h:280,w:760,label:'Milestone trend',series:sel.map((m,i)=>({name:m.n,c:PAL2[i%PAL2.length],pts:st.map((s,j)=>{ const r=(s.ms||[]).find(q=>q.k===m.k); return [xs[j],r?r.f:null]; })}))}):'<div class="pempty">Pick milestones to plot.</div>';
   const cmp=renderPerCmpShell();
+  // cost performance (earned value)
+  const cs=st.map(s=>s.cost||null), lc=[...cs].reverse().find(Boolean);
+  const costP=lc?(()=>{ const vac=lc.bac-lc.eac, ix=(v,t)=>v==null?'—':`<span class="${v<t?'late':''}">${v.toFixed(2)}</span>`;
+    const ch=perChart({x:xs,xLab:xl,y0:0,yFmt:v=>moneyK(v),label:'Planned value, earned value and actual cost',refs:[{y:lc.bac,c:'var(--ink3)',label:'Budget '+moneyK(lc.bac)}],series:[{name:'Planned value',c:'var(--ink3)',dash:true,hollow:true,tip:p=>moneyK(p[1]),pts:cs.map((c,i)=>[xs[i],c?c.pv:null])},{name:'Earned value',c:perC.blue,tip:p=>moneyK(p[1]),pts:cs.map((c,i)=>[xs[i],c?c.ev:null])},{name:'Actual cost',c:perC.live,tip:p=>moneyK(p[1]),pts:cs.map((c,i)=>[xs[i],c?c.ac:null])}]});
+    return `<div class="card dpanel span2"><div class="ph"><span class="sl">Cost performance</span><span class="pn">earned value from resource and expense costs${lc.fromBL?'':' · no baseline costs, so the live budget is used'}</span></div>
+      <div class="pev">${[['Budget at completion',moneyK(lc.bac),''],['Planned value',moneyK(lc.pv),'to data date'],['Earned value',moneyK(lc.ev),'work done, at budget'],['Actual cost',moneyK(lc.ac),'spent to date'],['Schedule index (SPI)',ix(lc.spi,.95),'earned ÷ planned'],['Cost index (CPI)',ix(lc.cpi,.95),'earned ÷ actual'],['Estimate at completion',moneyK(lc.eac),`<span class="${vac<0?'late':'early'}">${vac<0?'−':'+'}${moneyK(Math.abs(vac))}</span> vs budget`]].map(([l,v,s])=>`<div><div class="sl">${l}</div><b>${v}</b><div class="ss">${s}</div></div>`).join('')}</div>
+      ${ch}${perKeyLeg([['var(--ink3)','Planned value',1],[perC.blue,'Earned value'],[perC.live,'Actual cost']])}</div>`; })():'';
+  // schedule quality trend, scored with the current check set
+  const qk=qCurrent(), qsig=JSON.stringify(qCfg())+qk, qs=P.map(p=>QT.get(p.id+'|'+qsig)), qMissing=qs.some(x=>!x);
+  if(qMissing) setTimeout(()=>qTrend(qsig,qk),0);
+  const qP=`<div class="card dpanel"><div class="ph"><span class="sl">Schedule quality</span><span class="pn">${esc(qFwName(qk))} score by period</span></div>${qs.some(Boolean)?perChart({x:xs,xLab:xl,y0:0,y1:1,yFmt:v=>Math.round(v*100)+'%',label:'Schedule quality score by period',series:[{name:'Score',c:perC.live,tip:p=>Math.round(p[1]*100)+'%',pts:qs.map((q,i)=>[xs[i],q?q.score:null])},{name:'Checks passed',c:perC.good,dash:true,hollow:true,tip:p=>Math.round(p[1]*100)+'%',pts:qs.map((q,i)=>[xs[i],q&&q.n?q.p/q.n:null])}]})+perKeyLeg([[perC.live,'Score (pass = 1, amber = ½)'],[perC.good,'Share of checks passed',1]]):`<div class="pempty">${qMissing?'Scoring each update…':'Not enough data yet.'}</div>`}</div>`;
   el.innerHTML=tiles+`<div class="dgrid pgrid">
     <div class="card dpanel"><div class="ph"><span class="sl">Forecast completion</span><span class="pn">by data date</span></div>${c1}${perKeyLeg([[perC.live,'Forecast'],['var(--ink3)','Baseline finish',1]])}</div>
     <div class="card dpanel"><div class="ph"><span class="sl">Planned vs actual progress</span><span class="pn">duration-weighted</span></div>${c2}${perKeyLeg([['var(--ink3)','Planned (baseline)',1],[perC.live,'Actual']])}</div>
@@ -5350,6 +5384,7 @@ function renderPerMain(){
       <div class="pmsel">${sel.map((m,i)=>`<span class="pmc on" style="--c:${PAL2[i%PAL2.length]}"><button data-ms="${esc(m.k)}" aria-pressed="true" title="Remove">${esc(m.k.split('|').pop())} · ${esc(m.n)}</button></span>`).join('')}
         <select id="perMsAdd" aria-label="Add milestone"><option value="">+ Add milestone</option>${msList.filter(m=>!PER.ms.has(m.k)).map(m=>`<option value="${esc(m.k)}">${esc(m.k.split('|').pop())} · ${esc(m.n)}</option>`).join('')}</select></div></div>
     <div class="card dpanel"><div class="ph"><span class="sl">Critical &amp; float health</span><span class="pn">incomplete activities</span></div>${c4}${perKeyLeg([[perC.live,'Critical'],[perC.bad,'Negative float'],['var(--ink3)','Open ends',1]])}</div>
+    ${qP}${costP}
   </div>`+cmp;
   renderPerCmp();
 }
@@ -5436,6 +5471,7 @@ function wirePer(){
       return; }
     const l=e.target.closest('[data-pl]'); if(l){ const p=PER.periods.find(x=>x.id===l.dataset.pl); if(p) perLoad(p); return; }
     const ab=e.target.closest('[data-pab]'); if(ab){ PER.cmp[ab.dataset.pab]=ab.dataset.pid; PER.cmp.manual=true; renderPer(); setTimeout(()=>{ const c=document.querySelector('.pcmp'); if(c) c.scrollIntoView({behavior:'smooth',block:'start'}); },50); return; }
+    const nb=e.target.closest('[data-pnar]'); if(nb){ const p=PER.periods.find(x=>x.id===nb.dataset.pnar); if(p) narEdit(p); return; }
     const dl=e.target.closest('[data-pd]'); if(dl){ const p=PER.periods.find(x=>x.id===dl.dataset.pd); if(p) perDialog('Delete period?',`<p>This permanently deletes <b>${esc(p.label)}</b> (data date ${fmtL(p.dd)}). Files shared with other periods are kept.</p>`,'Delete period',async()=>{ await perRun('Deleting period…',async()=>{ await perDeletePeriod(PER.pid,p); if(PER.loaded&&PER.loaded.id===p.id) PER.loaded=null; perCmpCache.clear(); perToast('Period deleted.'); }); }); return; }
     const ms=e.target.closest('[data-ms]'); if(ms){ PER.ms.delete(ms.dataset.ms); renderPerMain(); return; }
     const tb=e.target.closest('[data-ptab]'); if(tb){ PER.cmp.tab=tb.dataset.ptab; renderPerCmp(); return; }
@@ -5445,6 +5481,26 @@ function wirePer(){
   });
 }
 
+
+/* ---- update narrative: what changed, why, recovery and risks ---- */
+const NAR=[['changed','What changed this period','Changes','e.g. Viaduct deck pours resequenced; two new interface milestones'],['cause','Causes of movement','Causes','e.g. Utility diversion late by 3 weeks; wet weather'],['recovery','Recovery and mitigation','Recovery','e.g. Second piling rig from 10 Nov; weekend working on S04'],['risks','Risks, issues and decisions needed','Risks','e.g. Possession for OLE energisation not yet confirmed by the client']];
+const narHas=n=>!!n&&NAR.some(([k])=>n[k]&&String(n[k]).trim());
+function narFields(n,open){ n=n||{}; return `<details class="pnar"${open||narHas(n)?' open':''}><summary>Update narrative <span class="muted">(optional, used in reports and AI analysis)</span></summary>${NAR.map(([k,l,,ph])=>`<label class="pfl"><span>${l}</span><textarea data-nar="${k}" rows="2" maxlength="1500" placeholder="${esc(ph)}">${esc(n[k]||'')}</textarea></label>`).join('')}</details>`; }
+function narRead(d){ const o={}; d.querySelectorAll('[data-nar]').forEach(t=>{ const v=t.value.trim(); if(v) o[t.dataset.nar]=v; }); return o; }
+function narEdit(p){ const can=perCanDel(p.savedBy);
+  perDialog(`Narrative · ${p.label}`,can?narFields(p.narrative,true):`<div class="pnar-v">${NAR.filter(([k])=>p.narrative&&p.narrative[k]).map(([k,l])=>`<div class="sl">${l}</div><p>${esc(p.narrative[k])}</p>`).join('')||'<p class="muted">No narrative for this update.</p>'}</div>`,can?'Save narrative':'Close',async d=>{
+    if(!can) return; const narrative=narRead(d); try{ await PER.store.updatePeriod(PER.pid,p.id,{narrative}); p.narrative=narrative; perToast('Narrative saved.'); renderPer(); }catch(e){ perToast(perErr(e),'err'); return false; } }); }
+
+/* ---- schedule quality trend: each saved update scored with the current check set (kept in memory) ---- */
+const QT=new Map(); let qtBusy=false;
+async function qTrend(sig,k){ if(qtBusy||!PER.pid) return; qtBusy=true; const pid=PER.pid; let n=0;
+  try{ for(const p of PER.periods.slice()){ const key=p.id+'|'+sig; if(QT.has(key)) continue; const files=await perGetFiles(pid,p); QT.set(key,qScoreFiles(files,k)); n++; await new Promise(r=>setTimeout(r,0)); } }
+  catch(e){ console.warn('quality trend',e); } finally{ qtBusy=false; }
+  if(n&&S.tab==='per'&&PER.pid===pid) renderPerMain(); }
+function qScoreFiles(files,k){ const sf=S.files, sm=M, sr=S.dq.role, ss=S.dq.scope, ctx=DQ.ctx;
+  try{ S.files=files; M=buildModel(); S.dq.role='live'; S.dq.scope='all'; Q.noPrev=true; const a=(runQuality(k)||[]).filter(c=>c.status!=='na'), p=a.filter(c=>c.status==='pass').length, w=a.filter(c=>c.status==='warn').length;
+    return {p,w,f:a.length-p-w,n:a.length,score:a.length?(p+w*.5)/a.length:null}; }
+  finally{ S.files=sf; M=sm; S.dq.role=sr; S.dq.scope=ss; Q.noPrev=false; DQ.ctx=ctx; } }
 /* ================= Portfolio: programmes and project slots ================= */
 const PORT={q:'',status:'all',collapsed:new Set(),sel:new Set()};
 const PSTAT={planned:'Planned',active:'Active',on_hold:'On hold',complete:'Complete'};
@@ -6136,12 +6192,12 @@ function updSave(){
     ${s.needs?`<p class="pwarn">${s.needs} activit${s.needs===1?'y was':'ies were'} due this period with no progress entered. ${s.needs===1?'It moves':'They move'} to the new data date.</p>`:''}
     ${newer.length?`<p class="pwarn">${esc(newer[newer.length-1].label)} was saved after the update you started from. Saving still adds this as a new period.</p>`:''}
     ${later.length&&!newer.length?`<p class="pwarn">A period with this data date or later already exists.</p>`:''}
-    <label class="pfl" style="margin-top:12px"><span>Notes (optional)</span><textarea id="udNotes" rows="2" maxlength="600" placeholder="e.g. Piling restarted after the utility diversion"></textarea></label>
+    <label class="pfl" style="margin-top:12px"><span>Notes (optional)</span><textarea id="udNotes" rows="2" maxlength="600" placeholder="e.g. Piling restarted after the utility diversion"></textarea></label>${narFields({})}
     <p class="muted" style="margin:10px 0 0">The new live XER${st.projects.length>1?'s are':' is'} written from last period’s file${st.projects.length>1?'s':''}: progress, dates, logic, resources, costs and notes are updated, and everything else in P6 (calendars, cost accounts, roles, steps, user fields and the rest) is kept as it was. The baseline is unchanged.</p>`,'Save update',async d=>{
-    const label=d.querySelector('#udLab').value.trim()||`Update ${updPad(u.n)}`, notes=d.querySelector('#udNotes').value.trim();
-    setTimeout(()=>updCommit(label,notes),0); });
+    const label=d.querySelector('#udLab').value.trim()||`Update ${updPad(u.n)}`, notes=d.querySelector('#udNotes').value.trim(), narrative=narRead(d);
+    setTimeout(()=>updCommit(label,notes,narrative),0); });
 }
-async function updCommit(label,notes){
+async function updCommit(label,notes,narrative){
   const st=B.st, u=st.upd; let saved=null;
   await perRun('Saving update…',async()=>{
     if(PER.pid!==u.pid){ perPick(u.pid); }
@@ -6153,7 +6209,7 @@ async function updCommit(label,notes){
     const extra=bToXer(st,B.res,'live').filter(f=>!covered.has(f.name.replace(/_Live\.xer$/,''))).map(f=>({name:f.name.replace(/_Live\.xer$/,'.xer'),tables:parseXER(f.text)}));
     const live=patched.concat(extra).map(f=>({id:uid(),name:nm(f.name),role:'live',tables:f.tables,info:fileInfo(f.tables)}));
     const files=live.concat(base.map(f=>({...f,role:'baseline'})));
-    const id=await perSavePeriod(u.pid,files,{label,notes:notes||`Updated in the workbench from ${u.perLabel}`});
+    const id=await perSavePeriod(u.pid,files,{label,notes:notes||`Updated in the workbench from ${u.perLabel}`,narrative});
     S.files=files.map(f=>({...f,period:id})); PER.loaded={pid:u.pid,id,label}; saved={id,label};
     B.st=null; B.undo=[]; B.redo=[]; try{ localStorage.removeItem('pacer.builder'); }catch(_){} document.getElementById('buildWrap').innerHTML='';
     rebuild(true); });

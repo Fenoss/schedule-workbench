@@ -1,0 +1,23 @@
+# Runs on every push and pull request: checks site/index.html was rebuilt from src/, then runs the browser tests.
+name: Tests
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci || npm install
+      - name: Built file is up to date
+        run: node build.mjs --check
+      - run: node build.mjs
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test
