@@ -721,6 +721,50 @@ select.bin{padding:0 2px}
 .um-b .ucb{margin-left:6px}
 .pdlg .ptab select{height:30px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:0 6px}
 
+
+/* ---- two-level navigation ---- */
+.navs{background:var(--surface);border-bottom:1px solid var(--line)}
+.nav1{display:flex;gap:4px;align-items:flex-end;overflow-x:auto;scrollbar-width:none}
+.nav1::-webkit-scrollbar{display:none}
+.n1t{flex:none;background:none;border:0;padding:12px 14px 11px;font-family:var(--fDisplay);font-weight:800;font-size:21px;letter-spacing:.02em;text-transform:uppercase;color:var(--ink3);border-bottom:3px solid transparent;display:inline-flex;align-items:baseline;gap:10px;white-space:nowrap}
+.n1t:first-child{padding-left:0}
+.n1t:hover{color:var(--ink2)}
+.n1t[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.n1p{font-family:var(--fBody);font-weight:600;font-size:13px;letter-spacing:0;text-transform:none;color:var(--ink2);max-width:240px;overflow:hidden;text-overflow:ellipsis}
+.n1p:empty{display:none}
+.nav2w{background:var(--surface2);border-top:1px solid var(--line)}
+.nav2{display:flex;align-items:center;gap:12px;padding-block:8px}
+.n2{display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none;min-width:0;flex:1}
+.n2::-webkit-scrollbar{display:none}
+.n2g{display:flex;align-items:center;gap:8px;flex:none;padding-right:10px;margin-right:4px;border-right:1px solid var(--line)}
+.n2g:last-child{border-right:0}
+.n2l{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.n2b{display:flex;gap:2px}
+.n2 .tab{flex:none;height:32px;padding:0 12px;border:0;border-radius:6px;margin:0;font-family:var(--fBody);font-weight:600;font-size:14px;letter-spacing:0;text-transform:none;color:var(--ink2);background:none;white-space:nowrap}
+.n2 .tab:hover{background:var(--band);color:var(--ink)}
+.n2 .tab[aria-selected="true"]{background:var(--accentSoft);color:var(--accent)}
+.aibtn{flex:none;height:34px;border-color:var(--accent);color:var(--accent);background:var(--surface)}
+.aibtn:hover,.aibtn.on{background:var(--accent);color:var(--accentInk)}
+.main{padding-top:14px}
+@media (max-width:720px){ .n2l{display:none} .n2g{padding-right:6px;margin-right:0} .n1t{font-size:18px;padding:10px 10px 9px} .aibtn span{display:none} .aibtn{padding:0 10px} }
+/* ---- Ask AI side panel ---- */
+.aipanel{position:fixed;z-index:19;right:0;bottom:0;top:60px;width:min(440px,100vw);background:var(--surface);border-left:1px solid var(--line);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 12px)}
+.aip-h{display:flex;align-items:center;gap:12px}
+.aip-h .aibadge{width:34px;height:34px;border-radius:8px}
+.aip-t{flex:1;min-width:0;display:flex;flex-direction:column}
+.aip-t h3{margin:0;font-family:var(--fDisplay);font-size:22px;text-transform:uppercase;letter-spacing:.02em;line-height:1}
+.aip-t span{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aipanel .aiopts{gap:6px}
+.aipanel .sg button{height:28px;font-size:12.5px;padding:0 9px}
+.aipanel .aiquick{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding-bottom:4px;flex:none}
+.aipanel .aiq{flex:none;height:30px;font-size:12.5px;padding:0 12px}
+.aipanel .aichat{flex:1;min-height:0;max-height:none;padding:6px 2px;border-top:1px solid var(--line)}
+.aipanel .aimsg.a .aib{font-size:14px}
+.aipanel .aiempty h4{font-size:14.5px}.aipanel .aiempty p{font-size:13px}
+.aipanel .aiform{border:1px solid var(--line);border-radius:10px;padding:8px 10px;flex:none}
+.aipanel .note{margin:0;font-size:11.5px}
+@media (min-width:1240px){ body.ai-open .navs .wrap,body.ai-open .main{padding-right:calc(440px + 16px)} }
+@media (max-width:560px){ .aipanel{padding-left:12px;padding-right:12px} }
 /* ---- portfolio ---- */
 .amber{color:#B97800!important}
 :root[data-theme="dark"] .amber{color:#F2B33D!important}
@@ -896,22 +940,27 @@ select.bin{padding:0 2px}
 </header>
 
 
+<nav class="navs" aria-label="Main">
+  <div class="wrap nav1" role="tablist" aria-label="Area">
+    <button class="n1t" role="tab" id="tabPort" aria-selected="false">Portfolio</button>
+    <button class="n1t" role="tab" id="navProj" aria-selected="false">Project<span class="n1p" id="navProjName"></span></button>
+    <button class="n1t" role="tab" id="tabBuild" aria-selected="false">Build</button>
+  </div>
+  <div class="nav2w" id="nav2"><div class="wrap nav2">
+    <div class="n2" role="tablist" aria-label="Project views">
+      <div class="n2g"><span class="n2l">Overview</span><div class="n2b"><button class="tab" role="tab" id="tabDash" aria-selected="false">Dashboard</button></div></div>
+      <div class="n2g"><span class="n2l">Schedule</span><div class="n2b"><button class="tab" role="tab" id="tabGantt" aria-selected="true">Gantt</button><button class="tab" role="tab" id="tabTld" aria-selected="false">Time–location</button></div></div>
+      <div class="n2g"><span class="n2l">Assurance</span><div class="n2b"><button class="tab" role="tab" id="tabDq" aria-selected="false">Quality</button><button class="tab" role="tab" id="tabIfc" aria-selected="false">Interfaces</button></div></div>
+      <div class="n2g"><span class="n2l">Reporting</span><div class="n2b"><button class="tab" role="tab" id="tabPer" aria-selected="false">Periods</button><button class="tab" role="tab" id="tabExec" aria-selected="false">Plan on a Page</button></div></div>
+    </div>
+    <button class="btn aibtn" id="btnAi" aria-expanded="false" aria-controls="aiWrap"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" fill="currentColor"/><circle cx="18.5" cy="17.5" r="1.8" fill="currentColor"/><circle cx="6" cy="18" r="1.2" fill="currentColor"/></svg><span>Ask AI</span></button>
+  </div></div>
+</nav>
+
 <main class="wrap main">
   <aside class="card side" id="side"></aside>
   <section class="stage">
     <div class="stage-bar">
-      <div class="tabs" role="tablist">
-        <button class="tab" role="tab" id="tabPort" aria-selected="false">Portfolio</button>
-        <button class="tab" role="tab" id="tabDash" aria-selected="false">Dashboard</button>
-        <button class="tab" role="tab" id="tabPer" aria-selected="false">Periods</button>
-        <button class="tab" role="tab" id="tabGantt" aria-selected="true">Gantt</button>
-        <button class="tab" role="tab" id="tabTld" aria-selected="false">Time–location</button>
-        <button class="tab" role="tab" id="tabIfc" aria-selected="false">Interfaces</button>
-        <button class="tab" role="tab" id="tabDq" aria-selected="false">Quality</button>
-        <button class="tab" role="tab" id="tabExec" aria-selected="false">Plan on a Page</button>
-        <button class="tab" role="tab" id="tabBuild" aria-selected="false">Build</button>
-        <button class="tab" role="tab" id="tabAi" aria-selected="false">AI Analyst</button>
-      </div>
       <div class="controls" id="controls"></div>
     </div>
     <div class="colpanel card chpanel" id="chPanel" role="dialog" aria-label="Chainage map" hidden></div>
@@ -939,21 +988,6 @@ select.bin{padding:0 2px}
     <div class="ifc" id="ifcWrap" hidden></div>
     <div class="card bai" id="bAi" hidden></div>
     <div class="build" id="buildWrap" hidden></div>
-    <div class="ai" id="aiWrap" hidden>
-      <div class="card aihead">
-        <div class="aiht"><div class="aibadge" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" fill="currentColor"/><circle cx="18.5" cy="17.5" r="1.8" fill="currentColor"/><circle cx="6" cy="18" r="1.2" fill="currentColor"/></svg></div>
-          <div><h3>AI schedule analyst</h3><p class="muted">Ask about slippage, the critical path, interfaces or quality. Claude reads a digest of the loaded schedule and can look up activities, trace logic and test delays.</p></div></div>
-        <div class="aiopts">
-          <span class="ctl">Scope</span><div class="sg" role="group" aria-label="Scope"><button data-ais="all" class="on">Whole schedule</button><button data-ais="filt">Current filters</button></div>
-          <span class="ctl">Depth</span><div class="sg" role="group" aria-label="Depth"><button data-aid="default" class="on">Standard</button><button data-aid="complex">Deep</button></div>
-          <button class="btn sm" id="aiNew">New conversation</button>
-        </div>
-      </div>
-      <div class="aiquick" id="aiQuick"></div>
-      <div class="card aichat" id="aiChat" aria-live="polite"></div>
-      <form class="card aiform" id="aiForm"><textarea id="aiQ" rows="2" placeholder="Ask about this schedule, e.g. What is driving the 52-day slip to Entry into Service?" aria-label="Question"></textarea><div class="aifb"><span class="muted" id="aiStatus"></span><button type="button" class="btn" id="aiStop" hidden>Stop</button><button type="submit" class="btn primary" id="aiAsk">Ask</button></div></form>
-      <div class="note">Uses your own Claude usage. Answers are based on the loaded XER data and may contain mistakes, so check key figures in P6.</div>
-    </div>
     <div class="exec" id="execWrap" hidden>
       <div class="exbar">
         <div class="exbar-l"><button class="btn sm" id="exEdit" aria-expanded="false">Edit plan</button><button class="btn sm" id="exAddRow">Add row</button><label class="tg"><input type="checkbox" id="exCp"> Critical path</label><span id="exCpOpt"></span><span class="muted" id="exInfo"></span></div>
@@ -997,6 +1031,21 @@ select.bin{padding:0 2px}
   </section>
 </main>
 
+
+<aside class="aipanel" id="aiWrap" aria-label="Ask AI" hidden>
+  <div class="aip-h"><div class="aibadge" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" fill="currentColor"/><circle cx="18.5" cy="17.5" r="1.8" fill="currentColor"/><circle cx="6" cy="18" r="1.2" fill="currentColor"/></svg></div>
+    <div class="aip-t"><h3>Ask AI</h3><span class="muted" id="aiCtx"></span></div>
+    <button class="fx" id="aiClose" aria-label="Close AI panel">×</button></div>
+  <div class="aiopts">
+    <div class="sg" role="group" aria-label="Scope"><button data-ais="all" class="on">Whole schedule</button><button data-ais="filt">Current filters</button></div>
+    <div class="sg" role="group" aria-label="Depth"><button data-aid="default" class="on">Standard</button><button data-aid="complex">Deep</button></div>
+    <button class="btn sm" id="aiNew">New chat</button>
+  </div>
+  <div class="aiquick" id="aiQuick"></div>
+  <div class="aichat" id="aiChat" aria-live="polite"></div>
+  <form class="aiform" id="aiForm"><textarea id="aiQ" rows="2" placeholder="Ask about this schedule, e.g. What is driving the slip to Entry into Service?" aria-label="Question"></textarea><div class="aifb"><span class="muted" id="aiStatus"></span><button type="button" class="btn sm" id="aiStop" hidden>Stop</button><button type="submit" class="btn sm primary" id="aiAsk">Ask</button></div></form>
+  <div class="note">Uses your own Claude usage. Answers come from the loaded XER data and may contain mistakes, so check key figures in P6.</div>
+</aside>
 <aside class="drawer" id="drawer" aria-label="Activity detail" hidden></aside>
 <div class="tip" id="tip" hidden></div>
 
@@ -3273,6 +3322,18 @@ const AI_QUICK=[
   ['Schedule quality','Review schedule quality using the DCMA results and the data: explain the failing checks in plain terms, name the worst offending activities and recommend fixes in priority order.'],
   ['4-week look-ahead','Produce a 4-week look-ahead from the data date: work that must start or finish, critical or near-critical items, and what must be true to hold the dates.'],
   ['Recovery options','Suggest realistic recovery options to claw back the forecast slip (resequencing, overlaps, extra crews on critical work, de-scoping), quantify the potential days for each using what-if tests where helpful, and note risks.']];
+// Ask AI side panel: opens beside the current view; wide screens make room for it.
+function aiPlace(){ const p=document.getElementById('aiWrap'), h=document.querySelector('.top'); p.style.top=Math.max(0,h.getBoundingClientRect().bottom)+'px'; }
+function aiPanel(open){
+  const p=document.getElementById('aiWrap'), b=document.getElementById('btnAi'); open=open==null?p.hidden:open;
+  if(open&&!PROJ_TABS.includes(S.tab)) setTab(S.lastProj||'dash');
+  p.hidden=!open; b.setAttribute('aria-expanded',open); b.classList.toggle('on',open); document.body.classList.toggle('ai-open',open);
+  try{ localStorage.setItem('pacer.aiopen',open?'1':''); }catch(_){}
+  if(open){ aiPlace(); renderAi(); aiCtxLabel(); setTimeout(()=>{ const q=document.getElementById('aiQ'); if(q&&!q.disabled) q.focus(); },60); }
+  requestAnimationFrame(()=>{ if(typeof drawProfile==='function') drawProfile(); redraw(); });
+}
+function aiCtxLabel(){ const el=document.getElementById('aiCtx'); if(!el) return; const c=typeof ctxInfo==='function'?ctxInfo():null;
+  el.textContent=!c||!c.ok.length?'No schedule open':c.L?`${c.proj?c.proj.name:'Saved project'} · ${c.L.label}`:c.sample?'Sample schedule':'Unsaved schedule'; }
 function renderAi(){
   const q=document.getElementById('aiQuick');
   if(!q.childElementCount) q.innerHTML=AI_QUICK.map(([l],i)=>`<button class="aiq" data-aiq="${i}">${esc(l)}</button>`).join('');
@@ -3304,7 +3365,7 @@ async function aiAsk(text){
 function wireAi(){
   (async()=>{ try{ AI.sample=await window.claude?.use?.('sample')??null; }catch(_){ AI.sample=null; } AI.checked=true; AI.ready=!!AI.sample;
     if(AI.sample){ try{ const lim=await AI.sample.limits(); AI.tools=!!(lim&&lim.tools); }catch(_){ AI.tools=false; } }
-    document.getElementById('aiAsk').disabled=!AI.ready; document.querySelectorAll('.aiq').forEach(b=>b.disabled=!AI.ready); if(S.tab==='ai') aiRenderChat(); })();
+    document.getElementById('aiAsk').disabled=!AI.ready; document.querySelectorAll('.aiq').forEach(b=>b.disabled=!AI.ready); if(!document.getElementById('aiWrap').hidden) aiRenderChat(); })();
   const w=document.getElementById('aiWrap');
   w.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
     if(b.dataset.aiq!=null){ const [l,p]=AI_QUICK[+b.dataset.aiq]; aiAsk(p); }
@@ -3763,6 +3824,8 @@ function renderMeta(){
   el.innerHTML=`<span class="cx-t"><span class="cx-1">${t1}</span><span class="cx-2">${t2.join(' · ')}</span></span><svg class="cx-c" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>`;
   el.setAttribute('aria-label','Open schedule: '+el.textContent.replace(/\s+/g,' ').trim()+'. Switch project');
   el.title='Switch project';
+  const np=document.getElementById('navProjName'); if(np){ const c=ctxInfo(); np.textContent=!c.ok.length?'':c.L?(c.proj?c.proj.name:c.L.label):c.sample?'Sample':'Unsaved'; }
+  if(typeof aiCtxLabel==='function') aiCtxLabel();
   const m=document.getElementById('ctxMenu'); if(m&&!m.hidden) renderCtxMenu();
 }
 function renderCtxMenu(){
@@ -3811,9 +3874,13 @@ function rebuild(fitView){
   T.view=null;
   if(fitView) fitGantt(); else redraw();
 }
+const PROJ_TABS=['dash','gantt','tld','dq','ifc','per','exec'];
 function setTab(t){
-  S.tab=t; const TABS={port:'tabPort',dash:'tabDash',per:'tabPer',gantt:'tabGantt',tld:'tabTld',dq:'tabDq',ifc:'tabIfc',exec:'tabExec',build:'tabBuild',ai:'tabAi'}; Object.entries(TABS).forEach(([x,id])=>document.getElementById(id).setAttribute('aria-selected',t===x));
-  gWrap.hidden=t!=='gantt'; tWrap.hidden=t!=='tld'; document.getElementById('dqWrap').hidden=t!=='dq'; document.getElementById('dashWrap').hidden=t!=='dash'; document.getElementById('execWrap').hidden=t!=='exec'; document.getElementById('ifcWrap').hidden=t!=='ifc'; document.getElementById('aiWrap').hidden=t!=='ai'; document.getElementById('buildWrap').hidden=t!=='build'; document.getElementById('perWrap').hidden=t!=='per'; document.getElementById('portWrap').hidden=t!=='port'; if(t!=='build') document.getElementById('bAi').hidden=true; if(t!=='exec'){ const pk=document.getElementById('exPick'); if(pk) pk.hidden=true; }
+  if(t==='ai'){ t=S.lastProj||'dash'; setTimeout(()=>aiPanel(true),0); }
+  S.tab=t; const TABS={port:'tabPort',dash:'tabDash',per:'tabPer',gantt:'tabGantt',tld:'tabTld',dq:'tabDq',ifc:'tabIfc',exec:'tabExec',build:'tabBuild'}; Object.entries(TABS).forEach(([x,id])=>document.getElementById(id).setAttribute('aria-selected',t===x));
+  const inProj=PROJ_TABS.includes(t); document.getElementById('navProj').setAttribute('aria-selected',inProj); document.getElementById('nav2').hidden=!inProj;
+  if(inProj) S.lastProj=t; else if(!document.getElementById('aiWrap').hidden) aiPanel(false);
+  gWrap.hidden=t!=='gantt'; tWrap.hidden=t!=='tld'; document.getElementById('dqWrap').hidden=t!=='dq'; document.getElementById('dashWrap').hidden=t!=='dash'; document.getElementById('execWrap').hidden=t!=='exec'; document.getElementById('ifcWrap').hidden=t!=='ifc'; document.getElementById('buildWrap').hidden=t!=='build'; document.getElementById('perWrap').hidden=t!=='per'; document.getElementById('portWrap').hidden=t!=='port'; if(t!=='build') document.getElementById('bAi').hidden=true; if(t!=='exec'){ const pk=document.getElementById('exPick'); if(pk) pk.hidden=true; }
   document.getElementById('legend').hidden=['dq','dash','exec','ifc','ai','build','per','port'].includes(t); document.getElementById('controls').hidden=['dash','exec','ifc','ai','build','per','port'].includes(t);
   document.querySelector('.main').classList.toggle('wide',t==='build'||t==='per'||t==='port'); setNote(''); tip.hidden=true;
   if(t!=='gantt'&&typeof closeCols==='function') closeCols();
@@ -3833,7 +3900,11 @@ function wire(){
   document.getElementById('tabDash').onclick=()=>setTab('dash');
   document.getElementById('tabExec').onclick=()=>setTab('exec');
   document.getElementById('tabIfc').onclick=()=>setTab('ifc');
-  document.getElementById('tabAi').onclick=()=>setTab('ai');
+  document.getElementById('navProj').onclick=()=>{ if(!S.files.some(f=>!f.error&&f.role!=='off')){ document.getElementById('meta').click(); return; } setTab(S.lastProj||'dash'); };
+  document.getElementById('btnAi').onclick=()=>aiPanel();
+  document.getElementById('aiClose').onclick=()=>{ aiPanel(false); document.getElementById('btnAi').focus(); };
+  document.getElementById('aiWrap').addEventListener('keydown',e=>{ if(e.key==='Escape'){ e.stopPropagation(); aiPanel(false); document.getElementById('btnAi').focus(); } });
+  addEventListener('resize',()=>{ if(!document.getElementById('aiWrap').hidden) aiPlace(); });
   document.getElementById('tabBuild').onclick=()=>setTab('build');
   document.getElementById('tabPer').onclick=()=>setTab('per'); document.getElementById('tabPort').onclick=()=>setTab('port'); wirePer();
   wireBuild(); wireBa();
@@ -4699,7 +4770,7 @@ function renderPort(){
   if(!PER.mode){ el.innerHTML='<div class="card pempty big"><h3>Sign in to see your portfolio</h3><p class="muted">Your programmes, projects and their latest schedule updates appear here once you’re signed in.</p><button class="btn primary" id="portSignIn">Sign in</button></div>'; document.getElementById('portSignIn').onclick=()=>{ if(!document.getElementById('auth')) authStart(); }; return; }
   const ro=perRO(), G=PER.programmes, P=PER.projects, wsp=PER.mode!=='local'?(PER.space==='team'?'Team workspace':'Private workspace'):'This browser';
   const head=`<div class="card porthead">
-    <div class="ph-t"><h2>Portfolio</h2><span class="pspace">${wsp}</span></div>
+    <div class="ph-t"><h2>${esc(wsp)}</h2><span class="pspace">${PER.programmes.length} programme${PER.programmes.length===1?'':'s'} · ${PER.projects.length} project${PER.projects.length===1?'':'s'}</span></div>
     <div class="ph-c"><input type="search" id="portQ" placeholder="Search programmes, projects, managers" value="${esc(PORT.q)}" aria-label="Search portfolio">
       <label class="ctl"><span>Status</span><select id="portStatus"><option value="all">All</option>${Object.entries(PSTAT).map(([k,v])=>`<option value="${k}" ${PORT.status===k?'selected':''}>${v}</option>`).join('')}</select></label>
       <span class="pbusy" id="portBusy" ${PER.busy?'':'hidden'}>${esc(PER.busy)}</span>
@@ -4892,7 +4963,7 @@ function makeHostedSample(C){
 function init(){
   readTheme(); loadPrefs(); exLoad(); ifcLoad(); bLoad(); try{ const cp=JSON.parse(localStorage.getItem('pacer.cp')||'null'); if(cp&&['off','hi','only'].includes(cp.mode)) S.cp={...S.cp,...cp}; }catch(_){} try{ const tl=JSON.parse(localStorage.getItem('pacer.tilos')||'null'); if(tl){ const {styles,...rest}=tl; Object.assign(S.tld,rest); S.styles=styles||{}; } const st=JSON.parse(localStorage.getItem('pacer.site')||'null'); if(st&&Array.isArray(st.marks)) S.site=st; }catch(_){} try{ S.chmap=JSON.parse(localStorage.getItem('pacer.chmap')||'{}')||{}; const cf=JSON.parse(localStorage.getItem('pacer.chfmt')||'null'); if(cf&&FMT[cf.fmt]) S.tld.fmt=cf.fmt; }catch(_){} try{ const lg=localStorage.getItem('pacer.logic'); if(['off','sel','all'].includes(lg)) S.logic=lg; }catch(_){} wire();
   S.files=(B.st&&B.st.sync&&B.res&&!B.res.loops.length)?bToFiles():sampleFiles(); if(!S.site.marks.length&&!S.site.profile.length) S.site=sampleSite(); if(!Object.keys(S.styles).length) S.styles=sampleStyles();
-  let tab='gantt'; try{ tab=localStorage.getItem('pacer.tab')||'gantt'; }catch(_){}
+  let tab='gantt'; try{ tab=localStorage.getItem('pacer.tab')||'gantt'; }catch(_){} if(tab==='ai') tab='dash';
   rebuild(true);
   if(tab!=='gantt') setTab(tab);
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ drawProfile(); redraw(); });
