@@ -715,3 +715,7 @@ do $$ begin
     grant execute on function private.handle_new_user() to supabase_auth_admin;
   end if;
 end $$;
+
+-- Company branding (title, accent colour, logo) and site features (AI, Build tab, sample buttons).
+alter table public.companies add column if not exists branding jsonb not null default '{}'::jsonb;
+alter table public.company_settings add column if not exists site jsonb not null default '{}'::jsonb;

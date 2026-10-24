@@ -15,8 +15,10 @@ supabase/functions/ai-proxy/index.ts AI proxy that keeps your Anthropic key on t
 ## Companies and the workbench owner
 One deployment can host several companies, each a **separate instance**: a company's people only ever see its own programmes, projects, updates, files and quality settings. The database enforces this.
 
-- **Workbench owner** (master admin): creates companies, suspends or reactivates them, moves people between companies, and can switch into any company from the account menu to work in it as its admin. The first person to sign in becomes the owner. To add another owner, run `update public.profiles set is_owner = true where email = 'them@example.com';` in the SQL editor.
-- **Company admin**: manages their own company from the account menu → **Manage *company***: approves people and sets their access, invites people by email, removes people, sets the company name, and optionally an email domain whose sign-ins join automatically. Company admins also set the company's quality checks.
+- **Admin tab** (top bar, shown to admins and owners) has two parts:
+  - **Workbench (owner)** — owners only: an overview across all companies; **Companies** (create, rename, suspend, add owner notes, delete empty ones, work in one); **Company admins** (make someone a company's admin by email, see companies with no admin); **All people** (move people between companies and set access); **Owners**.
+  - **Your company** — company admins (and owners working in that company): **Overview**; **People** (approve, change access, remove); **Invitations**; **Sign-in & access** (company name, auto-join email domain and its access); **Branding** (title, accent colour and logo shown to everyone in the company); **Features** (switch AI, the Build tab and sample buttons on or off); **Quality checks**.
+- **Workbench owner** (master admin): the first person to sign in. Owners can work in any company as its admin by choosing it under **Working in**. Add more owners on the Owners page.
 - **Joining a company:** someone who signs in with an invited email joins that company with the invited access. Someone whose email matches a company's domain joins it automatically. Anyone else waits with no company until an admin invites them or the owner places them. The workbench doesn't send invitation emails, so tell people to sign in.
 
 ## Who can do what
