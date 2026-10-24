@@ -982,7 +982,7 @@ select.bin{padding:0 2px}
       <button class="n1t" role="tab" id="navProj" aria-selected="false">Project<span class="n1p" id="navProjName"></span></button>
       <button class="n1t" role="tab" id="tabBuild" aria-selected="false">Build</button>
     </nav>
-    <div class="ctxw"><button class="ctx" id="meta" aria-haspopup="true" aria-expanded="false"></button><div class="card ctxmenu" id="ctxMenu" hidden></div></div>
+    <div class="ctxw"><button class="ctx" id="meta" aria-haspopup="true" aria-expanded="false" aria-label="Select Schedule" title="Select Schedule"></button><div class="card ctxmenu" id="ctxMenu" hidden></div></div>
     <div class="top-actions">
       <button class="btn only-m" id="btnFilters">Filters <span class="cnt" id="fBadge" hidden></span></button>
       <button class="btn" id="btnFiles" hidden>Files <span class="cnt" id="fileCnt">0</span></button>
@@ -4258,7 +4258,7 @@ function renderMeta(){
   const el=document.getElementById('meta'); if(!el) return;
   const {ok,L,proj,prog,sample,built}=ctxInfo();
   let t1, t2=[];
-  if(!ok.length){ t1='<b>No schedule open</b>'; t2.push('Pick a project or add XER files'); }
+  if(!ok.length){ t1='<b>Select Schedule</b>'; t2.push('Pick a project or add XER files'); }
   else {
     if(L&&L.multi) t1=(prog?`<span class="cx-g">${esc(prog.name)}</span><span class="cx-s" aria-hidden="true">/</span>`:'')+`<b>${L.all&&prog?'All projects':L.items.length+' projects'}</b><span class="pill">Combined</span>`;
     else if(L) t1=(prog?`<span class="cx-g">${esc(prog.name)}</span><span class="cx-s" aria-hidden="true">/</span>`:'')+`<b>${esc(proj?proj.name:'Saved project')}</b>`;
@@ -4290,7 +4290,7 @@ function renderCtxMenu(){
     list=groups.filter(([,ps])=>ps.length).map(([n,ps,gid])=>`<div class="cxm-g"><span>${esc(n)}</span>${gid&&PER.projects.filter(p=>p.programmeId===gid&&p.summary).length>1?`<button class="cxm-all" data-cxg="${esc(gid)}">Open all</button>`:''}</div>${ps.sort((a,b)=>String(a.name).localeCompare(b.name)).map(item).join('')}`).join('')||'<div class="cxm-e">No projects match.</div>';
   }
   const search=signed&&PER.projects.length>6?`<input type="search" class="cxm-q" id="ctxQ" placeholder="Find a project" value="${esc(m.dataset.q||'')}" aria-label="Find a project">`:'';
-  m.innerHTML=`<div class="cxm-h">Open a project</div>${search}<div class="cxm-l">${list}</div>
+  m.innerHTML=`<div class="cxm-h">Select Schedule</div>${search}<div class="cxm-l">${list}</div>
     <div class="cxm-f">${signed?'<button data-cxa="port">Portfolio</button>':'<button data-cxa="signin">Sign in</button>'}${signed&&ok.length&&!L&&!perRO()?'<button data-cxa="save">Save as period…</button>':''}${signed&&L&&!L.multi&&!perRO()?'<button data-cxa="upd">Update schedule…</button>':''}<button data-cxa="files">Schedule files${ok.length?` (${ok.length})`:''}…</button></div>`;
 }
 function wireCtx(){
