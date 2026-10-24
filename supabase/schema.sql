@@ -811,3 +811,6 @@ create or replace trigger audit_periods after insert or delete on public.periods
   for each row execute function private.audit_periods();
 
 revoke execute on function private.audit(text, uuid, text, jsonb), private.audit_profiles(), private.audit_companies(), private.audit_invitations(), private.audit_settings(), private.audit_projects(), private.audit_programmes(), private.audit_periods() from public, anon, authenticated;
+
+-- Structured narrative saved with each update.
+alter table public.periods add column if not exists narrative jsonb not null default '{}'::jsonb;

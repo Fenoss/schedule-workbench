@@ -117,9 +117,10 @@ const ADM_R={
       <label class="tg"><input type="checkbox" name="build" ${s.build!==false?'checked':''}> Build tab (schedule builder and in-app updates)</label>
       <label class="tg"><input type="checkbox" name="samples" ${s.samples!==false?'checked':''}> Sample portfolio buttons</label>
       <label class="tg"><input type="checkbox" name="setup" ${!s.hideSetup?'checked':''}> Set-up checklist on the Portfolio (for admins)</label>
+      <label class="tg"><input type="checkbox" name="reminders" ${s.reminders!==false?'checked':''}> Weekly email to admins and project managers when updates are due</label>
       <label class="pfl" style="max-width:320px"><span>Update cycle: a project is due an update after this many days</span><input type="number" name="cycle" min="7" max="120" value="${+s.cycle||35}"></label>
       <div class="adm-acts"><button class="btn primary">Save features</button></div></form>
-      <p class="muted">These change what everyone in your company sees. AI features also need the workbench’s AI service to be set up.</p>`; },
+      <p class="muted">These change what everyone in your company sees. AI features and reminder emails also need the workbench owner to set up the AI and email services. A project manager gets reminders when the project’s Manager field contains their email address.</p>`; },
   async 'wb-log'(){ return admLog(true); },
   async 'co-log'(){ return admLog(false); },
   async 'co-quality'(){ const c=qCfg(), av=qAvail();
@@ -183,7 +184,7 @@ function admWire(el){
       else if(k==='invite'){ const email=f.email.value.trim().toLowerCase(); const r=await PER.sb.from('invitations').insert({company_id:PER.companyId,email,role:f.role.value,invited_by:PER.uid}); if(r.error) throw (/duplicate|unique/i.test(r.error.message||'')?new Error('That email already has an open invitation.'):r.error); perToast(`Invited ${email}.`+await admEmailInvite(email)); }
       else if(k==='access'){ await admSaveCompany({name:f.name.value.trim(),auto_approve_domain:f.domain.value.trim().replace(/^@/,'').toLowerCase()||null,auto_approve_role:f.role.value}); perToast('Sign-in settings saved.'); }
       else if(k==='brand'){ const br={...((PER.company&&PER.company.branding)||{})}; const t=f.title.value.trim(); if(t) br.title=t; else delete br.title; if(f.dataset.noaccent) delete br.accent; else br.accent=f.accent.value; await admSaveCompany({branding:br}); perToast('Branding saved for everyone in the company.'); }
-      else if(k==='features'){ const site={...(ADM.cache.site||{}),ai:f.ai.checked,build:f.build.checked,samples:f.samples.checked,hideSetup:!f.setup.checked,cycle:Math.max(7,Math.min(120,+f.cycle.value||35))}; admOk(await PER.sb.from('company_settings').upsert({company_id:PER.companyId,site,updated_by:PER.uid,updated_at:new Date().toISOString()})); ADM.cache.site=site; PER.site=site; siteApply(); perToast('Features saved for everyone in the company.'); }
+      else if(k==='features'){ const site={...(ADM.cache.site||{}),ai:f.ai.checked,build:f.build.checked,samples:f.samples.checked,hideSetup:!f.setup.checked,reminders:f.reminders.checked,cycle:Math.max(7,Math.min(120,+f.cycle.value||35))}; admOk(await PER.sb.from('company_settings').upsert({company_id:PER.companyId,site,updated_by:PER.uid,updated_at:new Date().toISOString()})); ADM.cache.site=site; PER.site=site; siteApply(); perToast('Features saved for everyone in the company.'); }
       renderAdmin();
     }catch(ex){ perToast(perErr(ex),'err'); if(btn) btn.disabled=false; } });
 }

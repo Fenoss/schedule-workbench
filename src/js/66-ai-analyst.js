@@ -31,6 +31,10 @@ function aiDigest(){
     if(dq){ add('\n'+(DQ.ctx&&DQ.ctx.name||'Quality checks').toUpperCase()+' (live)'); dq.forEach(c=>add(c.n,'. ',c.title,': ',c.status.toUpperCase(),' ',c.metric,' (',c.sub||'',', target ',c.thr||'-',')',c.items&&c.items.length&&c.status==='fail'?' e.g. '+c.items.slice(0,5).map(i=>i.code).join(', '):'')); } }catch(_){}
   try{ const il=ifcList().map(I=>({...I,ev:ifcEval(I)})); if(il.length){ add('\nINTERFACES (giver -> receiver, margin = receiver need date minus giver forecast)'); add('id|giver|receiver|giver forecast|need by|margin d|logic issues');
       il.slice(0,40).forEach(I=>add(I.id,'|',I.g.code,' ',I.g.proj,'|',I.r.code,' ',I.r.proj,'|',aiFmt(I.ev.gF),'|',aiFmt(I.ev.need),'|',I.ev.margin??'-','|',I.ev.checks.filter(c=>!c[1]).map(c=>c[2]).join('; ')||'none')); } }catch(_){}
+  try{ if(typeof PER!=='undefined'&&PER.loaded&&!PER.loaded.multi&&PER.pid===PER.loaded.pid&&PER.periods.length){ const P=PER.periods;
+    add('\nUPDATE HISTORY (oldest first)'); add('update|data date|forecast finish|baseline finish|actual %|planned %|BEI|SPI|CPI|EAC');
+    P.slice(-12).forEach(p=>{ const s=p.stats||{}, c=s.cost||{}; add(p.label,'|',aiFmt(p.dd),'|',aiFmt(s.finish),'|',aiFmt(s.blFinish),'|',s.pctA!=null?Math.round(s.pctA*100):'-','|',s.pctP!=null?Math.round(s.pctP*100):'-','|',s.bei!=null?(+s.bei).toFixed(2):'-','|',c.spi!=null?c.spi.toFixed(2):'-','|',c.cpi!=null?c.cpi.toFixed(2):'-','|',c.eac!=null?Math.round(c.eac):'-'); });
+    const n=[...P].reverse().find(p=>narHas(p.narrative)); if(n){ add('\nLATEST UPDATE NARRATIVE (',n.label,')'); NAR.forEach(([k,l])=>{ if(n.narrative[k]) add(l,': ',n.narrative[k]); }); } } }catch(_){}
   return lines.join('\n').slice(0,60000);
 }
 const AI_RULES=`You are a senior project controls scheduler (Primavera P6, critical path method, DCMA 14-point, interface management) reviewing a construction programme inside Schedule Workbench, a schedule comparison tool. The user is an experienced programme controls director, so be direct and technical, and do not explain basic terms.

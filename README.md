@@ -128,6 +128,13 @@ cd site && python3 -m http.server 8000
 # open http://localhost:8000/ (add it to Supabase redirect URLs to sign in locally)
 ```
 
+## Emails
+- **Invitations:** inviting someone (Admin → Invitations, or a new company's first admin) sends them a sign-in email through Supabase Auth via the `invite-email` function. Supabase's built-in sender only allows a few emails an hour; set up your own SMTP under **Authentication → Emails → SMTP settings** before inviting a team.
+- **Weekly "updates due" reminders:** the `update-reminders` function runs every Monday (a `pg_cron` job; see `supabase/reminders.sql`). It emails each company's admins, and any project manager whose project **Manager** field contains their email, listing active projects with no update within the company's update cycle (Admin → Features). It needs a [Resend](https://resend.com) account with a verified sending domain: add the function secrets `RESEND_API_KEY`, `REMINDER_FROM` (for example `Schedule Workbench <updates@yourdomain.com>`) and `SITE_URL`. Until then it runs in dry-run mode and sends nothing.
+
+## Activity log
+Changes to access, companies, invitations, settings, projects and saved updates are recorded by database triggers in `audit_log`. Owners see everything under Admin → Workbench → Activity log; company admins see their own company's.
+
 ## Backups
 `.github/workflows/backup.yml` makes a nightly, encrypted backup of the database and the XER file store and keeps each one for 30 days under **Actions → Nightly backup → Artifacts**. It is encrypted because this repository is public. Turn it on by adding three repository secrets (**Settings → Secrets and variables → Actions**):
 
