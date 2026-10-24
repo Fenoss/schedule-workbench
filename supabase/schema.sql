@@ -377,3 +377,19 @@ grant select, insert, update, delete on public.profiles, public.programmes, publ
 
 -- Fill in summaries for projects that already have periods.
 select private.refresh_project_summary(id) from public.projects;
+
+-- Quality check settings (one row): DCMA / AACE / bespoke frameworks and their limits. Everyone approved reads; admins write.
+create table if not exists public.quality_settings (
+  id smallint primary key default 1 check (id = 1),
+  config jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now(),
+  updated_by uuid references auth.users(id) on delete set null
+);
+alter table public.quality_settings enable row level security;
+drop policy if exists quality_read on public.quality_settings;
+create policy quality_read on public.quality_settings for select to authenticated using (private.my_role() <> 'pending');
+drop policy if exists quality_admin_insert on public.quality_settings;
+create policy quality_admin_insert on public.quality_settings for insert to authenticated with check (private.my_role() = 'admin');
+drop policy if exists quality_admin_update on public.quality_settings;
+create policy quality_admin_update on public.quality_settings for update to authenticated using (private.my_role() = 'admin') with check (private.my_role() = 'admin');
+grant select, insert, update on public.quality_settings to authenticated;

@@ -101,6 +101,9 @@ Only signed-in, approved users can call the function. Edge functions have a time
   - Create a project, load the period's XER files, then choose **Save current as period**.
   - **Import past updates** turns a batch of monthly XERs into periods against the loaded baseline.
   - **Load sample history** creates a demo project.
+- **Quality tab:** choose the check set from the bar: **DCMA 14-point**, **AACE enhanced** (25 checks drawn from AACE RPs 78R-13, 53R-06, 49R-06, 92R-17 and 90R-17, including dangling logic, out-of-sequence progress, near-critical density and changes since the previous update) or a **bespoke** set.
+  - Admins choose **Configure checks** to set each check's pass and amber limits and parameters (such as the float or duration limit), switch checks off, build the bespoke set, and pick the default and which sets users can see. Settings are saved for everyone (the `quality_settings` table).
+  - AACE describes what to review but sets no pass marks, so the AACE limits are starting points to agree for each project.
 - **Account menu (top right):** switch between **Team** and **Private** workspaces, manage users (admins) and sign out.
 - **Offline:** the app still works offline. Choose **Work offline on this device** and data stays in that browser only.
 
