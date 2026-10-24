@@ -85,6 +85,9 @@ function docStore(db){
     updatePeriod:(pid,id,f)=>proj(pid).collection('periods').doc(id).update(f),
     async deleteProject(pid){ const pr=proj(pid), ps=await pr.collection('periods').get(), fs=await files(pid).get();
       for(const d of ps.docs) await pr.collection('periods').doc(d.id).delete(); for(const d of fs.docs) await this.dropFile(pid,d.id); await pr.delete(); },
+    watchStructures:(cb,err)=>db.collection('structures').onSnapshot(s=>cb(rows(s)),err),
+    async saveStructure(x){ const o={kind:x.kind,name:x.name,data:x.data||{},sort:x.sort||0,updatedAt:Date.now(),updatedBy:PER.uid||'local'}; if(x.id){ await db.collection('structures').doc(x.id).set(o); return x.id; } const ref=db.collection('structures').doc(); await ref.set(o); return ref.id; },
+    deleteStructure:id=>db.collection('structures').doc(id).delete(),
     watchRisks:(cb,err)=>base('risks').onSnapshot(s=>cb(rows(s)),err),
     async createRisk(r){ const ref=base('risks').doc(), now=Date.now(); await ref.set(Object.assign({parentId:null,programmeId:null,projectId:null},r,{createdBy:PER.uid||'local',createdAt:now,updatedAt:now,updatedBy:PER.uid||'local'})); return ref.id; },
     updateRisk:(id,f)=>base('risks').doc(id).update(Object.assign({},f,{updatedAt:Date.now(),updatedBy:PER.uid||'local'})),
@@ -100,10 +103,10 @@ async function perGzipBlob(text){ if(typeof CompressionStream==='undefined') ret
 async function perGunzipBlob(b){ const h=new Uint8Array(await b.slice(0,2).arrayBuffer()); if(h[0]!==0x1f||h[1]!==0x8b) return await b.text(); return await new Response(b.stream().pipeThrough(new DecompressionStream('gzip'))).text(); }
 function supaStore(sb){
   const ok=({data,error})=>{ if(error) throw error; return data; };
-  const mapP=r=>({id:r.id,name:r.name,createdBy:r.owner,updatedAt:Date.parse(r.updated_at)||0,space:r.space,programmeId:r.programme_id||null,code:r.code||'',status:r.status||'active',manager:r.manager||'',description:r.description||'',summary:r.summary||null});
-  const mapG=r=>({id:r.id,name:r.name,code:r.code||'',client:r.client||'',description:r.description||'',colour:r.colour||'',sort:r.sort||0,createdBy:r.owner,updatedAt:Date.parse(r.updated_at)||0});
-  const pCols=f=>{ const o={}; if('name' in f) o.name=f.name; if('programmeId' in f) o.programme_id=f.programmeId||null; ['code','status','manager','description'].forEach(k=>{ if(k in f) o[k]=f[k]||(k==='status'?'active':''); }); return o; };
-  const gCols=f=>{ const o={}; ['name','code','client','description','colour','sort'].forEach(k=>{ if(k in f) o[k]=f[k]; }); return o; };
+  const mapP=r=>({id:r.id,name:r.name,createdBy:r.owner,updatedAt:Date.parse(r.updated_at)||0,space:r.space,programmeId:r.programme_id||null,code:r.code||'',status:r.status||'active',manager:r.manager||'',description:r.description||'',summary:r.summary||null,attrs:r.attrs||{}});
+  const mapG=r=>({id:r.id,name:r.name,code:r.code||'',client:r.client||'',description:r.description||'',colour:r.colour||'',sort:r.sort||0,createdBy:r.owner,updatedAt:Date.parse(r.updated_at)||0,attrs:r.attrs||{}});
+  const pCols=f=>{ const o={}; if('name' in f) o.name=f.name; if('programmeId' in f) o.programme_id=f.programmeId||null; ['code','status','manager','description'].forEach(k=>{ if(k in f) o[k]=f[k]||(k==='status'?'active':''); }); if('attrs' in f) o.attrs=f.attrs||{}; return o; };
+  const gCols=f=>{ const o={}; ['name','code','client','description','colour','sort','attrs'].forEach(k=>{ if(k in f) o[k]=f[k]; }); return o; };
   const mapR=r=>({id:r.id,label:r.label,notes:r.notes||'',dd:r.dd==null?null:Number(r.dd),stats:r.stats||{},files:r.files||[],narrative:r.narrative||{},savedBy:r.saved_by,savedAt:Date.parse(r.saved_at)||0});
   const mapK=r=>({id:r.id,level:r.level,programmeId:r.programme_id||null,projectId:r.project_id||null,parentId:r.parent_id||null,ref:r.ref||'',title:r.title,status:r.status||'open',d:r.data||{},space:r.space,createdBy:r.owner,updatedBy:r.updated_by,updatedAt:Date.parse(r.updated_at)||0,createdAt:Date.parse(r.created_at)||0});
   const kCols=f=>{ const o={}, M={level:'level',programmeId:'programme_id',projectId:'project_id',parentId:'parent_id',ref:'ref',title:'title',status:'status',d:'data'}; for(const k in M) if(k in f) o[M[k]]=f[k]===undefined?null:f[k]; return o; };
@@ -134,6 +137,9 @@ function supaStore(sb){
     async updatePeriod(pid,id,f){ const o={}; if('narrative' in f) o.narrative=f.narrative||{}; if('notes' in f) o.notes=f.notes||''; if('label' in f) o.label=f.label; ok(await sb.from('periods').update(o).eq('id',id)); },
     async deletePeriod(pid,id){ ok(await sb.from('periods').delete().eq('id',id)); },
     async deleteProject(pid){ const fs=ok(await sb.from('xer_files').select('path').eq('project_id',pid)); if(fs.length) await sb.storage.from('xer').remove(fs.map(f=>f.path)); ok(await sb.from('projects').delete().eq('id',pid)); },
+    watchStructures:(cb,err)=>watch('structures',null,async()=>ok(await sb.from('structures').select('*')).map(r=>({id:r.id,kind:r.kind,name:r.name,data:r.data||{},sort:r.sort||0,updatedAt:Date.parse(r.updated_at)||0})),cb,err),
+    async saveStructure(x){ const o={kind:x.kind,name:x.name,data:x.data||{},sort:x.sort||0}; if(x.id){ ok(await sb.from('structures').update(o).eq('id',x.id)); return x.id; } return ok(await sb.from('structures').insert(o).select('id').single()).id; },
+    async deleteStructure(id){ ok(await sb.from('structures').delete().eq('id',id)); },
     watchRisks(cb,err){ const sp=PER.space, me=PER.uid; return watch('risks',null,async()=>{ let q=sb.from('risks').select('*').eq('space',sp); if(sp==='private') q=q.eq('owner',me); return ok(await q).map(mapK); },cb,err); },
     async createRisk(r){ return ok(await sb.from('risks').insert(Object.assign(kCols(r),{space:PER.space})).select('id').single()).id; },
     async updateRisk(id,f){ ok(await sb.from('risks').update(kCols(f)).eq('id',id)); },
@@ -265,7 +271,7 @@ function authDone(mode){
   const au=document.getElementById('auth'); if(au){ au.classList.add('out'); setTimeout(()=>au.remove(),260); }
   renderUserChip(); perSubscribe(); setTab('port'); qLoad();
 }
-function perReset(){ if(typeof RK!=='undefined'){ if(RK.un){ try{ RK.un(); }catch(_){} RK.un=null; } RK.risks=[]; RK.loaded=false; RK.cfg=null; } if(PER.unP) PER.unP(); if(PER.unR) PER.unR(); if(PER.unG) PER.unG(); PER.unP=PER.unR=PER.unG=null; PER.projects=[]; PER.programmes=[]; PER.periods=[]; PER.pid=null; PER.mode=null; PER.store=null; PER.loaded=null; PER.company=null; PER.site={}; PER.platform=false; try{ brandApply(); siteApply(); }catch(_){} const m=document.getElementById('userMenu'); if(m) m.hidden=true; renderUserChip(); perRenderAll(); if(typeof rkRender==='function') rkRender(); }
+function perReset(){ if(typeof FW!=='undefined'){ if(FW.un){ try{ FW.un(); }catch(_){} FW.un=null; } FW.structs=[]; FW.loaded=false; FW.work=null; FW.ifc=null; } if(typeof RK!=='undefined'){ if(RK.un){ try{ RK.un(); }catch(_){} RK.un=null; } RK.risks=[]; RK.loaded=false; RK.cfg=null; } if(PER.unP) PER.unP(); if(PER.unR) PER.unR(); if(PER.unG) PER.unG(); PER.unP=PER.unR=PER.unG=null; PER.projects=[]; PER.programmes=[]; PER.periods=[]; PER.pid=null; PER.mode=null; PER.store=null; PER.loaded=null; PER.company=null; PER.site={}; PER.platform=false; try{ brandApply(); siteApply(); }catch(_){} const m=document.getElementById('userMenu'); if(m) m.hidden=true; renderUserChip(); perRenderAll(); if(typeof rkRender==='function') rkRender(); }
 async function signOut(){
   try{ localStorage.removeItem('pacer.auth'); }catch(_){}
   const wasSupa=PER.mode==='supa'; perReset();

@@ -30,7 +30,7 @@ function rkDefaultCfg(){
     esc:{programme:{score:15,cost:1000000},portfolio:{score:20,cost:5000000}},
     review:30,cur:'$'};
 }
-function rkCfg(){ if(RK._cc&&RK._ccSrc===RK.cfg) return RK._cc; const d=rkDefaultCfg(), c=RK.cfg||{}; const o=Object.assign({},d,c); o.cols=Object.assign({},d.cols,c.cols||{}); o.esc=Object.assign({},d.esc,c.esc||{}); o.progCols=c.progCols||{}; o.fields=c.fields||[]; RK._cc=o; RK._ccSrc=RK.cfg; return o; }
+function rkCfg(){ if(RK._cc&&RK._ccSrc===RK.cfg) return RK._cc; const d=rkDefaultCfg(), c=RK.cfg||{}; const o=Object.assign({},d,c); o.cols=Object.assign({},d.cols,c.cols||{}); o.esc=Object.assign({},d.esc,c.esc||{}); o.progCols=c.progCols||{}; o.fields=c.fields||[]; const rbs=typeof fwRbsCats==='function'?fwRbsCats():[]; if(rbs.length){ o.cats=rbs; o.catsFromRbs=true; } RK._cc=o; RK._ccSrc=RK.cfg; return o; }
 
 /* ---- columns available to a register ---- */
 const RCOL={

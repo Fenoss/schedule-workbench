@@ -2,19 +2,24 @@
 const RLOGO='<svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="var(--accent)"/><rect x="6" y="6" width="6" height="6" rx="1.5" fill="#fff" opacity=".45"/><rect x="13" y="6" width="6" height="6" rx="1.5" fill="#fff" opacity=".7"/><rect x="20" y="6" width="6" height="6" rx="1.5" fill="#fff"/><rect x="6" y="13" width="6" height="6" rx="1.5" fill="#fff" opacity=".3"/><rect x="13" y="13" width="6" height="6" rx="1.5" fill="#fff" opacity=".45"/><rect x="20" y="13" width="6" height="6" rx="1.5" fill="#fff" opacity=".7"/><rect x="6" y="20" width="6" height="6" rx="1.5" fill="#fff" opacity=".2"/><rect x="13" y="20" width="6" height="6" rx="1.5" fill="#fff" opacity=".3"/><rect x="20" y="20" width="6" height="6" rx="1.5" fill="#fff" opacity=".45"/></svg>';
 const RTABS=[['over','Overview'],['reg','Register'],['tree','Hierarchy'],['ifc','Interfaces'],['resp','Responses']];
 
-/* ---- switching between the Schedule and Risk workbenches ---- */
-function rkBrand(){ const br=document.querySelector('.top .brand'); if(!br) return; const risk=RK.app==='risk', nm=br.querySelector('.bname'), b=(typeof PER!=='undefined'&&PER.mode==='supa'&&PER.company&&PER.company.branding)||{};
-  const svg=br.querySelector('svg'); if(svg&&!b.logo){ if(!br._slogo) br._slogo=svg.outerHTML; svg.outerHTML=risk?RLOGO:br._slogo; }
-  if(nm){ if(b.title){ nm.innerHTML=esc(b.title)+`<em class="apptag">${risk?'Risk':'Schedule'}</em>`; } else nm.innerHTML=`${risk?'Risk':'Schedule'} <span>Workbench</span>`; }
-  br.setAttribute('aria-label',(risk?'Risk':'Schedule')+' Workbench. Switch workbench'); document.title=(risk?'Risk':'Schedule')+' Workbench'; }
-function rkApp(app,o){ o=o||{}; app=app==='risk'?'risk':'schedule'; RK.app=app; try{ localStorage.setItem('pacer.app',app); }catch(_){}
-  if(!o.keepHash){ try{ history.replaceState(null,'',app==='risk'?'#risk':location.pathname+location.search); }catch(_){} }
-  document.body.classList.toggle('app-risk',app==='risk'); rkBrand();
+/* ---- switching between the Schedule, Risk and Framework workbenches ---- */
+const FLOGO='<svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="var(--accent)"/><rect x="12" y="5.5" width="8" height="6" rx="1.5" fill="#fff"/><rect x="4.5" y="20.5" width="8" height="6" rx="1.5" fill="#fff" opacity=".8"/><rect x="19.5" y="20.5" width="8" height="6" rx="1.5" fill="#fff" opacity=".8"/><path d="M16 11.5v4.5M8.5 20.5V16h15v4.5" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg>';
+const APPS={schedule:{n:'Schedule',d:'P6 schedules, updates, quality and reporting',hash:''},risk:{n:'Risk',d:'Risk registers, interfaces and responses',hash:'#risk'},frame:{n:'Framework',d:'Portfolio set-up, breakdown structures, codes and standards',hash:'#framework'}};
+const appLogo=a=>a==='risk'?RLOGO:a==='frame'?FLOGO:((document.querySelector('.top .brand')||{})._slogo||LOGO);
+function rkBrand(){ const br=document.querySelector('.top .brand'); if(!br) return; const A=APPS[RK.app]||APPS.schedule, nm=br.querySelector('.bname'), b=(typeof PER!=='undefined'&&PER.mode==='supa'&&PER.company&&PER.company.branding)||{};
+  const svg=br.querySelector('svg'); if(svg&&!b.logo){ if(!br._slogo) br._slogo=svg.outerHTML; svg.outerHTML=appLogo(RK.app); }
+  if(nm){ if(b.title){ nm.innerHTML=esc(b.title)+`<em class="apptag">${A.n}</em>`; } else nm.innerHTML=`${A.n} <span>Workbench</span>`; }
+  br.setAttribute('aria-label',A.n+' Workbench. Switch workbench'); document.title=A.n+' Workbench'; }
+function rkApp(app,o){ o=o||{}; app=APPS[app]?app:'schedule'; const prev=RK.app; RK.app=app; try{ localStorage.setItem('pacer.app',app); }catch(_){}
+  if(!o.keepHash){ try{ history.replaceState(null,'',APPS[app].hash||location.pathname+location.search); }catch(_){} }
+  document.body.classList.toggle('app-risk',app==='risk'); document.body.classList.toggle('app-frame',app==='frame'); document.body.classList.toggle('app-alt',app!=='schedule'); rkBrand();
   document.getElementById('rkNav').hidden=app!=='risk'; document.getElementById('rkScopeW').hidden=app!=='risk'; document.getElementById('riskWrap').hidden=app!=='risk';
-  if(app==='risk'){ if(S.tab==='admin') setTab('port'); if(typeof aiPanel==='function'&&!document.getElementById('aiWrap').hidden) aiPanel(false); hideDrawer&&hideDrawer(); rkRender(); window.scrollTo(0,0); }
-  else { if(typeof rkAiPanel==='function'&&RKAI.open) rkAiPanel(false); redraw(); } }
-function rkAppMenu(){ const m=document.getElementById('appMenu'); const it=(k,t,d,ic)=>`<button class="appi${RK.app===k?' cur':''}" data-app="${k}" role="menuitemradio" aria-checked="${RK.app===k}"><span class="appic">${ic}</span><span><b>${t}</b><span class="muted">${d}</span></span>${RK.app===k?'<span class="appok" aria-hidden="true">✓</span>':''}</button>`;
-  m.innerHTML=`<div class="cxm-h">Switch workbench</div>${it('schedule','Schedule Workbench','P6 schedules, updates, quality and reporting',(document.querySelector('.top .brand')||{})._slogo||LOGO)}${it('risk','Risk Workbench','Risk registers, interfaces and responses',RLOGO)}`; }
+  document.getElementById('fwNav').hidden=app!=='frame'; document.getElementById('fwWrap').hidden=app!=='frame';
+  if(app!=='risk'&&typeof rkAiPanel==='function'&&RKAI.open) rkAiPanel(false);
+  if(app!=='schedule'){ if(S.tab==='admin') setTab('port'); if(typeof aiPanel==='function'&&!document.getElementById('aiWrap').hidden) aiPanel(false); hideDrawer&&hideDrawer(); if(app==='risk') rkRender(); else fwRender(); window.scrollTo(0,0); }
+  else redraw(); }
+function rkAppMenu(){ const m=document.getElementById('appMenu'); const it=k=>`<button class="appi${RK.app===k?' cur':''}" data-app="${k}" role="menuitemradio" aria-checked="${RK.app===k}"><span class="appic">${appLogo(k)}</span><span><b>${APPS[k].n} Workbench</b><span class="muted">${APPS[k].d}</span></span>${RK.app===k?'<span class="appok" aria-hidden="true">✓</span>':''}</button>`;
+  m.innerHTML=`<div class="cxm-h">Switch workbench</div>${Object.keys(APPS).map(it).join('')}`; }
 function wireRk(){
   const top=document.querySelector('.top .brand'), m=document.getElementById('appMenu'); if(!top||!m) return;
   const close=()=>{ m.hidden=true; top.setAttribute('aria-expanded','false'); };
@@ -32,8 +37,9 @@ function wireRk(){
   const w=document.getElementById('riskWrap'); w.addEventListener('click',rkClick); w.addEventListener('change',rkChange); w.addEventListener('input',rkInput);
   document.addEventListener('click',rkCfgClick); document.addEventListener('change',rkCfgChange);
   try{ const sc=JSON.parse(localStorage.getItem('pacer.rkscope')||'null'); if(sc&&RLV.includes(sc.lv)) RK.scope=sc; const t=localStorage.getItem('pacer.rktab'); if(RTABS.some(x=>x[0]===t)) RK.tab=t; RK.roll=localStorage.getItem('pacer.rkroll')!=='0'; }catch(_){}
-  let want='schedule'; try{ want=location.hash==='#risk'?'risk':(localStorage.getItem('pacer.app')||'schedule'); }catch(_){}
-  if(want==='risk') rkApp('risk',{keepHash:true}); else rkBrand();
+  if(typeof wireFw==='function') wireFw();
+  let want='schedule'; try{ want=location.hash==='#risk'?'risk':location.hash==='#framework'?'frame':(localStorage.getItem('pacer.app')||'schedule'); }catch(_){}
+  if(want!=='schedule'&&APPS[want]) rkApp(want,{keepHash:true}); else rkBrand();
 }
 function rkGo(t){ RK.tab=t; try{ localStorage.setItem('pacer.rktab',t); }catch(_){} if(S.tab==='admin') setTab('port'); rkRender(); window.scrollTo(0,0); }
 function rkSetScope(sc){ RK.scope={lv:sc.lv,id:sc.lv==='portfolio'?null:sc.id}; RK.cell=null; RK.ifcPair=null; try{ localStorage.setItem('pacer.rkscope',JSON.stringify(RK.scope)); }catch(_){} rkRender(); }

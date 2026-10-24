@@ -138,6 +138,23 @@ Click the logo to switch between the Schedule Workbench and the Risk Workbench. 
 
 The database part is `supabase/risks.sql`, which is also included at the end of `schema.sql`.
 
+## Framework Workbench
+
+The third workbench on the logo switcher. It sets up the portfolio and the standards the Schedule and Risk workbenches share.
+
+- **Portfolio.** Programmes and projects in one tree. Edit their codes, managers, status and description, and your own attributes (sector, region, contract type, budget, dates and so on, set under *Attributes*; required ones are flagged). Import or update the whole portfolio from Excel or CSV, matched by code and then by name, and export it to Excel. Each item shows what uses it: schedule updates, live risks and interfaces.
+- **Structures.** These are WBS, OBS, RBS, CBS, activity-code dictionaries and any other coding structure. You can edit them as a tree: add, move, indent, outdent and delete items. You can also:
+  - import them from Excel or CSV (Code, Name, plus Parent or Level)
+  - build them from the open schedule's WBS or activity codes
+  - build the OBS from risk owners or the RBS from risk categories
+  - draft them with AI
+
+  *Load standard structures* gives you a starting set to adapt.
+- **Interfaces.** The interface register: IDs with giver and receiver projects, type, need date and status. It shows which interfaces appear in the open schedule and which risks refer to each one.
+- **Conformance.** Checks portfolio data for missing codes, managers, required attributes and duplicate codes. It checks the open schedule's WBS, activity codes and interface IDs against your standards, and checks risk categories, owners and interface IDs against the RBS, OBS and register.
+- **Used by the Risk Workbench.** The RBS top level becomes the risk categories in every register, the OBS fills the owner lists, and interface risks pick their ID from the register, which ticks the giver and receiver projects for you.
+- Only admins can change structures. Programme and project editing follows the usual access rules. The database part is `supabase/framework.sql`, which is also included at the end of `schema.sql`.
+
 ## Changing the app
 Edit the files in `src/` (the scripts in `src/js/` are joined in name order into one page), then:
 ```bash
