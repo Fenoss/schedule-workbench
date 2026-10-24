@@ -393,3 +393,325 @@ create policy quality_admin_insert on public.quality_settings for insert to auth
 drop policy if exists quality_admin_update on public.quality_settings;
 create policy quality_admin_update on public.quality_settings for update to authenticated using (private.my_role() = 'admin') with check (private.my_role() = 'admin');
 grant select, insert, update on public.quality_settings to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Companies (multi-tenant). Must run after everything above.
+-- ---------------------------------------------------------------------------
+-- Multi-company: a workbench owner (master admin), separate company instances, and an admin per company.
+create table if not exists public.companies (
+  id                  uuid primary key default gen_random_uuid(),
+  name                text not null check (length(name) between 1 and 120),
+  status              text not null default 'active' check (status in ('active', 'suspended')),
+  auto_approve_domain text,
+  auto_approve_role   text not null default 'viewer' check (auto_approve_role in ('viewer', 'contributor')),
+  notes               text not null default '',
+  created_at          timestamptz not null default now(),
+  created_by          uuid references auth.users (id) on delete set null
+);
+alter table public.profiles add column if not exists company_id        uuid references public.companies (id) on delete set null;
+alter table public.profiles add column if not exists is_owner          boolean not null default false;
+alter table public.profiles add column if not exists active_company_id uuid references public.companies (id) on delete set null;
+create index if not exists profiles_company_idx on public.profiles (company_id);
+
+create table if not exists public.invitations (
+  id          uuid primary key default gen_random_uuid(),
+  company_id  uuid not null references public.companies (id) on delete cascade,
+  email       text not null,
+  role        text not null default 'viewer' check (role in ('viewer', 'contributor', 'admin')),
+  invited_by  uuid references auth.users (id) on delete set null,
+  created_at  timestamptz not null default now(),
+  accepted_at timestamptz
+);
+create unique index if not exists invitations_open_idx on public.invitations (company_id, lower(email)) where accepted_at is null;
+
+create table if not exists public.company_settings (
+  company_id  uuid primary key references public.companies (id) on delete cascade,
+  quality     jsonb not null default '{}'::jsonb,
+  updated_at  timestamptz not null default now(),
+  updated_by  uuid references auth.users (id) on delete set null
+);
+
+alter table public.programmes add column if not exists company_id uuid references public.companies (id) on delete restrict;
+alter table public.projects   add column if not exists company_id uuid references public.companies (id) on delete restrict;
+create index if not exists programmes_company_idx on public.programmes (company_id);
+create index if not exists projects_company_idx on public.projects (company_id);
+
+-- Helpers
+create or replace function private.is_owner() returns boolean
+language sql stable security definer set search_path = public as $$
+  select coalesce((select is_owner from public.profiles where id = auth.uid()), false)
+$$;
+-- The company whose data you're working in: your own, or for the owner the one they've switched into.
+create or replace function private.my_company() returns uuid
+language sql stable security definer set search_path = public as $$
+  select case when p.is_owner then coalesce(p.active_company_id, p.company_id) else p.company_id end
+  from public.profiles p where p.id = auth.uid()
+$$;
+-- Your role in that company. The owner is admin everywhere; people with no company, or in a suspended one, are pending.
+create or replace function private.my_role() returns text
+language sql stable security definer set search_path = public as $$
+  select coalesce((
+    select case when p.is_owner then 'admin'
+                when p.company_id is null then 'pending'
+                when c.status <> 'active' then 'pending'
+                else p.role end
+    from public.profiles p left join public.companies c on c.id = p.company_id
+    where p.id = auth.uid()), 'pending')
+$$;
+create or replace function private.can_read_project(p uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from public.projects pr
+    where pr.id = p and private.my_role() <> 'pending' and pr.company_id = private.my_company()
+      and (pr.space = 'team' or pr.owner = auth.uid()))
+$$;
+create or replace function private.can_write_project(p uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from public.projects pr
+    where pr.id = p and pr.company_id = private.my_company()
+      and ((pr.space = 'team' and private.my_role() in ('contributor', 'admin'))
+           or (pr.space = 'private' and pr.owner = auth.uid() and private.my_role() <> 'pending')))
+$$;
+
+-- Backfill: existing data becomes the first company; the owner accounts are flagged.
+do $$
+declare cid uuid;
+begin
+  select id into cid from public.companies order by created_at limit 1;
+  if cid is null then
+    insert into public.companies (name, auto_approve_domain, auto_approve_role)
+    select 'My company', s.auto_approve_domain, coalesce(s.auto_approve_role, 'viewer')
+    from (select 1) x left join public.app_settings s on s.id = 1
+    returning id into cid;
+  end if;
+  update public.profiles   set company_id = cid where company_id is null;
+  update public.programmes set company_id = cid where company_id is null;
+  update public.projects   set company_id = cid where company_id is null;
+  insert into public.company_settings (company_id, quality)
+    select cid, q.config from public.quality_settings q where q.id = 1
+    on conflict (company_id) do nothing;
+end $$;
+-- If no one is the workbench owner yet, the earliest admin becomes it. Add more owners in the SQL editor:
+--   update public.profiles set is_owner = true where email = 'you@example.com';
+update public.profiles set is_owner = true
+ where not exists (select 1 from public.profiles where is_owner)
+   and id = (select id from public.profiles where role = 'admin' order by created_at limit 1);
+
+alter table public.programmes alter column company_id set default private.my_company();
+alter table public.projects   alter column company_id set default private.my_company();
+alter table public.programmes alter column company_id set not null;
+alter table public.projects   alter column company_id set not null;
+
+-- Sign-up: the first person is the owner; then an open invitation, then a company's auto-approve domain, else pending with no company.
+create or replace function private.handle_new_user() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare
+  first_user boolean;
+  inv public.invitations;
+  co  public.companies;
+  r   text := 'pending';
+  cid uuid;
+  own boolean := false;
+begin
+  select not exists (select 1 from public.profiles) into first_user;
+  select * into inv from public.invitations where lower(email) = lower(new.email) and accepted_at is null order by created_at limit 1;
+  if first_user then
+    own := true; r := 'admin';
+    select id into cid from public.companies order by created_at limit 1;
+    if cid is null then insert into public.companies (name) values ('My company') returning id into cid; end if;
+  elsif inv.id is not null then
+    cid := inv.company_id; r := inv.role;
+    update public.invitations set accepted_at = now() where id = inv.id;
+  else
+    select * into co from public.companies
+     where status = 'active' and auto_approve_domain is not null and lower(auto_approve_domain) = lower(split_part(new.email, '@', 2))
+     order by created_at limit 1;
+    if co.id is not null then cid := co.id; r := co.auto_approve_role; end if;
+  end if;
+  insert into public.profiles (id, email, name, role, company_id, is_owner)
+  values (new.id, new.email,
+          coalesce(new.raw_user_meta_data ->> 'full_name', new.raw_user_meta_data ->> 'name', split_part(new.email, '@', 1)),
+          r, cid, own)
+  on conflict (id) do nothing;
+  return new;
+end $$;
+
+-- Who may change what on a profile.
+create or replace function private.guard_profile_update() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  -- Direct database sessions (SQL editor, service key) and the workbench's own invitation step are trusted.
+  if auth.uid() is null or current_setting('sw.trusted', true) = 'on' then return new; end if;
+  if new.id <> old.id or new.email is distinct from old.email then raise exception 'Profile id and email cannot be changed'; end if;
+  if new.is_owner is distinct from old.is_owner then
+    if not private.is_owner() then raise exception 'Only the workbench owner can change owner access'; end if;
+    if old.id = auth.uid() then raise exception 'You cannot change your own owner access'; end if;
+  end if;
+  if new.active_company_id is distinct from old.active_company_id and not (old.id = auth.uid() and old.is_owner) then
+    raise exception 'Only the workbench owner can switch companies';
+  end if;
+  if new.company_id is distinct from old.company_id and not private.is_owner() then
+    if not (private.my_role() = 'admin' and old.company_id = private.my_company() and new.company_id is null) then
+      raise exception 'Only the workbench owner can move people between companies';
+    end if;
+    new.role := 'pending';
+  end if;
+  if new.role is distinct from old.role then
+    if not (private.is_owner() or (private.my_role() = 'admin' and old.company_id = private.my_company())) then raise exception 'Only admins can change access'; end if;
+    if old.id = auth.uid() and not private.is_owner() then raise exception 'You cannot change your own access'; end if;
+  end if;
+  return new;
+end $$;
+
+-- Only the owner changes a company's status.
+create or replace function private.guard_company_update() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is not null and new.status is distinct from old.status and not private.is_owner() then
+    raise exception 'Only the workbench owner can suspend or reactivate a company';
+  end if;
+  return new;
+end $$;
+create or replace trigger guard_company_update before update on public.companies
+  for each row execute function private.guard_company_update();
+
+-- Inviting someone who has already signed in (and has no company) adds them straight away.
+create or replace function private.apply_invitation() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  new.email := lower(trim(new.email));
+  perform set_config('sw.trusted', 'on', true);
+  update public.profiles set company_id = new.company_id, role = new.role
+   where lower(email) = new.email and company_id is null and not is_owner;
+  if found then new.accepted_at := now(); end if;
+  perform set_config('sw.trusted', '', true);
+  return new;
+end $$;
+create or replace trigger apply_invitation before insert on public.invitations
+  for each row execute function private.apply_invitation();
+
+-- Company admins (and the owner) take someone out of a company; they go back to pending with no company.
+create or replace function public.company_remove_user(uid uuid) returns void
+language plpgsql security definer set search_path = public as $$
+declare t public.profiles;
+begin
+  select * into t from public.profiles where id = uid;
+  if t.id is null then raise exception 'Person not found'; end if;
+  if uid = auth.uid() then raise exception 'You cannot remove yourself'; end if;
+  if t.is_owner then raise exception 'The workbench owner cannot be removed from a company'; end if;
+  if not (private.is_owner() or (private.my_role() = 'admin' and t.company_id = private.my_company())) then raise exception 'Only an admin of this company can remove people'; end if;
+  perform set_config('sw.trusted', 'on', true);
+  update public.profiles set company_id = null, role = 'pending' where id = uid;
+  perform set_config('sw.trusted', '', true);
+end $$;
+-- The owner places someone in a company with a role.
+create or replace function public.owner_assign_user(uid uuid, cid uuid, r text) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not private.is_owner() then raise exception 'Only the workbench owner can move people between companies'; end if;
+  if r not in ('pending', 'viewer', 'contributor', 'admin') then raise exception 'Unknown role'; end if;
+  perform set_config('sw.trusted', 'on', true);
+  update public.profiles set company_id = cid, role = case when cid is null then 'pending' else r end where id = uid and not (is_owner and id = auth.uid());
+  perform set_config('sw.trusted', '', true);
+end $$;
+
+-- Owner tools
+create or replace function public.set_active_company(cid uuid) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not private.is_owner() then raise exception 'Only the workbench owner can switch companies'; end if;
+  if cid is not null and not exists (select 1 from public.companies where id = cid) then raise exception 'Company not found'; end if;
+  update public.profiles set active_company_id = cid where id = auth.uid();
+end $$;
+create or replace function public.owner_companies()
+returns table (id uuid, name text, status text, auto_approve_domain text, auto_approve_role text, notes text, created_at timestamptz,
+               users bigint, admins bigint, pending bigint, programmes bigint, projects bigint, periods bigint, invites bigint)
+language plpgsql stable security definer set search_path = public as $$
+begin
+  if not private.is_owner() then raise exception 'Only the workbench owner can list companies'; end if;
+  return query
+  select c.id, c.name, c.status, c.auto_approve_domain, c.auto_approve_role, c.notes, c.created_at,
+    (select count(*) from public.profiles p where p.company_id = c.id),
+    (select count(*) from public.profiles p where p.company_id = c.id and p.role = 'admin'),
+    (select count(*) from public.profiles p where p.company_id = c.id and p.role = 'pending'),
+    (select count(*) from public.programmes g where g.company_id = c.id),
+    (select count(*) from public.projects pr where pr.company_id = c.id),
+    (select count(*) from public.periods pe join public.projects pr on pr.id = pe.project_id where pr.company_id = c.id),
+    (select count(*) from public.invitations i where i.company_id = c.id and i.accepted_at is null)
+  from public.companies c order by c.name;
+end $$;
+
+-- Access rules
+alter table public.companies        enable row level security;
+alter table public.invitations      enable row level security;
+alter table public.company_settings enable row level security;
+
+alter policy profiles_read on public.profiles
+  using (id = auth.uid() or private.is_owner() or (private.my_role() <> 'pending' and company_id = private.my_company()));
+alter policy profiles_admin_update on public.profiles
+  using (private.is_owner() or (private.my_role() = 'admin' and company_id = private.my_company()))
+  with check (private.is_owner() or (private.my_role() = 'admin' and (company_id = private.my_company() or company_id is null)));
+alter policy profiles_admin_delete on public.profiles
+  using ((private.is_owner() or (private.my_role() = 'admin' and company_id = private.my_company())) and id <> auth.uid());
+
+alter policy programmes_read on public.programmes
+  using (private.my_role() <> 'pending' and company_id = private.my_company() and (space = 'team' or owner = auth.uid()));
+alter policy programmes_insert on public.programmes
+  with check (owner = auth.uid() and company_id = private.my_company() and (
+    (space = 'team' and private.my_role() in ('contributor', 'admin'))
+    or (space = 'private' and private.my_role() <> 'pending')));
+alter policy programmes_update on public.programmes
+  using (company_id = private.my_company() and (private.my_role() = 'admin' or owner = auth.uid()))
+  with check (company_id = private.my_company() and (private.my_role() = 'admin' or owner = auth.uid()));
+alter policy programmes_delete on public.programmes
+  using (company_id = private.my_company() and (private.my_role() = 'admin' or owner = auth.uid()));
+
+alter policy projects_read on public.projects
+  using (private.my_role() <> 'pending' and company_id = private.my_company() and (space = 'team' or owner = auth.uid()));
+alter policy projects_insert on public.projects
+  with check (owner = auth.uid() and company_id = private.my_company() and (
+    (space = 'team' and private.my_role() in ('contributor', 'admin'))
+    or (space = 'private' and private.my_role() <> 'pending')));
+alter policy projects_update on public.projects
+  using (company_id = private.my_company() and (private.my_role() = 'admin' or owner = auth.uid()))
+  with check (company_id = private.my_company() and (private.my_role() = 'admin' or owner = auth.uid()));
+alter policy projects_delete on public.projects
+  using (company_id = private.my_company() and (private.my_role() = 'admin' or owner = auth.uid()));
+
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'companies' and policyname = 'companies_read') then
+    create policy companies_read on public.companies for select to authenticated
+      using (private.is_owner() or id = private.my_company());
+    create policy companies_insert on public.companies for insert to authenticated with check (private.is_owner());
+    create policy companies_update on public.companies for update to authenticated
+      using (private.is_owner() or (private.my_role() = 'admin' and id = private.my_company()))
+      with check (private.is_owner() or (private.my_role() = 'admin' and id = private.my_company()));
+    create policy companies_delete on public.companies for delete to authenticated using (private.is_owner());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'invitations' and policyname = 'invitations_admin') then
+    create policy invitations_admin on public.invitations for all to authenticated
+      using (private.is_owner() or (private.my_role() = 'admin' and company_id = private.my_company()))
+      with check (private.is_owner() or (private.my_role() = 'admin' and company_id = private.my_company()));
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'company_settings' and policyname = 'company_settings_read') then
+    create policy company_settings_read on public.company_settings for select to authenticated
+      using (company_id = private.my_company() and private.my_role() <> 'pending');
+    create policy company_settings_insert on public.company_settings for insert to authenticated
+      with check (company_id = private.my_company() and private.my_role() = 'admin');
+    create policy company_settings_update on public.company_settings for update to authenticated
+      using (company_id = private.my_company() and private.my_role() = 'admin')
+      with check (company_id = private.my_company() and private.my_role() = 'admin');
+  end if;
+end $$;
+
+grant select, insert, update, delete on public.companies, public.invitations, public.company_settings to authenticated;
+revoke execute on function private.is_owner(), private.my_company(), private.handle_new_user(), private.guard_profile_update(), private.guard_company_update(), private.apply_invitation() from public, anon;
+grant execute on function private.is_owner(), private.my_company() to authenticated;
+revoke execute on function public.set_active_company(uuid), public.owner_companies(), public.company_remove_user(uuid), public.owner_assign_user(uuid, uuid, text) from public, anon;
+grant execute on function public.set_active_company(uuid), public.owner_companies(), public.company_remove_user(uuid), public.owner_assign_user(uuid, uuid, text) to authenticated;
+do $$ begin
+  if exists (select 1 from pg_roles where rolname = 'supabase_auth_admin') then
+    grant execute on function private.handle_new_user() to supabase_auth_admin;
+  end if;
+end $$;

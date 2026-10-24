@@ -12,6 +12,13 @@ supabase/functions/ai-proxy/index.ts AI proxy that keeps your Anthropic key on t
 .github/workflows/pages.yml          publishes site/ to GitHub Pages on every push to main
 ```
 
+## Companies and the workbench owner
+One deployment can host several companies, each a **separate instance**: a company's people only ever see its own programmes, projects, updates, files and quality settings. The database enforces this.
+
+- **Workbench owner** (master admin): creates companies, suspends or reactivates them, moves people between companies, and can switch into any company from the account menu to work in it as its admin. The first person to sign in becomes the owner. To add another owner, run `update public.profiles set is_owner = true where email = 'them@example.com';` in the SQL editor.
+- **Company admin**: manages their own company from the account menu → **Manage *company***: approves people and sets their access, invites people by email, removes people, sets the company name, and optionally an email domain whose sign-ins join automatically. Company admins also set the company's quality checks.
+- **Joining a company:** someone who signs in with an invited email joins that company with the invited access. Someone whose email matches a company's domain joins it automatically. Anyone else waits with no company until an admin invites them or the owner places them. The workbench doesn't send invitation emails, so tell people to sign in.
+
 ## Who can do what
 
 | Role | Team projects | Private projects | Users |
@@ -21,7 +28,7 @@ supabase/functions/ai-proxy/index.ts AI proxy that keeps your Anthropic key on t
 | Contributor | create projects, save periods, delete what they saved | yes | — |
 | Admin | everything | their own only | approve users and set roles |
 
-The first person to sign in becomes the admin. Everyone after that starts as **Pending** until an admin approves them from the account menu → **Manage users**. The database enforces these rules (row-level security), not only the page.
+Roles apply within a company. The workbench owner is an admin in every company. The database enforces these rules (row-level security), not only the page.
 
 ## Setup (about 20 minutes)
 
@@ -58,14 +65,7 @@ Email links work out of the box. Supabase's built-in email sender is rate-limite
 Some company tenants stop staff from approving new apps themselves. If people see a "needs admin approval" message, ask that company's IT to grant consent, or use email links in the meantime. To hide either option, set `signIn` in `config.js`.
 
 ### 7. First sign-in
-Open the site and sign in. You become the admin. To approve everyone from one company automatically, run this in the SQL editor:
-
-```sql
-insert into public.app_settings (id, auto_approve_domain, auto_approve_role)
-values (1, 'yourcompany.com', 'viewer')
-on conflict (id) do update set auto_approve_domain = excluded.auto_approve_domain,
-                               auto_approve_role  = excluded.auto_approve_role;
-```
+Open the site and sign in. You become the workbench owner and admin of the first company. Rename it, set an auto-approve email domain and invite people from the account menu → **Manage *company***, and add more companies from **Companies and people (owner)**.
 
 ### 8. AI features (optional)
 The AI Analyst and AI schedule build call Claude through `supabase/functions/ai-proxy`, so your API key never reaches the browser. Usage is billed to your Anthropic account.

@@ -737,6 +737,13 @@ select.bin{padding:0 2px}
 .um-s p{margin:6px 0 0;font-size:13px}.um-s .sg{margin-top:6px}
 .um-b{display:block;width:100%;text-align:left;padding:10px;border:0;border-top:1px solid var(--line);background:none;font-weight:600;font-size:14px}
 .um-b:hover{background:var(--band)}
+.um-co{width:100%;height:34px;margin-top:6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:0 8px;font-size:13.5px}
+.codlg{width:min(860px,calc(100vw - 32px));max-height:calc(100vh - 48px);display:flex;flex-direction:column} .codlg.wide{width:min(1120px,calc(100vw - 32px))}
+.codlg .pdb{overflow:auto} .co-b{display:flex;flex-direction:column;gap:12px;padding-top:14px}
+.co-t tbody tr{cursor:default} .co-t select{height:30px;border:1px solid var(--line);border-radius:5px;background:var(--surface);padding:0 6px;font-size:13px} .co-t .pill{margin-left:6px}
+.co-t tr.co-cur td{background:var(--accentSoft)} .co-act{white-space:nowrap;display:flex;gap:10px;align-items:center}
+.co-inv{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end} .co-inv input,.co-inv select,.co-set input,.co-set select{height:36px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:0 10px;font-size:14px;min-width:220px}
+.co-set{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px 18px;align-items:end}
 @media (max-width:720px){ .uc-t,.uchip svg{display:none} .uchip{padding:0 4px} }
 .tabs{overflow-x:auto;scrollbar-width:none;max-width:100%;min-width:0}.tabs::-webkit-scrollbar{display:none}.tabs .tab{flex:none}
 .stage-bar{min-width:0}
@@ -4102,13 +4109,13 @@ function runDCMA(){ return runQuality(); }
 function qAdmin(){ if(typeof PER==='undefined'||!PER.mode) return true; return PER.mode==='local'||(PER.mode==='supa'&&PER.srole==='admin')||(PER.mode==='cloud'&&(PER.isOwner||PER.canEdit)); }
 async function qLoad(){
   let cfg=null;
-  try{ if(PER.mode==='supa'){ const {data,error}=await PER.sb.from('quality_settings').select('config').eq('id',1).maybeSingle(); if(error) throw error; cfg=data&&data.config; }
+  try{ if(PER.mode==='supa'){ if(!PER.companyId) cfg=null; else { const {data,error}=await PER.sb.from('company_settings').select('quality').eq('company_id',PER.companyId).maybeSingle(); if(error) throw error; cfg=data&&data.quality; } }
     else if(PER.store&&PER.store.getQuality) cfg=await PER.store.getQuality(); }catch(e){ console.warn('quality settings',e); cfg=PER.mode==='supa'?null:qLoadLocal(); }
   Q.cfg=cfg&&typeof cfg==='object'&&Object.keys(cfg).length?cfg:(PER.mode==='local'?qLoadLocal():null);
   if(S.tab==='dq'){ renderControls(); renderDQ(); }
 }
 async function qSaveCfg(cfg){
-  if(PER.mode==='supa'){ const {error}=await PER.sb.from('quality_settings').upsert({id:1,config:cfg,updated_by:PER.uid||null,updated_at:new Date().toISOString()}); if(error) throw error; }
+  if(PER.mode==='supa'){ if(!PER.companyId) throw new Error('Choose a company first.'); const {error}=await PER.sb.from('company_settings').upsert({company_id:PER.companyId,quality:cfg,updated_by:PER.uid||null,updated_at:new Date().toISOString()}); if(error) throw error; }
   else if(PER.mode&&PER.store&&PER.store.setQuality) await PER.store.setQuality(cfg);
   try{ localStorage.setItem('pacer.qcfg',JSON.stringify(cfg)); }catch(_){}
   Q.cfg=cfg;
@@ -4186,7 +4193,7 @@ function qCfgClick(e){
     if(!E.avail[E.def]){ err.textContent='The default must be one of the available frameworks.'; return; }
     const clean=L=>L.map(r=>({id:r.id,on:!!r.on,pass:r.pass===''||r.pass==null?null:+r.pass,warn:r.warn===''||r.warn==null?null:+r.warn,p:r.p===''||r.p==null?null:+r.p}));
     const cfg={v:1,def:E.def,avail:{...E.avail,custom:!!(E.avail.custom&&E.custom.checks.length)},fw:{dcma:clean(E.fw.dcma),aace:clean(E.fw.aace)},custom:{name:E.custom.name.trim()||'Bespoke',checks:clean(E.custom.checks)},at:Date.now()};
-    b.disabled=true; qSaveCfg(cfg).then(()=>{ d.remove(); DQ.sel=null; renderControls(); renderDQ(); perToast('Quality check settings saved for everyone.'); }).catch(ex=>{ b.disabled=false; err.textContent=perErr(ex); }); }
+    b.disabled=true; qSaveCfg(cfg).then(()=>{ d.remove(); DQ.sel=null; renderControls(); renderDQ(); perToast(PER.mode==='supa'&&PER.company?`Quality check settings saved for everyone at ${PER.company.name}.`:'Quality check settings saved for everyone.'); }).catch(ex=>{ b.disabled=false; err.textContent=perErr(ex); }); }
 }
 function qCfgChange(e){
   const t=e.target, E=Q.edit;
@@ -4753,8 +4760,13 @@ async function supaAfter(session){
   let prof=null;
   for(let i=0;i<3&&!prof;i++){ const r=await sb.from('profiles').select('*').eq('id',PER.uid).maybeSingle(); prof=r.data; if(r.error&&i===2){ authShellPending(`Can’t load your profile`,r.error.message+'. Has schema.sql been run in Supabase?'); return; } if(!prof) await new Promise(r=>setTimeout(r,800)); }
   if(!prof){ authShellPending('Your account is being set up','Try again in a moment.'); return; }
-  PER.prof=prof; PER.srole=prof.role;
-  if(prof.role==='pending'){ authShellPending('Waiting for approval',`You’re signed in as ${PER.email}. An admin needs to approve your account before you can see team projects. You can still work offline.`); return; }
+  PER.prof=prof; await coLoad(prof);
+  PER.srole=PER.platform?'admin':!prof.company_id?'pending':(PER.company&&PER.company.status==='suspended')?'pending':prof.role;
+  if(PER.srole==='pending'){
+    if(!PER.platform&&!prof.company_id) authShellPending('Not part of a company yet',`You’re signed in as ${PER.email}, but this account hasn’t been added to a company. Ask your company’s workbench admin to invite this email address, then choose Check again. You can still work offline.`);
+    else if(PER.company&&PER.company.status==='suspended') authShellPending('Workbench paused',`${PER.company.name}’s workbench is suspended at the moment. Contact the workbench owner. You can still work offline.`);
+    else authShellPending('Waiting for approval',`You’re signed in as ${PER.email}. An admin at ${PER.company?PER.company.name:'your company'} needs to approve your account before you can see its projects. You can still work offline.`);
+    return; }
   authDone('supa');
 }
 function authShellPending(title,body){
@@ -4787,22 +4799,122 @@ function renderUserChip(){
   const el=document.getElementById('userChip'); if(!el) return;
   if(!PER.mode){ el.hidden=true; return; } el.hidden=false;
   const nm=userName(), shared=PER.mode!=='local';
-  el.innerHTML=userAv()+`<span class="uc-t"><b></b><em>${esc(PER.role)}</em></span><span class="ucb" id="ucBadge" hidden></span><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>`;
+  el.innerHTML=userAv()+`<span class="uc-t"><b></b><em>${esc(PER.role)}${PER.mode==='supa'&&PER.company?' · '+esc(PER.company.name):''}</em></span><span class="ucb" id="ucBadge" hidden></span><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>`;
   el.querySelector('b').textContent=nm;
   const m=document.getElementById('userMenu');
   m.innerHTML=`<div class="um-h">${userAv(true)}<div><b></b><span class="muted">${PER.mode==='local'?'Offline · this browser only':esc(PER.role)+(PER.mode==='cloud'?' · Claude account':PER.email?' · '+esc(PER.email):'')}</span></div></div>
     ${shared?`<div class="um-s"><div class="sl">Workspace</div><div class="sg" role="group" aria-label="Workspace"><button data-space="team" class="${PER.space==='team'?'on':''}">Team</button><button data-space="private" class="${PER.space==='private'?'on':''}">Private</button></div>
-    <p class="muted">${PER.space==='team'?'Projects everyone with access to this workbench can see.':'Projects only you can see.'}</p></div>`:''}
+    <p class="muted">${PER.space==='team'?(PER.mode==='supa'&&PER.company?`Projects everyone at ${esc(PER.company.name)} can see.`:'Projects everyone with access to this workbench can see.'):'Projects only you can see.'}</p></div>`:''}
     <div class="um-s"><div class="sl">Your access</div><p class="muted">${esc(roleBlurb())}</p></div>
-    ${PER.mode==='supa'&&PER.srole==='admin'?'<button class="um-b" data-um="users">Manage users <span class="ucb" id="umBadge" hidden></span></button>':''}
+    ${PER.mode==='supa'&&PER.platform?`<div class="um-s"><div class="sl">Company</div><select id="umCo" class="um-co" aria-label="Switch company">${(PER.companies||[]).map(c=>`<option value="${esc(c.id)}"${c.id===PER.companyId?' selected':''}>${esc(c.name)}${c.status==='suspended'?' (suspended)':''}</option>`).join('')}${PER.companyId?'':'<option selected value="">Choose a company</option>'}</select><p class="muted">As workbench owner you can work in any company.</p></div>`:''}
+    ${PER.mode==='supa'&&PER.srole==='admin'&&PER.companyId?`<button class="um-b" data-um="users">Manage ${esc(PER.company?PER.company.name:'company')} <span class="ucb" id="umBadge" hidden></span></button>`:''}
+    ${PER.mode==='supa'&&PER.platform?'<button class="um-b" data-um="owner">Companies and people (owner)</button>':''}
     <button class="um-b" data-um="periods">Portfolio</button><button class="um-b" data-um="out">Sign out</button>`;
   m.querySelector('b').textContent=nm;
-  if(PER.mode==='supa'&&PER.srole==='admin') PER.sb.from('profiles').select('id',{count:'exact',head:true}).eq('role','pending').then(({count})=>{ ['ucBadge','umBadge'].forEach(i=>{ const b=document.getElementById(i); if(b){ b.hidden=!count; b.textContent=count||''; b.title=count?count+' waiting for approval':''; } }); });
+  if(PER.mode==='supa'&&PER.srole==='admin'&&PER.companyId) PER.sb.from('profiles').select('id',{count:'exact',head:true}).eq('company_id',PER.companyId).eq('role','pending').then(({count})=>{ ['ucBadge','umBadge'].forEach(i=>{ const b=document.getElementById(i); if(b){ b.hidden=!count; b.textContent=count||''; b.title=count?count+' waiting for approval':''; } }); });
 }
 function roleBlurb(){
   if(PER.mode==='local') return supaOn()?'Everything you save stays in this browser. Sign in to share with your team.':'Everything you save stays in this browser. Sign in with Claude to share with your team.';
+  if(PER.mode==='supa'&&PER.platform) return `Workbench owner: you can create companies, move people between them and work in any company as its admin. You’re in ${PER.company?PER.company.name:'no company'} now.`;
   if(PER.mode==='supa') return PER.srole==='admin'?'Admin: you can save periods, manage every project and approve users.':PER.srole==='contributor'?'Contributor: you can create team projects, save periods and delete what you saved.':'Viewer: you can open and compare team periods. You can save to your Private workspace.';
   return PER.isOwner?'You own this workbench: you can save, rename and delete any project or period.':PER.canEdit?'Editor: you can save periods and manage every project.':perRO()?'Viewer: you can open and compare saved periods but not save new ones.':'Contributor: you can create projects, save periods and delete what you saved.'; }
+/* ================= Companies: workbench owner, company instances and company admins (hosted mode) ================= */
+const CO={tab:'people',otab:'companies',edit:null};
+const CO_ROLES=[['pending','Pending'],['viewer','Viewer'],['contributor','Contributor'],['admin','Admin']];
+async function coLoad(prof){
+  const sb=PER.sb; PER.platform=!!prof.is_owner; PER.companyId=PER.platform?(prof.active_company_id||prof.company_id||null):(prof.company_id||null); PER.company=null; PER.companies=[];
+  if(PER.companyId){ try{ const r=await sb.from('companies').select('*').eq('id',PER.companyId).maybeSingle(); PER.company=r.data||null; }catch(_){} }
+  if(PER.platform){ try{ const r=await sb.from('companies').select('id,name,status').order('name'); PER.companies=r.data||[]; }catch(_){} }
+}
+function coModal(id,cls){ let d=document.getElementById(id); if(d) d.remove(); d=document.createElement('div'); d.className='modal'; d.id=id; d.innerHTML=`<div class="mcard ${cls}" role="dialog" aria-modal="true"></div>`; document.body.appendChild(d);
+  d.addEventListener('click',e=>{ if(e.target===d||e.target.closest('[data-cox]')) d.remove(); }); d.addEventListener('keydown',e=>{ if(e.key==='Escape') d.remove(); }); return d; }
+const coWho=u=>`<b>${esc(u.name||u.email||'—')}</b>${u.name&&u.email?`<div class="muted">${esc(u.email)}</div>`:''}`;
+// Switch the owner into another company's instance.
+async function coSwitch(cid){
+  if(!PER.platform||cid===PER.companyId) return;
+  perBusy('Switching company…');
+  try{ const {error}=await PER.sb.rpc('set_active_company',{cid}); if(error) throw error;
+    if(PER.loaded){ S.files=[]; PER.loaded=null; try{ rebuild(true); }catch(_){} }
+    const s=(await PER.sb.auth.getSession()).data.session; perReset(); if(s) await supaAfter(s);
+    perToast(`You’re now working in ${PER.company?PER.company.name:'that company'}.`); }
+  catch(e){ perToast(perErr(e),'err'); } finally{ perBusy(''); }
+}
+/* ---- company admin: people, invitations, settings ---- */
+async function coManage(tab){
+  if(!PER.companyId) return perToast('Choose a company first.','err');
+  CO.tab=tab||CO.tab||'people'; const d=coModal('coDlg','codlg'); d.querySelector('.mcard').innerHTML='<div class="pdb muted">Loading…</div>'; await coRender();
+}
+async function coRender(){
+  const d=document.getElementById('coDlg'); if(!d) return; const sb=PER.sb, cid=PER.companyId, c=PER.company||{name:'Company'};
+  const [P,I]=await Promise.all([sb.from('profiles').select('*').eq('company_id',cid).order('created_at'),sb.from('invitations').select('*').eq('company_id',cid).order('created_at')]);
+  if(P.error||I.error){ d.querySelector('.mcard').innerHTML=`<div class="pdb">${esc(perErr(P.error||I.error))}</div>`; return; }
+  const people=P.data||[], inv=(I.data||[]).filter(i=>!i.accepted_at), pend=people.filter(u=>u.role==='pending').length, t=CO.tab;
+  const tabs=[['people',`People <em>${people.length}</em>`],['invites',`Invitations <em>${inv.length}</em>`],['settings','Settings']];
+  let body='';
+  if(t==='people') body=`<p class="muted">${pend?`<b class="amber">${pend} waiting for approval.</b> `:''}Viewers open and compare projects; contributors also create projects and save updates; admins manage this company’s people and settings.</p>
+    <div class="ptw"><table class="ptab co-t"><thead><tr><th>Person</th><th>Joined</th><th>Access</th><th></th></tr></thead><tbody>${people.map(u=>`<tr><td>${coWho(u)}${u.is_owner?'<span class="pill">Workbench owner</span>':''}</td><td class="num">${fmtD(Date.parse(u.created_at))}</td>
+      <td><select data-corole="${esc(u.id)}" ${u.id===PER.uid||u.is_owner?'disabled':''}>${CO_ROLES.map(([v,l])=>`<option value="${v}"${u.role===v?' selected':''}>${l}</option>`).join('')}</select></td>
+      <td>${u.id===PER.uid||u.is_owner?'':`<button class="link danger" data-corm="${esc(u.id)}">Remove</button>`}</td></tr>`).join('')||'<tr><td colspan="4" class="muted">No one yet.</td></tr>'}</tbody></table></div>`;
+  if(t==='invites') body=`<form class="co-inv" id="coInv"><label class="pfl"><span>Email</span><input type="email" id="coInvE" required placeholder="name@company.com"></label><label class="pfl"><span>Access</span><select id="coInvR">${CO_ROLES.slice(1).map(([v,l])=>`<option value="${v}"${v==='viewer'?' selected':''}>${l}</option>`).join('')}</select></label><button class="btn primary">Invite</button></form>
+    <p class="muted">They sign in with this email (Microsoft or an email link) and join ${esc(c.name)} with this access. Someone who has already signed in without a company joins straight away. The workbench doesn’t send the email, so let them know.</p>
+    <div class="ptw"><table class="ptab co-t"><thead><tr><th>Email</th><th>Access</th><th>Invited</th><th></th></tr></thead><tbody>${inv.map(i=>`<tr><td>${esc(i.email)}</td><td>${esc((CO_ROLES.find(r=>r[0]===i.role)||[0,i.role])[1])}</td><td class="num">${fmtD(Date.parse(i.created_at))}</td><td><button class="link danger" data-coinvdel="${esc(i.id)}">Cancel</button></td></tr>`).join('')||'<tr><td colspan="4" class="muted">No open invitations.</td></tr>'}</tbody></table></div>`;
+  if(t==='settings') body=`<div class="co-set"><label class="pfl"><span>Company name</span><input id="coName" maxlength="120" value="${esc(c.name||'')}"></label>
+    <label class="pfl"><span>Approve everyone from this email domain (optional)</span><input id="coDom" placeholder="e.g. acme.com" value="${esc(c.auto_approve_domain||'')}"></label>
+    <label class="pfl"><span>…with this access</span><select id="coDomR">${CO_ROLES.slice(1,3).map(([v,l])=>`<option value="${v}"${(c.auto_approve_role||'viewer')===v?' selected':''}>${l}</option>`).join('')}</select></label>
+    ${PER.platform?`<label class="pfl"><span>Status (owner only)</span><select id="coStat"><option value="active"${c.status!=='suspended'?' selected':''}>Active</option><option value="suspended"${c.status==='suspended'?' selected':''}>Suspended: members can’t sign in to its data</option></select></label>`:''}
+    <div><button class="btn primary" data-cosave>Save settings</button></div></div>
+    <p class="muted">People who sign in with an address on the domain join this company automatically. Leave it blank to admit people by invitation only.</p>`;
+  d.querySelector('.mcard').innerHTML=`<div class="mh"><h2>${esc(c.name||'Company')}</h2><button class="fx" data-cox aria-label="Close">×</button></div>
+    <div class="ptabs" role="tablist">${tabs.map(([k,l])=>`<button role="tab" data-cotab="${k}" aria-selected="${t===k}">${l}</button>`).join('')}</div><div class="pdb co-b">${body}</div>`;
+  if(!d._wired){ d._wired=true;
+    d.addEventListener('click',async e=>{ const b=e.target.closest('button'); if(!b) return;
+      if(b.dataset.cotab){ CO.tab=b.dataset.cotab; coRender(); return; }
+      if(b.dataset.corm){ if(!confirmIn(b,'Remove?')) return; const {error}=await PER.sb.rpc('company_remove_user',{uid:b.dataset.corm}); if(error) perToast(perErr(error),'err'); else { perToast('Removed from the company.'); coRender(); renderUserChip(); } return; }
+      if(b.dataset.coinvdel){ const {error}=await PER.sb.from('invitations').delete().eq('id',b.dataset.coinvdel); if(error) perToast(perErr(error),'err'); else coRender(); return; }
+      if(b.hasAttribute('data-cosave')){ const f={name:document.getElementById('coName').value.trim(),auto_approve_domain:document.getElementById('coDom').value.trim().replace(/^@/,'').toLowerCase()||null,auto_approve_role:document.getElementById('coDomR').value};
+        if(!f.name) return perToast('Give the company a name.','err'); const st=document.getElementById('coStat'); if(st) f.status=st.value;
+        b.disabled=true; const {error}=await PER.sb.from('companies').update(f).eq('id',PER.companyId); b.disabled=false;
+        if(error) perToast(perErr(error),'err'); else { Object.assign(PER.company||(PER.company={}),f); const k=(PER.companies||[]).find(x=>x.id===PER.companyId); if(k) Object.assign(k,{name:f.name,status:f.status||k.status}); perToast('Company settings saved.'); renderUserChip(); coRender(); } } });
+    d.addEventListener('change',async e=>{ const s=e.target.closest('[data-corole]'); if(!s) return; s.disabled=true; const {error}=await PER.sb.from('profiles').update({role:s.value}).eq('id',s.dataset.corole); s.disabled=false; if(error){ perToast(perErr(error),'err'); coRender(); } else { perToast('Access updated.'); renderUserChip(); } });
+    d.addEventListener('submit',async e=>{ if(e.target.id!=='coInv') return; e.preventDefault(); const email=document.getElementById('coInvE').value.trim().toLowerCase(), role=document.getElementById('coInvR').value; if(!email) return;
+      const {error}=await PER.sb.from('invitations').insert({company_id:PER.companyId,email,role,invited_by:PER.uid}); if(error) perToast(/duplicate|unique/i.test(error.message||'')?'That email already has an open invitation.':perErr(error),'err'); else { perToast(`Invited ${email}.`); coRender(); } }); }
+}
+function confirmIn(b,label){ if(b.dataset.armed){ return true; } b.dataset.armed='1'; const t=b.textContent; b.textContent=label; setTimeout(()=>{ if(b.isConnected){ delete b.dataset.armed; b.textContent=t; } },3000); return false; }
+/* ---- workbench owner: all companies and all people ---- */
+async function coConsole(tab){ if(!PER.platform) return; CO.otab=tab||CO.otab||'companies'; const d=coModal('coOwn','codlg wide'); d.querySelector('.mcard').innerHTML='<div class="pdb muted">Loading…</div>'; await coConsoleRender(); }
+async function coConsoleRender(){
+  const d=document.getElementById('coOwn'); if(!d) return; const sb=PER.sb, t=CO.otab;
+  const [C,P]=await Promise.all([sb.rpc('owner_companies'),sb.from('profiles').select('*').order('created_at')]);
+  if(C.error||P.error){ d.querySelector('.mcard').innerHTML=`<div class="pdb">${esc(perErr(C.error||P.error))}</div>`; return; }
+  const cos=C.data||[], people=P.data||[], none=people.filter(u=>!u.company_id&&!u.is_owner); PER.companies=cos.map(c=>({id:c.id,name:c.name,status:c.status}));
+  const coName=id=>(cos.find(c=>c.id===id)||{}).name||'';
+  let body='';
+  if(t==='companies') body=`<form class="co-inv" id="coNew"><label class="pfl"><span>New company</span><input id="coNewN" maxlength="120" required placeholder="Company name"></label><label class="pfl"><span>Its first admin (email, optional)</span><input type="email" id="coNewA" placeholder="admin@company.com"></label><button class="btn primary">Create company</button></form>
+    <div class="ptw"><table class="ptab co-t"><thead><tr><th>Company</th><th>Status</th><th class="num">People</th><th class="num">Admins</th><th class="num">Waiting</th><th class="num">Invites</th><th class="num">Programmes</th><th class="num">Projects</th><th class="num">Updates</th><th></th></tr></thead><tbody>
+    ${cos.map(c=>`<tr class="${c.id===PER.companyId?'co-cur':''}"><td><b>${esc(c.name)}</b>${c.id===PER.companyId?'<span class="pill">You’re here</span>':''}${c.auto_approve_domain?`<div class="muted">Auto-approves @${esc(c.auto_approve_domain)}</div>`:''}</td>
+      <td><span class="st ${c.status==='active'?'pass':'fail'}">${c.status==='active'?'Active':'Suspended'}</span></td><td class="num">${c.users}</td><td class="num">${c.admins}</td><td class="num${c.pending?' amber':''}">${c.pending}</td><td class="num">${c.invites}</td><td class="num">${c.programmes}</td><td class="num">${c.projects}</td><td class="num">${c.periods}</td>
+      <td class="co-act">${c.id!==PER.companyId?`<button class="btn sm" data-coopen="${esc(c.id)}">Open</button>`:`<button class="btn sm" data-comanage>Manage</button>`}<button class="link" data-costat="${esc(c.id)}" data-v="${c.status==='active'?'suspended':'active'}">${c.status==='active'?'Suspend':'Reactivate'}</button>${!+c.users&&!+c.projects&&!+c.programmes?`<button class="link danger" data-codel="${esc(c.id)}">Delete</button>`:''}</td></tr>`).join('')||'<tr><td colspan="10" class="muted">No companies yet.</td></tr>'}</tbody></table></div>
+    <p class="muted">Each company is a separate instance: its people only ever see its own programmes, projects, updates and quality settings. Open a company to work in it as its admin; Manage sets its people, invitations and settings.</p>`;
+  if(t==='people') body=`<p class="muted">Everyone who has signed in. Move people between companies and set their access${none.length?`. <b class="amber">${none.length} not in a company yet.</b>`:'.'}</p>
+    <div class="ptw"><table class="ptab co-t"><thead><tr><th>Person</th><th>Joined</th><th>Company</th><th>Access</th></tr></thead><tbody>${people.map(u=>`<tr><td>${coWho(u)}</td><td class="num">${fmtD(Date.parse(u.created_at))}</td>
+      <td>${u.is_owner?`<span class="pill">Workbench owner</span>${u.company_id?`<div class="muted">${esc(coName(u.company_id))}</div>`:''}`:`<select data-coco="${esc(u.id)}"><option value="">No company</option>${cos.map(c=>`<option value="${esc(c.id)}"${u.company_id===c.id?' selected':''}>${esc(c.name)}</option>`).join('')}</select>`}</td>
+      <td>${u.is_owner?'<span class="muted">Admin everywhere</span>':`<select data-cor="${esc(u.id)}" ${u.company_id?'':'disabled'}>${CO_ROLES.map(([v,l])=>`<option value="${v}"${u.role===v?' selected':''}>${l}</option>`).join('')}</select>`}</td></tr>`).join('')}</tbody></table></div>`;
+  d.querySelector('.mcard').innerHTML=`<div class="mh"><h2>Workbench owner</h2><button class="fx" data-cox aria-label="Close">×</button></div>
+    <div class="ptabs" role="tablist"><button role="tab" data-cotab="companies" aria-selected="${t==='companies'}">Companies <em>${cos.length}</em></button><button role="tab" data-cotab="people" aria-selected="${t==='people'}">People <em>${people.length}</em></button></div><div class="pdb co-b">${body}</div>`;
+  if(!d._wired){ d._wired=true;
+    d.addEventListener('click',async e=>{ const b=e.target.closest('button'); if(!b) return;
+      if(b.dataset.cotab){ CO.otab=b.dataset.cotab; coConsoleRender(); return; }
+      if(b.dataset.coopen){ d.remove(); await coSwitch(b.dataset.coopen); return; }
+      if(b.hasAttribute('data-comanage')){ d.remove(); coManage('people'); return; }
+      if(b.dataset.costat){ const {error}=await PER.sb.from('companies').update({status:b.dataset.v}).eq('id',b.dataset.costat); if(error) perToast(perErr(error),'err'); else { perToast(b.dataset.v==='active'?'Company reactivated.':'Company suspended. Its members can’t reach its data until you reactivate it.'); coConsoleRender(); } return; }
+      if(b.dataset.codel){ if(!confirmIn(b,'Delete?')) return; const {error}=await PER.sb.from('companies').delete().eq('id',b.dataset.codel); if(error) perToast(perErr(error),'err'); else { perToast('Company deleted.'); coConsoleRender(); } return; } });
+    d.addEventListener('change',async e=>{ const s=e.target; if(!s.dataset.coco&&!s.dataset.cor) return; const uid=s.dataset.coco||s.dataset.cor, tr=s.closest('tr'), co=tr.querySelector('[data-coco]').value||null, r=tr.querySelector('[data-cor]').value;
+      s.disabled=true; const {error}=await PER.sb.rpc('owner_assign_user',{uid,cid:co,r:co&&r==='pending'&&s.dataset.coco?'viewer':r}); s.disabled=false; if(error) perToast(perErr(error),'err'); else perToast('Updated.'); coConsoleRender(); });
+    d.addEventListener('submit',async e=>{ if(e.target.id!=='coNew') return; e.preventDefault(); const name=document.getElementById('coNewN').value.trim(), admin=document.getElementById('coNewA').value.trim().toLowerCase(); if(!name) return;
+      const {data,error}=await PER.sb.from('companies').insert({name,created_by:PER.uid}).select('id').single(); if(error) return perToast(perErr(error),'err');
+      if(admin){ const r=await PER.sb.from('invitations').insert({company_id:data.id,email:admin,role:'admin',invited_by:PER.uid}); if(r.error) perToast(perErr(r.error),'err'); }
+      perToast(`Created ${name}${admin?` and invited ${admin} as its admin`:''}.`); coConsoleRender(); }); }
+}
 async function supaUsers(){
   const sb=PER.sb; const {data,error}=await sb.from('profiles').select('*').order('created_at'); if(error){ perToast(perErr(error),'err'); return; }
   const R=[['pending','Pending'],['viewer','Viewer'],['contributor','Contributor'],['admin','Admin']];
@@ -5034,7 +5146,7 @@ async function renderPer(){
     <label class="ctl"><span>Project</span><select id="perProjSel" ${PER.projects.length?'':'disabled'}>${PER.projects.length?portProjectOptions(PER.pid):'<option>No projects yet</option>'}</select></label>
     <button class="btn sm" data-w data-pa="new" ${ro?'disabled':''}>New project</button>
     ${proj?`<button class="btn sm" data-w data-pa="ren" ${perCanDel(proj.createdBy)?'':'disabled'}>Rename</button><button class="btn sm ghostd" data-w data-pa="delp" ${perCanDel(proj.createdBy)?'':'disabled'}>Delete</button>`:''}
-    <span class="pspace">${PER.mode!=='local'?(PER.space==='team'?'Team workspace':'Private workspace'):'This browser'}</span>
+    <span class="pspace">${PER.mode!=='local'?(PER.space==='team'?(PER.mode==='supa'&&PER.company?PER.company.name:'Team workspace'):'Private workspace'):'This browser'}</span>
     <span class="sp"></span><span class="pbusy" id="perBusy" ${PER.busy?'':'hidden'}>${esc(PER.busy)}</span>
     <button class="btn sm" data-pa="files" title="Load XER files and set which is live and which is baseline">Schedule files</button><button class="btn sm" data-w data-pa="imp" ${ro?'disabled':''} title="Turn several past XER updates into periods in one go">Import past updates</button>
     ${proj&&P.length&&!ro?'<button class="btn sm" data-w data-pa="upd" title="Enter progress for a new data date and edit the programme, then save it as the next period">Update schedule</button>':''}<button class="btn sm primary" data-w data-pa="save" ${ro?'disabled':''}>Save current as period</button></div>`;
@@ -5155,7 +5267,8 @@ function wirePer(){
   document.addEventListener('click',e=>{ if(!menu.hidden&&!menu.contains(e.target)&&e.target!==chip){ menu.hidden=true; chip.setAttribute('aria-expanded','false'); } });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!menu.hidden){ menu.hidden=true; chip.setAttribute('aria-expanded','false'); chip.focus(); } });
   menu.addEventListener('click',e=>{ const s=e.target.closest('[data-space]'); if(s){ PER.space=s.dataset.space; try{ localStorage.setItem('pacer.space',PER.space); }catch(_){} PER.pid=null; perCmpCache.clear(); renderUserChip(); perSubscribe(); return; }
-    const u=e.target.closest('[data-um]'); if(!u) return; menu.hidden=true; if(u.dataset.um==='out') signOut(); else if(u.dataset.um==='users') supaUsers(); else setTab('port'); });
+    const u=e.target.closest('[data-um]'); if(!u) return; menu.hidden=true; if(u.dataset.um==='out') signOut(); else if(u.dataset.um==='users') coManage('people'); else if(u.dataset.um==='owner') coConsole('companies'); else setTab('port'); });
+  menu.addEventListener('change',e=>{ if(e.target.id==='umCo'&&e.target.value){ menu.hidden=true; coSwitch(e.target.value); } });
   wirePort();
   const w=document.getElementById('perWrap');
   w.addEventListener('change',e=>{ const t=e.target;
@@ -5213,7 +5326,7 @@ function renderPort(){
   const el=document.getElementById('portWrap'); if(!el||el.hidden) return;
   if(!PER.mode){ el.innerHTML='<div class="card pempty big"><h3>Sign in to see your portfolio</h3><p class="muted">Your programmes, projects and their latest schedule updates appear here once you’re signed in.</p><button class="btn primary" id="portSignIn">Sign in</button></div>'; document.getElementById('portSignIn').onclick=()=>{ if(!document.getElementById('auth')) authStart(); }; return; }
   [...PORT.sel].forEach(id=>{ const p=PER.projects.find(x=>x.id===id); if(!p||!p.summary) PORT.sel.delete(id); });
-  const ro=perRO(), G=PER.programmes, P=PER.projects, wsp=PER.mode!=='local'?(PER.space==='team'?'Team workspace':'Private workspace'):'This browser';
+  const ro=perRO(), G=PER.programmes, P=PER.projects, wsp=PER.mode!=='local'?(PER.space==='team'?(PER.mode==='supa'&&PER.company?PER.company.name:'Team workspace'):'Private workspace'):'This browser';
   const head=`<div class="card porthead">
     <div class="ph-t"><h2>${esc(wsp)}</h2><span class="pspace">${PER.programmes.length} programme${PER.programmes.length===1?'':'s'} · ${PER.projects.length} project${PER.projects.length===1?'':'s'}</span></div>
     <div class="ph-c"><input type="search" id="portQ" placeholder="Search programmes, projects, managers" value="${esc(PORT.q)}" aria-label="Search portfolio">
