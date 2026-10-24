@@ -136,6 +136,22 @@ button{cursor:pointer}
 .main{display:grid;grid-template-columns:288px minmax(0,1fr);gap:16px;padding-block:18px 28px;align-items:start}
 .side{padding:14px 14px 18px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 74px);max-height:calc(100vh - 92px);overflow:auto}
 .side-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.side{padding:6px 14px 14px}
+.sbox+.sbox{border-top:1px solid var(--line);margin-top:6px}
+.sbox[hidden]+.sbox{border-top:0;margin-top:0}
+.sbh{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0}
+.sbt{display:inline-flex;align-items:center;gap:8px;background:none;border:0;padding:4px 0;font-family:var(--fDisplay);font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;color:var(--ink);cursor:pointer}
+.sbt .sbc{color:var(--ink3);transition:transform .15s}
+.sbt[aria-expanded="false"] .sbc{transform:rotate(-90deg)}
+.sbt .cnt{font-family:var(--fBody);font-size:12px}
+.sbox.closed .sbb{display:none}
+.sbox.closed #fClear{display:none}
+.sbb{padding-bottom:8px}
+.side .controls{flex-direction:column;align-items:flex-start;gap:8px}
+.side .controls>.ctl{margin-top:4px;margin-bottom:-4px}
+.side .controls label.ctl{margin:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%}
+.side .controls label.ctl select,.side .controls>select{max-width:100%}
+.side .controls .sg{max-width:100%;flex-wrap:wrap}
 .side-head h3{margin:0;font-family:var(--fDisplay);font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:.02em}
 .link{background:none;border:0;color:var(--accent);font-weight:600;font-size:13px;padding:4px}
 .search{display:block;margin-bottom:12px}
@@ -984,7 +1000,7 @@ select.bin{padding:0 2px}
     </nav>
     <div class="ctxw"><button class="ctx" id="meta" aria-haspopup="true" aria-expanded="false" aria-label="Select Schedule" title="Select Schedule"></button><div class="card ctxmenu" id="ctxMenu" hidden></div></div>
     <div class="top-actions">
-      <button class="btn only-m" id="btnFilters">Filters <span class="cnt" id="fBadge" hidden></span></button>
+      <button class="btn only-m" id="btnFilters">View &amp; filters <span class="cnt" id="fBadge" hidden></span></button>
       <button class="btn" id="btnFiles" hidden>Files <span class="cnt" id="fileCnt">0</span></button>
       <button class="uchip" id="userChip" aria-haspopup="true" aria-expanded="false" aria-label="Account" hidden></button>
       <div class="card umenu" id="userMenu" hidden></div>
@@ -1006,11 +1022,11 @@ select.bin{padding:0 2px}
 </nav>
 
 <main class="wrap main">
-  <aside class="card side" id="side"></aside>
+  <aside class="card side" id="side">
+    <section class="sbox" id="sbView"><div class="sbh"><button class="sbt" data-sb="view" aria-expanded="true" aria-controls="sbViewB"><svg class="sbc" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>View</span></button></div><div class="sbb" id="sbViewB"><div class="controls" id="controls"></div></div></section>
+    <section class="sbox" id="sbFilt"><div class="sbh"><button class="sbt" data-sb="filt" aria-expanded="true" aria-controls="sideF"><svg class="sbc" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>Filters</span><span class="cnt" id="sbFiltN" hidden></span></button><button class="link" id="fClear">Clear all</button></div><div class="sbb" id="sideF"></div></section>
+  </aside>
   <section class="stage">
-    <div class="stage-bar">
-      <div class="controls" id="controls"></div>
-    </div>
     <div class="colpanel card chpanel" id="chPanel" role="dialog" aria-label="Chainage map" hidden></div>
     <div class="colpanel card tpanel" id="tvPanel" role="dialog" aria-label="Display options" hidden></div>
     <div class="colpanel card tpanel" id="stylePanel" role="dialog" aria-label="Activity styles" hidden></div>
@@ -3690,12 +3706,11 @@ function renderLegend(){
 
 /* ---------------- sidebar filters ---------------- */
 function renderFilters(){
-  const side=document.getElementById('side'), F=S.F;
+  const side=document.getElementById('sideF'), F=S.F;
   const cnt=k=>M.rows.filter(r=>stat(r)===k).length, ccnt=k=>M.rows.filter(r=>r.cmp===k).length;
   const chip=(f,v,l,n,extra='')=>`<button class="chip${(f==='status'?F.status:f==='cmp'?F.cmp:F.proj).has(v)?' on':''}" data-f="${f}" data-v="${esc(v)}" ${extra}><span>${esc(l)}</span><em>${n}</em></button>`;
   const tree=n=>{ let h=`<button class="tn${F.wbs.has(n.key)?' on':''}" data-wbs="${esc(n.key)}" style="padding-left:${6+n.depth*14}px" title="${esc(n.label)}"><span class="bx"></span><span class="lb">${n.depth?esc(n.label):esc(n.short+' · '+n.label)}</span><em>${n.n}</em></button>`; n.children.forEach(c=>h+=tree(c)); return h; };
-  let h=`<div class="side-head"><h3>Filters</h3><button class="link" id="fClear">Clear all</button></div>
-  ${F.ids?`<div class="fids"><span><b>${esc(F.ids.label)}</b><br>${F.ids.set.size} activities</span><button class="fx" id="fIdsX" aria-label="Clear quality check filter">×</button></div>`:''}
+  let h=`${F.ids?`<div class="fids"><span><b>${esc(F.ids.label)}</b><br>${F.ids.set.size} activities</span><button class="fx" id="fIdsX" aria-label="Clear quality check filter">×</button></div>`:''}
   <label class="search"><input id="fq" type="search" placeholder="Search activity ID or name" value="${esc(F.q)}" autocomplete="off"></label>
   <div class="fsec"><div class="fh">Status</div><div class="chips">${chip('status','ns','Not started',cnt('ns'))}${chip('status','ip','In progress',cnt('ip'))}${chip('status','cp','Complete',cnt('cp'))}</div></div>
   <div class="fsec"><div class="fh">Versus baseline</div><div class="chips">${chip('cmp','late','Behind',ccnt('late'))}${chip('cmp','ontime','On or ahead',ccnt('ontime'))}${chip('cmp','added','Added',ccnt('added'))}${chip('cmp','removed','Removed',ccnt('removed'))}</div></div>
@@ -3707,7 +3722,12 @@ function renderFilters(){
     h+=`<details class="fsec"${set.size?' open':''}><summary><div class="fh">${esc(t)} <span class="on-n">${set.size||''}</span></div></summary><div class="chips">${vals.map(o=>`<button class="chip${set.has(o.short)?' on':''}" data-code="${esc(t)}" data-v="${esc(o.short)}" title="${esc(o.name)}"><span>${esc(o.name===o.short?o.short:o.short+' · '+o.name)}</span><em>${counts[o.short]}</em></button>`).join('')}</div></details>`; });
   side.innerHTML=h;
 }
-function updateBadge(){ const n=activeFilterCount(), b=document.getElementById('fBadge'); b.hidden=!n; b.textContent=n; }
+function updateBadge(){ const n=activeFilterCount(), b=document.getElementById('fBadge'); b.hidden=!n; b.textContent=n; const s=document.getElementById('sbFiltN'); if(s){ s.hidden=!n; s.textContent=n; } }
+// Collapsible sidebar sections, remembered per browser.
+function sbInit(){ let st={}; try{ st=JSON.parse(localStorage.getItem('pacer.sb')||'{}'); }catch(_){}
+  const apply=()=>document.querySelectorAll('#side .sbt').forEach(b=>{ const k=b.dataset.sb, closed=!!st[k]; b.setAttribute('aria-expanded',String(!closed)); b.closest('.sbox').classList.toggle('closed',closed); });
+  document.getElementById('side').addEventListener('click',e=>{ const b=e.target.closest('.sbt'); if(!b) return; st[b.dataset.sb]=!st[b.dataset.sb]; try{ localStorage.setItem('pacer.sb',JSON.stringify(st)); }catch(_){} apply(); });
+  apply(); }
 
 /* ---------------- controls ---------------- */
 function renderControls(){
@@ -4330,7 +4350,7 @@ function setTab(t){
   const inProj=PROJ_TABS.includes(t); document.getElementById('navProj').setAttribute('aria-selected',inProj); document.getElementById('nav2').hidden=!inProj;
   if(inProj) S.lastProj=t; else if(!document.getElementById('aiWrap').hidden) aiPanel(false);
   gWrap.hidden=t!=='gantt'; tWrap.hidden=t!=='tld'; document.getElementById('dqWrap').hidden=t!=='dq'; document.getElementById('dashWrap').hidden=t!=='dash'; document.getElementById('execWrap').hidden=t!=='exec'; document.getElementById('ifcWrap').hidden=t!=='ifc'; document.getElementById('buildWrap').hidden=t!=='build'; document.getElementById('perWrap').hidden=t!=='per'; document.getElementById('portWrap').hidden=t!=='port'; if(t!=='build') document.getElementById('bAi').hidden=true; if(t!=='exec'){ const pk=document.getElementById('exPick'); if(pk) pk.hidden=true; }
-  document.getElementById('legend').hidden=['dq','dash','exec','ifc','ai','build','per','port'].includes(t); document.getElementById('controls').hidden=['dash','exec','ifc','ai','build','per','port'].includes(t);
+  document.getElementById('legend').hidden=['dq','dash','exec','ifc','ai','build','per','port'].includes(t); document.getElementById('controls').hidden=['dash','exec','ifc','ai','build','per','port'].includes(t); document.getElementById('sbView').hidden=document.getElementById('controls').hidden;
   document.querySelector('.main').classList.toggle('wide',t==='build'||t==='per'||t==='port'); setNote(''); tip.hidden=true;
   if(t!=='gantt'&&typeof closeCols==='function') closeCols();
   if(t==='gantt'){ hideDrawer(); if(G.needFit) requestAnimationFrame(fitGantt); } renderDock(); POPS.forEach(p=>document.getElementById(p).hidden=true); if(t!=='tld') document.getElementById('clashList').hidden=true;
@@ -4384,7 +4404,7 @@ function wire(){
   });
   let qT; side.addEventListener('input',e=>{ if(e.target.id==='fq'){ clearTimeout(qT); qT=setTimeout(()=>{ S.F.q=e.target.value; applyFilters(); },160); } });
   side.addEventListener('change',e=>{ if(e.target.id==='fcrit'){ S.F.crit=e.target.checked; applyFilters(); } });
-  document.getElementById('btnFilters').onclick=()=>side.classList.toggle('open');
+  document.getElementById('btnFilters').onclick=()=>side.classList.toggle('open'); sbInit();
 
   // controls
   const ctl=document.getElementById('controls');
