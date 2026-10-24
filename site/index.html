@@ -48,8 +48,32 @@ button{cursor:pointer}
 .bname{white-space:nowrap}
 .bname span{color:var(--accent)}
 @media (max-width:420px){ .brand{font-size:20px} }
-.meta{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;color:var(--ink2);font-size:13px;min-width:0;flex:1}
-.meta b{color:var(--ink);font-weight:600}
+.ctxw{position:relative;min-width:0;flex:1;display:flex}
+.ctx{display:inline-flex;align-items:center;gap:10px;min-width:0;max-width:min(560px,100%);height:44px;padding:0 12px;border:1px solid transparent;border-left:1px solid var(--line);border-radius:0 8px 8px 0;background:none;text-align:left;color:var(--ink)}
+.ctx:hover,.ctx[aria-expanded="true"]{border-color:var(--line);background:var(--surface2);border-radius:8px}
+.cx-t{display:flex;flex-direction:column;min-width:0;line-height:1.2}
+.cx-1{display:flex;align-items:center;gap:6px;min-width:0;font-size:15px;white-space:nowrap;overflow:hidden}
+.cx-1 b{font-weight:700;overflow:hidden;text-overflow:ellipsis}
+.cx-1 .pill{height:18px;font-size:10px}
+.cx-g{color:var(--ink2);overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;min-width:40px}
+.cx-s{color:var(--ink3)}
+.cx-2{font-size:12px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.cx-c{flex:none;color:var(--ink3)}
+.ctxmenu{position:absolute;left:0;top:calc(100% + 6px);width:min(380px,calc(100vw - 32px));z-index:40;box-shadow:var(--shadow);padding:6px;display:flex;flex-direction:column;max-height:min(70vh,560px)}
+.cxm-h{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);padding:8px 10px 6px}
+.cxm-q{margin:0 6px 6px;height:34px;border:1px solid var(--line);border-radius:6px;padding:0 10px;font-size:14px;background:var(--surface)}
+.cxm-l{overflow:auto;min-height:0}
+.cxm-g{font-size:11px;font-weight:700;color:var(--ink3);padding:10px 10px 4px;text-transform:uppercase;letter-spacing:.05em}
+.cxm-i{display:flex;flex-direction:column;align-items:flex-start;width:100%;border:0;background:none;padding:7px 10px;border-radius:6px;text-align:left}
+.cxm-i:hover:not(:disabled){background:var(--band)}
+.cxm-i:disabled{opacity:.55;cursor:default}
+.cxm-i.cur{background:var(--accentSoft)}
+.cxm-n{font-weight:600;font-size:14px}.cxm-n em{font-style:normal;font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--accent);margin-left:6px}
+.cxm-d{font-size:12px;color:var(--ink2)}
+.cxm-e{padding:12px 10px;color:var(--ink2);font-size:13px}
+.cxm-f{display:flex;gap:4px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:6px;padding-top:6px}
+.cxm-f button{border:0;background:none;padding:8px 10px;border-radius:6px;font-weight:600;font-size:13px}
+.cxm-f button:hover{background:var(--band)}
 .pill{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:999px;background:var(--accentSoft);color:var(--accent);font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
 .top-actions{display:flex;gap:8px;flex:none}
 .btn{height:36px;padding:0 14px;border-radius:6px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:8px}
@@ -624,7 +648,7 @@ select.bin{padding:0 2px}
   .only-m{display:inline-flex}
 }
 @media (max-width:560px){
-  .meta{display:none}
+  .ctxw{order:3;flex-basis:100%}.ctx{border-left:0;padding-left:0;height:auto;max-width:100%}.cx-2{display:none}
   .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .stat:nth-child(n){border-left:1px solid var(--line);border-top:0}
   .stat:nth-child(odd){border-left:0}
@@ -686,7 +710,8 @@ select.bin{padding:0 2px}
 @media (max-width:720px){ .uc-t,.uchip svg{display:none} .uchip{padding:0 4px} }
 .tabs{overflow-x:auto;scrollbar-width:none;max-width:100%;min-width:0}.tabs::-webkit-scrollbar{display:none}.tabs .tab{flex:none}
 .stage-bar{min-width:0}
-@media (max-width:560px){ .top-in{flex-wrap:wrap;row-gap:6px} .top-actions{margin-left:auto} }
+@media (max-width:560px){ .top-in{flex-wrap:wrap;row-gap:4px} .top-actions{margin-left:auto} }
+@media (max-width:480px){ .brand .bname{display:none} }
 .auth-x.ok{background:var(--band);color:var(--early)}
 .auth-ms{background:var(--surface);border-color:var(--ink3);width:100%;justify-content:center;gap:10px}
 .auth-mail{display:flex;flex-direction:column;gap:10px}.auth-mail .auth-go{width:100%}
@@ -860,10 +885,10 @@ select.bin{padding:0 2px}
       <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="var(--accent)"/><rect x="6" y="6.5" width="11" height="4" rx="2" fill="#fff"/><path d="M6 16h4.5l2.5-3.5 3 7 2.5-3.5H26" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="15" y="21.5" width="11" height="4" rx="2" fill="#fff" opacity=".75"/></svg>
       <span class="bname">Schedule <span>Workbench</span></span>
     </div>
-    <div class="meta" id="meta"></div>
+    <div class="ctxw"><button class="ctx" id="meta" aria-haspopup="true" aria-expanded="false"></button><div class="card ctxmenu" id="ctxMenu" hidden></div></div>
     <div class="top-actions">
       <button class="btn only-m" id="btnFilters">Filters <span class="cnt" id="fBadge" hidden></span></button>
-      <button class="btn primary" id="btnFiles">Files <span class="cnt" id="fileCnt">0</span></button>
+      <button class="btn" id="btnFiles" hidden>Files <span class="cnt" id="fileCnt">0</span></button>
       <button class="uchip" id="userChip" aria-haspopup="true" aria-expanded="false" aria-label="Account" hidden></button>
       <div class="card umenu" id="userMenu" hidden></div>
     </div>
@@ -3715,11 +3740,59 @@ function pickTldDefaults(){
   if(S.colorBy.startsWith('code:')&&!M.codeTypes.includes(S.colorBy.slice(5))) S.colorBy='crit';
   if(S.group.startsWith('code:')&&!M.codeTypes.includes(S.group.slice(5))) S.group='wbs';
 }
+// Header: which schedule is open (programme / project / period), with a switcher.
+function ctxInfo(){
+  const ok=S.files.filter(f=>!f.error&&f.role!=='off'), hasP=typeof PER!=='undefined';
+  const pf=ok.find(f=>f.period), L=hasP&&pf&&PER.loaded&&PER.loaded.id===pf.period?PER.loaded:null;
+  const proj=L&&PER.projects.find(p=>p.id===L.pid), prog=proj&&PER.programmes.find(g=>g.id===proj.programmeId);
+  return {ok,L,proj,prog,sample:ok.some(f=>f.sample),built:ok.some(f=>f.builder)};
+}
 function renderMeta(){
-  const el=document.getElementById('meta'), ok=S.files.filter(f=>!f.error&&f.role!=='off');
-  if(!ok.length){ el.innerHTML='<span>No schedule loaded</span>'; return; }
-  const sample=ok.some(f=>f.sample), built=ok.some(f=>f.builder), pf=ok.find(f=>f.period), plab=pf&&typeof PER!=='undefined'&&PER.loaded&&PER.loaded.id===pf.period?PER.loaded.label:null;
-  el.innerHTML=`${plab?`<span class="pill">${esc(plab)}</span>`:''}${sample?'<span class="pill">Sample data</span>':''}${built?'<span class="pill">Built here</span>':''}<span><b>${M.projs.length}</b> project${M.projs.length===1?'':'s'} · <b>${ok.length}</b> files</span><span>Data date <b>${fmtL(M.dd)}</b></span><span>Baseline data date <b>${fmtL(M.bdd)}</b></span><span>${M.live.xlinks} inter-file links resolved</span>`;
+  const el=document.getElementById('meta'); if(!el) return;
+  const {ok,L,proj,prog,sample,built}=ctxInfo();
+  let t1, t2=[];
+  if(!ok.length){ t1='<b>No schedule open</b>'; t2.push('Pick a project or add XER files'); }
+  else {
+    if(L) t1=(prog?`<span class="cx-g">${esc(prog.name)}</span><span class="cx-s" aria-hidden="true">/</span>`:'')+`<b>${esc(proj?proj.name:'Saved project')}</b>`;
+    else t1=`<b>${sample?'Sample schedule':built?'Schedule built here':'Unsaved schedule'}</b>`;
+    const dd=M&&M.dd!=null?fmtL(M.dd):null;
+    if(L) t2.push(esc(L.label)); else t2.push(`${ok.length} file${ok.length===1?'':'s'}${sample||built?'':' · not saved'}`);
+    if(dd&&!(L&&String(L.label).includes(dd))) t2.push('Data date '+(M?fmtD(M.dd):''));
+    if(M&&M.base&&M.base.acts.size&&M.bdd!=null) t2.push('Baseline '+fmtD(M.bdd));
+  }
+  el.innerHTML=`<span class="cx-t"><span class="cx-1">${t1}</span><span class="cx-2">${t2.join(' · ')}</span></span><svg class="cx-c" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>`;
+  el.setAttribute('aria-label','Open schedule: '+el.textContent.replace(/\s+/g,' ').trim()+'. Switch project');
+  el.title='Switch project';
+  const m=document.getElementById('ctxMenu'); if(m&&!m.hidden) renderCtxMenu();
+}
+function renderCtxMenu(){
+  const m=document.getElementById('ctxMenu'); if(!m) return;
+  const {ok,L}=ctxInfo(), signed=typeof PER!=='undefined'&&PER.mode, q=(m.dataset.q||'').toLowerCase();
+  let list='';
+  if(!signed) list='<div class="cxm-e">Sign in to open your saved projects.</div>';
+  else if(!PER.projects.length) list='<div class="cxm-e">No saved projects yet. Add one on the Portfolio page.</div>';
+  else {
+    const item=p=>{ const s=p.summary, cur=L&&L.pid===p.id; return `<button class="cxm-i${cur?' cur':''}" data-cx="${esc(p.id)}" ${s?'':'disabled'}><span class="cxm-n">${esc(p.name)}${cur?' <em>Open</em>':''}</span><span class="cxm-d">${s?esc(s.label||'')+(s.dd!=null&&!String(s.label||'').includes(fmtL(s.dd))?' · '+fmtD(s.dd):''):'No schedule yet'}</span></button>`; };
+    const match=p=>!q||[p.name,p.code,(PER.programmes.find(g=>g.id===p.programmeId)||{}).name].some(x=>x&&String(x).toLowerCase().includes(q));
+    const groups=PER.programmes.map(g=>[g.name,PER.projects.filter(p=>p.programmeId===g.id&&match(p))]);
+    groups.push(['Not in a programme',PER.projects.filter(p=>(!p.programmeId||!PER.programmes.some(g=>g.id===p.programmeId))&&match(p))]);
+    list=groups.filter(([,ps])=>ps.length).map(([n,ps])=>`<div class="cxm-g">${esc(n)}</div>${ps.sort((a,b)=>String(a.name).localeCompare(b.name)).map(item).join('')}`).join('')||'<div class="cxm-e">No projects match.</div>';
+  }
+  const search=signed&&PER.projects.length>6?`<input type="search" class="cxm-q" id="ctxQ" placeholder="Find a project" value="${esc(m.dataset.q||'')}" aria-label="Find a project">`:'';
+  m.innerHTML=`<div class="cxm-h">Open a project</div>${search}<div class="cxm-l">${list}</div>
+    <div class="cxm-f">${signed?'<button data-cxa="port">Portfolio</button>':'<button data-cxa="signin">Sign in</button>'}${signed&&ok.length&&!L&&!perRO()?'<button data-cxa="save">Save as period…</button>':''}<button data-cxa="files">Schedule files${ok.length?` (${ok.length})`:''}…</button></div>`;
+}
+function wireCtx(){
+  const b=document.getElementById('meta'), m=document.getElementById('ctxMenu');
+  const close=()=>{ m.hidden=true; b.setAttribute('aria-expanded','false'); };
+  b.onclick=e=>{ e.stopPropagation(); if(!m.hidden){ close(); return; } m.dataset.q=''; renderCtxMenu(); m.hidden=false; b.setAttribute('aria-expanded','true'); const q=document.getElementById('ctxQ'); if(q) q.focus(); };
+  document.addEventListener('click',e=>{ if(!m.hidden&&!m.contains(e.target)&&!b.contains(e.target)) close(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!m.hidden){ close(); b.focus(); } });
+  m.addEventListener('input',e=>{ if(e.target.id==='ctxQ'){ m.dataset.q=e.target.value; const pos=e.target.selectionStart; renderCtxMenu(); const q=document.getElementById('ctxQ'); if(q){ q.focus(); try{ q.setSelectionRange(pos,pos); }catch(_){} } } });
+  m.addEventListener('click',e=>{
+    const it=e.target.closest('[data-cx]'); if(it){ close(); portOpen(it.dataset.cx,true); return; }
+    const a=e.target.closest('[data-cxa]'); if(!a) return; close();
+    if(a.dataset.cxa==='port') setTab('port'); else if(a.dataset.cxa==='save') perAskSave(); else if(a.dataset.cxa==='files') openFilesModal(); else if(a.dataset.cxa==='signin'&&!document.getElementById('auth')) authStart(); });
 }
 function rebuild(fitView){
   M=buildModel(); colCache=new Map();
@@ -3919,8 +3992,9 @@ function wire(){
   // files modal
   const modal=document.getElementById('modal');
   const openModal=()=>{ renderFiles(); modal.hidden=false; document.getElementById('mClose').focus(); };
+  window.openFilesModal=openModal;
   window.closeModal=()=>{ modal.hidden=true; };
-  document.getElementById('btnFiles').onclick=openModal;
+  document.getElementById('btnFiles').onclick=openModal; wireCtx();
   document.addEventListener('click',e=>{ if(e.target.closest('[data-open-files]')) openModal(); });
   document.getElementById('mClose').onclick=closeModal; document.getElementById('mDone').onclick=closeModal;
   modal.addEventListener('click',e=>{ if(e.target===modal) closeModal();
@@ -4235,13 +4309,13 @@ function perSummary(list){
   const L=list.slice().sort((a,b)=>(a.dd||0)-(b.dd||0)||(a.savedAt||0)-(b.savedAt||0)), a=L[L.length-1], b=L.length>1?L[L.length-2]:null, s=a.stats||{}, v=x=>x===undefined?null:x;
   return {periodId:a.id,label:a.label,dd:v(a.dd),finish:v(s.finish),blFinish:v(s.blFinish),bei:v(s.bei),crit:v(s.crit),neg:v(s.neg),pctA:v(s.pctA),pctP:v(s.pctP),rel:s.rel||null,n:v(s.n),prevFinish:b&&b.stats?v(b.stats.finish):null,count:L.length};
 }
-function perRenderAll(){ renderPer(); if(typeof renderPort==='function') renderPort(); }
+function perRenderAll(){ renderPer(); if(typeof renderPort==='function') renderPort(); if(M) renderMeta(); }
 function perSubscribe(){
   if(PER.unP) PER.unP(); if(PER.unR) PER.unR(); if(PER.unG) PER.unG(); PER.unR=PER.unG=null; PER.periods=[]; PER.projects=[]; PER.programmes=[]; PER.schemaOld=false;
   if(!PER.store){ perRenderAll(); return; }
-  PER.unG=PER.store.watchProgrammes(list=>{ PER.programmes=list.sort((a,b)=>(a.sort||0)-(b.sort||0)||String(a.name).localeCompare(b.name)); PER.schemaOld=false; if(typeof renderPort==='function') renderPort(); },
+  PER.unG=PER.store.watchProgrammes(list=>{ PER.programmes=list.sort((a,b)=>(a.sort||0)-(b.sort||0)||String(a.name).localeCompare(b.name)); PER.schemaOld=false; if(typeof renderPort==='function') renderPort(); renderMeta(); },
     e=>{ if(/programmes|schema cache|does not exist|42P01|PGRST20/i.test((e&&(e.message||e.code))||'')){ PER.schemaOld=true; if(typeof renderPort==='function') renderPort(); } else perToast(perErr(e),'err'); });
-  PER.unP=PER.store.watchProjects(list=>{ PER.projects=list.map(p=>Object.assign({programmeId:null,code:'',status:'active',manager:'',description:'',summary:null},p)).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)); if(typeof renderPort==='function') renderPort();
+  PER.unP=PER.store.watchProjects(list=>{ PER.projects=list.map(p=>Object.assign({programmeId:null,code:'',status:'active',manager:'',description:'',summary:null},p)).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)); if(typeof renderPort==='function') renderPort(); renderMeta();
       let want=PER.pid; if(!want){ try{ want=localStorage.getItem('pacer.proj.'+PER.space); }catch(_){} }
       if(!PER.projects.some(p=>p.id===want)) want=PER.projects[0]?PER.projects[0].id:null;
       if(want!==PER.pid||!PER.unR) perPick(want); else renderPer(); },
@@ -4447,7 +4521,7 @@ async function renderPer(){
     ${proj?`<button class="btn sm" data-w data-pa="ren" ${perCanDel(proj.createdBy)?'':'disabled'}>Rename</button><button class="btn sm ghostd" data-w data-pa="delp" ${perCanDel(proj.createdBy)?'':'disabled'}>Delete</button>`:''}
     <span class="pspace">${PER.mode!=='local'?(PER.space==='team'?'Team workspace':'Private workspace'):'This browser'}</span>
     <span class="sp"></span><span class="pbusy" id="perBusy" ${PER.busy?'':'hidden'}>${esc(PER.busy)}</span>
-    <button class="btn sm" data-w data-pa="imp" ${ro?'disabled':''} title="Turn several past XER updates into periods in one go">Import past updates</button>
+    <button class="btn sm" data-pa="files" title="Load XER files and set which is live and which is baseline">Schedule files</button><button class="btn sm" data-w data-pa="imp" ${ro?'disabled':''} title="Turn several past XER updates into periods in one go">Import past updates</button>
     <button class="btn sm primary" data-w data-pa="save" ${ro?'disabled':''}>Save current as period</button></div>`;
   if(!proj){ el.innerHTML=bar+`<div class="card pempty big"><h3>${PER.projects.length?'Pick a project':'Start your period history'}</h3><p class="muted">Create a project, then save each schedule update as a period. The workbench tracks the forecast, progress and changes from one period to the next.</p>
       <div class="prow">${ro?'':'<button class="btn primary" data-w data-pa="new">Create a project</button><button class="btn" data-w data-pa="sample">Load sample history</button>'}</div>${ro?'<p class="muted">You have view-only access, so ask an editor to create a project.</p>':''}</div>`; perBusy(PER.busy); return; }
@@ -4575,7 +4649,7 @@ function wirePer(){
     else if(t.id==='perMsAdd'&&t.value){ PER.ms.add(t.value); renderPerMain(); } });
   w.addEventListener('click',e=>{
     const a=e.target.closest('[data-pa]'); if(a){ const v=a.dataset.pa, proj=PER.projects.find(p=>p.id===PER.pid);
-      if(v==='new') perAskProject(); else if(v==='save') perAskSave(); else if(v==='imp') perAskImport(); else if(v==='sample') perSampleHistory();
+      if(v==='new') perAskProject(); else if(v==='files') openFilesModal(); else if(v==='save') perAskSave(); else if(v==='imp') perAskImport(); else if(v==='sample') perSampleHistory();
       else if(v==='ren'&&proj) perDialog('Rename project',`<label class="pfl"><span>Project name</span><input id="pdName" maxlength="80" value="${esc(proj.name)}"></label>`,'Rename',async d=>{ const n=d.querySelector('#pdName').value.trim(); if(!n) return false; await perRun('Renaming…',()=>PER.store.renameProject(proj.id,n)); });
       else if(v==='delp'&&proj) perDialog('Delete project?',`<p>This permanently deletes <b>${esc(proj.name)}</b> and its ${PER.periods.length} saved period${PER.periods.length===1?'':'s'} for everyone. This can’t be undone.</p>`,'Delete project',async()=>{ await perRun('Deleting project…',async()=>{ await perDeleteProject(proj); PER.pid=null; perToast('Project deleted.'); }); });
       return; }
@@ -4715,11 +4789,11 @@ function portProjectDialog(p,o){
 }
 
 /* ---- actions ---- */
-async function portOpen(pid){
+async function portOpen(pid,keep){
   const p=PER.projects.find(x=>x.id===pid); if(!p) return;
   let list; try{ list=await PER.store.listPeriods(pid); }catch(e){ perToast(perErr(e),'err'); return; }
   const sm=perSummary(list); if(!sm){ perToast('This project has no saved periods yet.','err'); return; }
-  const per=list.find(x=>x.id===sm.periodId); perPick(pid); await perLoad(per,pid); setTab('dash');
+  const per=list.find(x=>x.id===sm.periodId); perPick(pid); await perLoad(per,pid); if(!keep||S.tab==='port'||S.tab==='per') setTab('dash'); else renderMeta();
 }
 function portUpload(pid){
   const inp=document.createElement('input'); inp.type='file'; inp.multiple=true; inp.accept='.xer,.XER';
@@ -4727,7 +4801,7 @@ function portUpload(pid){
     S.files=[]; PER.loaded=null; await addFiles(list); perPick(pid);
     const ok=S.files.filter(f=>!f.error);
     if(!ok.some(f=>f.role==='live')){ perToast('None of those files could be read as a live schedule.','err'); return; }
-    perToast(ok.some(f=>f.role==='baseline')?'Files loaded. Check the roles, then save the period.':'Loaded with no baseline. Name a file “baseline” or set its role in Files to compare against one.');
+    perToast(ok.some(f=>f.role==='baseline')?'Files loaded. Check the roles, then save the period.':'Loaded with no baseline. To compare against one, cancel, open Schedule files from the header menu and set a file’s role to Baseline.');
     setTimeout(perAskSave,150); };
   inp.click();
 }
