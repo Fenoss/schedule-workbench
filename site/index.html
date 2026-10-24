@@ -223,6 +223,9 @@ details.fsec[open]>summary .fh::after{content:"−"}
 .bname{height:34px;border:1px solid transparent;border-radius:6px;background:transparent;font-family:var(--fDisplay);font-weight:700;font-size:20px;text-transform:uppercase;letter-spacing:.02em;padding:0 8px;min-width:200px;max-width:340px}
 .bname:hover,.bname:focus{border-color:var(--line);background:var(--surface2)}
 .btool input[type=date],#bMenu{height:32px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:0 8px;font-size:13px}
+.rs-t{overflow-x:auto} .rst{border-collapse:collapse;font-size:13px;min-width:100%} .rst th{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3);text-align:left;padding:4px 6px;white-space:nowrap} .rst th.r,.rst td.r{text-align:right}
+.rst td{padding:3px 6px;border-top:1px solid var(--grid);white-space:nowrap} .rst select,.rs-n,.rs-s{height:30px;border:1px solid var(--line);border-radius:5px;background:var(--surface2);padding:0 6px;font-size:13px} .rs-n{width:190px} .rs-s{width:110px}
+.rs-sum{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink2)} .rs-sum b{color:var(--ink)} .rs-sum em{font-style:normal;font-weight:600}
 .bupd{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:10px 12px;margin-bottom:10px;border-left:4px solid var(--accent)}
 .bu-h{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;font-size:13.5px} .bu-h>b{font-size:15px}
 .bu-s{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--ink2)} .bu-s b{color:var(--ink)} .bu-s em{font-style:normal;font-weight:600}
@@ -261,7 +264,7 @@ select.bin{padding:0 2px}
 .bgantt{flex:1;position:relative;min-width:0}
 .bgantt canvas{position:absolute;inset:0}
 .btoast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 20px);z-index:70;background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:8px;font-size:13.5px;box-shadow:var(--shadow);max-width:min(640px,92vw)}
-.bdlg{top:96px;width:min(640px,100%);max-height:70vh;overflow:auto}
+.bdlg{top:96px;width:min(640px,100%);max-height:70vh;overflow:auto} .colpanel.bdlg.wide{position:fixed;left:50%;right:auto;transform:translateX(-50%);top:110px;width:min(1100px,calc(100vw - 32px));max-height:calc(100vh - 140px)}
 .bcals{display:flex;flex-direction:column;gap:12px}
 .bcal{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
 .bcr{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -1241,7 +1244,7 @@ function sampleFiles(opt){
       txt+=tbl('UDFVALUE',['udf_type_id','fk_id','proj_id','udf_date','udf_number','udf_text'],udf);
       txt+='%E\n';
       const dl=new Date(DDT), name=L?`${p.short}_UP${UPN}_${dl.getUTCDate()}${MON[dl.getUTCMonth()]}${String(dl.getUTCFullYear()).slice(2)}.xer`:`${p.short}_Baseline_BL01.xer`;
-      const T=parseXER(txt);
+      const T=spEnrich(parseXER(txt),{501:['CVJ','Ardent Civils JV'],502:['RSP','Railsys Partners']});
       out.push({id:uid(),name,role:L?'live':'baseline',tables:T,info:fileInfo(T),sample:true});
     }
   }
@@ -1267,10 +1270,10 @@ function buildRole(files){
   const set={acts:new Map(), codeTypes:new Map(), udfs:new Set(), fields:new Set(), dd:null, links:0, xlinks:0, files:files.length, projs:new Set()};
   const byFile=new Map(), byGlobal=new Map(), seenPairs=new Set();
   files.forEach((f,fi)=>{
-    const T=f.tables, projs={}, cal={}, calN={}, wbs={}, ctype={}, codes={}, udft={};
+    const T=f.tables, projs={}, cal={}, calN={}, calR={}, wbs={}, ctype={}, codes={}, udft={};
     if(T.TASK&&T.TASK[0]) Object.keys(T.TASK[0]).forEach(k=>set.fields.add(k));
     (T.PROJECT||[]).forEach(p=>{ const d=pd(p.last_recalc_date||p.next_data_date); projs[p.proj_id]={short:p.proj_short_name||('P'+p.proj_id),dd:d}; set.projs.add(projs[p.proj_id].short); if(d!=null&&(set.dd==null||d>set.dd)) set.dd=d; });
-    (T.CALENDAR||[]).forEach(c=>{ cal[c.clndr_id]=+c.day_hr_cnt||8; calN[c.clndr_id]=c.clndr_name; });
+    (T.CALENDAR||[]).forEach(c=>{ cal[c.clndr_id]=+c.day_hr_cnt||8; calN[c.clndr_id]=c.clndr_name; calR[c.clndr_id]=c; });
     (T.PROJWBS||[]).forEach(w=>wbs[w.wbs_id]=w);
     (T.ACTVTYPE||[]).forEach(t=>{ ctype[t.actv_code_type_id]=t.actv_code_type; if(!set.codeTypes.has(t.actv_code_type)) set.codeTypes.set(t.actv_code_type,new Map()); });
     (T.ACTVCODE||[]).forEach(c=>{ const tn=ctype[c.actv_code_type_id]; if(!tn) return; const sh=c.short_name||c.actv_code_name; codes[c.actv_code_id]={type:tn,short:sh};
@@ -1278,8 +1281,8 @@ function buildRole(files){
     (T.UDFTYPE||[]).forEach(u=>{ if(u.table_name==='TASK'){ udft[u.udf_type_id]=u.udf_type_label||u.udf_type_name; set.udfs.add(udft[u.udf_type_id]); } });
     const pc={};
     const wpath=id=>{ if(pc[id]) return pc[id]; const w=wbs[id]; if(!w) return []; const par=wbs[w.parent_wbs_id];
-      let p; if(w.proj_node_flag==='Y'||!par){ const pj=projs[w.proj_id]; p=[{k:pj?pj.short:w.wbs_short_name,n:w.wbs_name||w.wbs_short_name,seq:+w.seq_num||0}]; }
-      else p=wpath(w.parent_wbs_id).concat([{k:w.wbs_short_name,n:w.wbs_name||w.wbs_short_name,seq:+w.seq_num||0}]);
+      let p; if(w.proj_node_flag==='Y'||!par){ const pj=projs[w.proj_id]; p=[{k:pj?pj.short:w.wbs_short_name,n:w.wbs_name||w.wbs_short_name,seq:+w.seq_num||0,id:w.wbs_id}]; }
+      else p=wpath(w.parent_wbs_id).concat([{k:w.wbs_short_name,n:w.wbs_name||w.wbs_short_name,seq:+w.seq_num||0,id:w.wbs_id}]);
       return pc[id]=p; };
     (T.TASK||[]).forEach(t=>{
       if(t.task_type==='TT_WBS') return;
@@ -1291,7 +1294,7 @@ function buildRole(files){
       let wp=wpath(t.wbs_id); if(!wp.length) wp=[{k:pj,n:pj,seq:0}];
       const tf=t.total_float_hr_cnt===''||t.total_float_hr_cnt==null?null:(+t.total_float_hr_cnt)/dh;
       const a={id:pj+'|'+t.task_code, code:t.task_code, name:t.task_name||'', proj:pj, type:t.task_type, ms, status:t.status_code, pct:+t.phys_complete_pct||0,
-        tf, crit: tf!=null && tf<=0.01 && t.status_code!=='TK_Complete', s, f, wp, codes:{}, udf:{}, preds:[], succs:[], fi, dh, raw:t, calName:calN[t.clndr_id]||t.clndr_id};
+        tf, crit: tf!=null && tf<=0.01 && t.status_code!=='TK_Complete', s, f, wp, codes:{}, udf:{}, preds:[], succs:[], fi, fname:files[fi].name, dh, raw:t, calRow:calR[t.clndr_id], calName:calN[t.clndr_id]||t.clndr_id};
       if(set.acts.has(a.id)) a.id+='#'+fi;
       set.acts.set(a.id,a); byFile.set(fi+':'+t.task_id,a); if(!byGlobal.has(t.task_id)) byGlobal.set(t.task_id,a);
     });
@@ -2557,24 +2560,26 @@ function bCompute(st){
 
 /* ---------- conversions: builder <-> Workbench model / XER ---------- */
 function bCalFromName(name,hrs){ const n=String(name||'').toLowerCase(); const work=/7\s*-?\s*day|seven/.test(n)?[1,1,1,1,1,1,1]:/6\s*-?\s*day|six/.test(n)?[0,1,1,1,1,1,1]:[0,1,1,1,1,1,0]; return {id:bid(),name:name||'Standard',work,hrs:hrs||8,hol:[]}; }
-function bFromSet(set,dd){
+function bFromSet(set,dd,files){
   const st={v:1,name:M.projs.join(' + ')||'Imported schedule',dd:dd!=null?dayOf(dd):dayOf(Date.now()),mf:null,cals:[],projects:[],wbs:[],acts:[],rels:[],codeTypes:[],baseline:null,sync:false,chUnit:S.tld.inUnit||'km'};
   const calByName=new Map(), projBy=new Map(), wbsBy=new Map(), actBy=new Map();
   const acts=[...set.acts.values()];
-  acts.forEach(a=>{ if(!projBy.has(a.proj)){ const p={id:bid(),short:a.proj,name:(a.wp[0]&&a.wp[0].n)||a.proj}; projBy.set(a.proj,p); st.projects.push(p); } });
+  acts.forEach(a=>{ if(!projBy.has(a.proj)){ const p={id:bid(),short:a.proj,name:(a.wp[0]&&a.wp[0].n)||a.proj,src:{f:a.fname,pid:a.raw.proj_id},srcWbs:a.wp[0]&&a.wp[0].id}; projBy.set(a.proj,p); st.projects.push(p); } });
   const chS=S.tld.src==='udf'?S.tld.udfS:null, chE=S.tld.src==='udf'?S.tld.udfE:null;
   acts.forEach(a=>{
     const p=projBy.get(a.proj); let parent=null, key=a.proj;
-    a.wp.slice(1).forEach(w=>{ key+=' › '+w.k; if(!wbsBy.has(key)){ const n={id:bid(),proj:p.id,parent,code:w.k,name:w.n,seq:w.seq||wbsBy.size+1}; wbsBy.set(key,n); st.wbs.push(n); } parent=wbsBy.get(key).id; });
-    const cn=a.calName||'Standard'; if(!calByName.has(cn)){ const c=bCalFromName(cn,a.dh); calByName.set(cn,c); st.cals.push(c); }
+    a.wp.slice(1).forEach(w=>{ key+=' › '+w.k; if(!wbsBy.has(key)){ const n={id:bid(),proj:p.id,parent,code:w.k,name:w.n,seq:w.seq||wbsBy.size+1,src:w.id,name0:w.n,code0:w.k}; wbsBy.set(key,n); st.wbs.push(n); } parent=wbsBy.get(key).id; });
+    const cn=a.calName||'Standard'; if(!calByName.has(cn)){ const pc=p6CalParse(a.calRow), c=pc?{id:bid(),name:cn,work:pc.work,hrs:+a.calRow.day_hr_cnt||a.dh||8,hol:pc.hol}:bCalFromName(cn,a.dh); if(a.calRow) c.src=a.calRow.clndr_id; calByName.set(cn,c); st.cals.push(c); }
     const raw=a.raw, dh=a.dh||8, type=a.type==='TT_Mile'?'start':a.type==='TT_FinMile'?'finish':'task';
     const dur=type==='task'?Math.max(0,Math.round((+raw.target_drtn_hr_cnt||0)/dh)):0;
-    const x={id:bid(),proj:p.id,wbs:parent,seq:st.acts.length+1,code:a.code,name:a.name,type,dur,cal:calByName.get(cn).id,cstr:P6_CSTR[raw.cstr_type]||'',cdate:raw.cstr_date?(()=>{ const t=pd(raw.cstr_date), fin=/^(FNET|FNLT|MFO)$/.test(P6_CSTR[raw.cstr_type]||''); return dayOf(t)-(fin&&(t%DAY)<=8*HR?1:0); })():null,as:null,af:null,rem:null,pct:null,codes:{...a.codes},ch0:null,ch1:null};
+    const x={id:bid(),proj:p.id,wbs:parent,seq:st.acts.length+1,code:a.code,name:a.name,type,dur,cal:calByName.get(cn).id,cstr:P6_CSTR[raw.cstr_type]||'',cdate:raw.cstr_date?(()=>{ const t=pd(raw.cstr_date), fin=/^(FNET|FNLT|MFO)$/.test(P6_CSTR[raw.cstr_type]||''); return dayOf(t)-(fin&&(t%DAY)<=8*HR?1:0); })():null,as:null,af:null,rem:null,pct:null,codes:{...a.codes},ch0:null,ch1:null,src:{f:a.fname,t:a.raw.task_id}};
     if(!x.cstr) x.cdate=null;
     if(a.status==='TK_Complete'){ x.as=dayOf(pd(raw.act_start_date)??a.s); const tf=pd(raw.act_end_date)??a.f; x.af=dayOf(tf); if(type==='finish'&&(tf%DAY)<=8*HR){ x.af-=1; x.as=x.af+1; } }
     else if(a.status==='TK_Active'){ x.as=dayOf(pd(raw.act_start_date)??a.s); x.rem=Math.round((+raw.remain_drtn_hr_cnt||0)/dh); x.pct=Math.round(+raw.phys_complete_pct||0); }
     if(chS){ const v0=parseFloat(a.udf[chS]), v1=parseFloat(a.udf[chE||chS]); if(isFinite(v0)) x.ch0=v0; if(isFinite(v1)) x.ch1=v1; }
+    x.src.ch=[x.ch0,x.ch1]; x.src.codes=JSON.stringify(x.codes); x.src.cstr=[x.cstr,x.cdate,raw.cstr_type||'',raw.cstr_date||''];
     actBy.set(a,x); st.acts.push(x); });
+  if(files) bRsFromFiles(st,files);
   st.defCal=st.cals[0]?st.cals[0].id:null; if(!st.cals.length){ const c=bCalFromName('Standard 5-day',8); st.cals.push(c); st.defCal=c.id; }
   acts.forEach(a=>a.preds.forEach(p=>{ const s=actBy.get(a), q=actBy.get(p.a); if(s&&q) st.rels.push({p:q.id,s:s.id,t:p.type,lag:Math.round(p.lag)}); }));
   M.codeTypes.forEach(t=>st.codeTypes.push({name:t,values:(M.codeOrder[t]||[]).map(o=>({short:o.short,name:o.name}))}));
@@ -2592,7 +2597,7 @@ function bToXer(st,res,mode,snap){
   const ddate=isB&&snap&&snap.dd!=null?snap.dd:st.dd;
   st.projects.forEach(p=>{ const pid=projId.get(p.id), root=off+90000+pid;
     const wbs=[{wbs_id:root,proj_id:pid,seq_num:0,proj_node_flag:'Y',wbs_short_name:p.short,wbs_name:p.name,parent_wbs_id:''}].concat(st.wbs.filter(w=>w.proj===p.id).map(w=>({wbs_id:wbsNum.get(w.id),proj_id:pid,seq_num:w.seq,proj_node_flag:'N',wbs_short_name:w.code,wbs_name:w.name,parent_wbs_id:w.parent&&wbsNum.has(w.parent)?wbsNum.get(w.parent):root})));
-    const tasks=[], preds=[], tav=[], udf=[]; let pid2=off+1;
+    const tasks=[], preds=[], tav=[], udf=[], trs=[], pcs=[], memos=[]; let pid2=off+1;
     st.acts.filter(a=>a.proj===p.id).forEach(a=>{ const r=isB?snap.R[a.id]:res.R.get(a.id); if(!r) return; const hrs=calHrs.get(a.cal)||8, tt=a.type==='start'?'TT_Mile':a.type==='finish'?'TT_FinMile':'TT_Task', s=isB?'ns':bStatus(a);
       const fin=a.type==='finish', ms=a.type!=='task'||r.dur===0;
       const es=ms?(fin?FE(r.ef):T(r.es)):T(r.rs!=null&&s==='ip'?r.rs:r.es), ef=ms?(fin?FE(r.ef):T(r.es)):TE(r.ef);
@@ -2603,6 +2608,10 @@ function bToXer(st,res,mode,snap){
       if(s==='cp') Object.assign(t,{status_code:'TK_Complete',phys_complete_pct:100,act_start_date:T(a.as),act_end_date:ms&&fin?FE(a.af):TE(a.af),early_start_date:'',early_end_date:'',late_start_date:'',late_end_date:'',remain_drtn_hr_cnt:0,total_float_hr_cnt:'',free_float_hr_cnt:''});
       else if(s==='ip') Object.assign(t,{status_code:'TK_Active',phys_complete_pct:a.pct!=null&&a.pct!==''?+a.pct:Math.round((1-(r.rem/(r.dur||1)))*100),act_start_date:T(a.as),remain_drtn_hr_cnt:r.rem*hrs,late_start_date:''});
       tasks.push(t);
+      if(!isB){ const tid=actNum.get(a.id);
+        (a.asg||[]).forEach((x,j)=>{ const rs=(st.rsrcs||[]).find(q=>q.id===x.r); if(!rs) return; trs.push({taskrsrc_id:tid*10+j+1,task_id:tid,proj_id:pid,rsrc_id:700+(st.rsrcs||[]).indexOf(rs),rsrc_type:rs.type,target_qty:+x.bu||0,remain_qty:+x.ru||0,act_reg_qty:+x.au||0,act_ot_qty:0,cost_per_qty:+x.price||0,target_cost:r2(x.bc),remain_cost:r2(x.rc),act_reg_cost:r2(x.ac),act_ot_cost:0,act_start_date:s!=='ns'?T(a.as):'',act_end_date:s==='cp'?TE(a.af):'',target_start_date:t.target_start_date,target_end_date:t.target_end_date}); });
+        (a.exp||[]).forEach((x,j)=>pcs.push({cost_item_id:tid*10+j+1,proj_id:pid,task_id:tid,cost_name:x.name,target_cost:r2(x.bc),act_cost:r2(x.ac),remain_cost:r2(x.rc),cost_load_type:'CL_Uniform',auto_compute_act_flag:'N'}));
+        if(a.note) memos.push({memo_id:tid,task_id:tid,memo_type_id:1,proj_id:pid,task_memo:memoHtml(a.note)}); }
       (res.preds.get(a.id)||[]).forEach(rel=>{ if(isB&&!snap.R[rel.p]) return; preds.push({task_pred_id:pid2++,task_id:actNum.get(a.id),pred_task_id:actNum.get(rel.p),proj_id:pid,pred_proj_id:projId.get(byId.get(rel.p).proj),pred_type:'PR_'+(rel.t||'FS'),lag_hr_cnt:(Math.round(+rel.lag||0))*hrs}); });
       types.forEach((ty,ti)=>{ const v=a.codes&&a.codes[ty.name]; if(v==null) return; const cid=codeIdFor(ti,v); if(cid) tav.push({task_id:actNum.get(a.id),actv_code_type_id:ty.id,actv_code_id:cid,proj_id:pid}); });
       if(a.ch0!=null&&a.ch0!=='') udf.push({udf_type_id:901,fk_id:actNum.get(a.id),proj_id:pid,udf_number:a.ch0});
@@ -2619,6 +2628,10 @@ function bToXer(st,res,mode,snap){
     txt+=tbl('TASKPRED',['task_pred_id','task_id','pred_task_id','proj_id','pred_proj_id','pred_type','lag_hr_cnt'],preds);
     txt+=tbl('TASKACTV',['task_id','actv_code_type_id','actv_code_id','proj_id'],tav);
     txt+=tbl('UDFVALUE',['udf_type_id','fk_id','proj_id','udf_date','udf_number','udf_text'],udf);
+    if(trs.length){ const ids=new Set(trs.map(r=>r.rsrc_id)); txt+=tbl('RSRC',['rsrc_id','rsrc_short_name','rsrc_name','rsrc_type'],(st.rsrcs||[]).map((r,i)=>({rsrc_id:700+i,rsrc_short_name:r.short,rsrc_name:r.name,rsrc_type:r.type})).filter(r=>ids.has(r.rsrc_id)));
+      txt+=tbl('TASKRSRC',['taskrsrc_id','task_id','proj_id','rsrc_id','rsrc_type','target_qty','remain_qty','act_reg_qty','act_ot_qty','cost_per_qty','target_cost','remain_cost','act_reg_cost','act_ot_cost','act_start_date','act_end_date','target_start_date','target_end_date'],trs); }
+    if(pcs.length) txt+=tbl('PROJCOST',['cost_item_id','proj_id','task_id','cost_name','target_cost','act_cost','remain_cost','cost_load_type','auto_compute_act_flag'],pcs);
+    if(memos.length){ txt+=tbl('MEMOTYPE',['memo_type_id','seq_num','task_flag','memo_type'],[{memo_type_id:1,seq_num:1,task_flag:'Y',memo_type:'Notes'}]); txt+=tbl('TASKMEMO',['memo_id','task_id','memo_type_id','proj_id','task_memo'],memos); }
     txt+='%E\n';
     files.push({name:`${p.short}_${isB?'Baseline':'Live'}.xer`,text:txt}); });
   return files;
@@ -2630,6 +2643,224 @@ function bToFiles(){
     const bres={R:new Map(),preds:new Map()}; bst.acts.forEach(a=>bres.preds.set(a.id,[])); bst.rels.forEach(r=>{ if(bres.preds.has(r.s)) bres.preds.get(r.s).push(r); });
     bToXer(bst,bres,'base',{R:bs.R,dd:bs.dd}).forEach(f=>{ const T=parseXER(f.text); out.push({id:uid(),name:f.name,role:'baseline',tables:T,info:fileInfo(T),builder:true}); }); }
   return out;
+}
+
+/* ---------- resources, costs, notes and other P6 data ---------- */
+// P6 calendar data: weekdays 1=Sun..7=Sat, exceptions as Excel serial days. Holidays only (working exceptions are ignored).
+function p6CalParse(row){
+  const d=row&&row.clndr_data; if(!d) return null;
+  const i=d.indexOf('DaysOfWeek'); if(i<0) return null; const j=d.indexOf('Exceptions'), dow=d.slice(i,j>i?j:undefined), work=[0,0,0,0,0,0,0]; let found=false;
+  for(let k=1;k<=7;k++){ const a=dow.indexOf(`(0||${k}()(`); if(a<0) continue; found=true; const b=k<7?dow.indexOf(`(0||${k+1}()(`,a+1):-1; work[k-1]=/s\|\d/.test(dow.slice(a,b<0?dow.length:b))?1:0; }
+  if(!found||!work.some(Boolean)) return null;
+  const hol=[]; if(j>=0){ const re=/\(0\|\|\d+\(d\|(\d+)\)\([\s\x7f]*\)\)/g; let m; while((m=re.exec(d.slice(j)))) hol.push(isoD(+m[1]-25569)); }
+  return {work,hol};
+}
+const memoText=h=>String(h||'').replace(/\x7f\x7f/g,'\n').replace(/<br\s*\/?>/gi,'\n').replace(/<\/(p|div|li)>/gi,'\n').replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&').replace(/\n{3,}/g,'\n\n').trim();
+const memoHtml=t=>`<HTML><BODY>${esc(t).replace(/\n/g,'<br>')}</BODY></HTML>`;
+const RS_TYPES=[['RT_Labor','Labour'],['RT_Equip','Equipment'],['RT_Mat','Material']];
+const r2=v=>Math.round((+v||0)*100)/100;
+// Read resource assignments, expenses and notebook notes from the source XER tables into builder state.
+function bRsFromFiles(st,files){
+  const tabs=new Map(files.map(f=>[f.name,f.tables])), rsBy=new Map(); st.rsrcs=st.rsrcs||[];
+  const rsFor=(fname,rid,T)=>{ const row=(T.RSRC||[]).find(r=>String(r.rsrc_id)===String(rid)), short=row?(row.rsrc_short_name||row.rsrc_name||'R'+rid):'R'+rid;
+    let r=rsBy.get(short); if(!r){ const rate=(T.RSRCRATE||[]).filter(x=>String(x.rsrc_id)===String(rid)).map(x=>+x.cost_per_qty||0).find(v=>v>0);
+      r={id:bid(),short,name:row?(row.rsrc_name||short):short,type:row&&row.rsrc_type||'RT_Labor',unit:row&&row.rsrc_type==='RT_Mat'?(row.unit_id||'unit'):'h',price:rate||0,src:{},name0:null}; r.name0=r.name; rsBy.set(short,r); st.rsrcs.push(r); }
+    r.src[fname]=rid; return r; };
+  const idx=new Map(); files.forEach(f=>{ const T=f.tables, g=k=>{ const m=new Map(); (T[k]||[]).forEach(r=>{ const id=String(r.task_id); if(!m.has(id)) m.set(id,[]); m.get(id).push(r); }); return m; };
+    idx.set(f.name,{T,tr:g('TASKRSRC'),pc:g('PROJCOST'),memo:g('TASKMEMO')}); });
+  st.acts.forEach(a=>{ const I=a.src&&idx.get(a.src.f); if(!I) return; const tid=String(a.src.t);
+    a.asg=(I.tr.get(tid)||[]).map(r=>{ const rs=rsFor(a.src.f,r.rsrc_id,I.T), bu=+r.target_qty||0, ot=+r.act_ot_qty||0, au=(+r.act_reg_qty||0)+ot, price=+r.cost_per_qty||rs.price||0;
+      const st0=bStatus(a), ru=r.remain_qty!==''&&r.remain_qty!=null?+r.remain_qty:st0==='cp'?0:Math.max(0,bu-au);
+      if(!rs.price&&price) rs.price=price;
+      const otc=+r.act_ot_cost||0, bc=r.target_cost!==''&&r.target_cost!=null?+r.target_cost:bu*price, ac=r.act_reg_cost!=null&&r.act_reg_cost!==''?(+r.act_reg_cost||0)+otc:au*price, rc=r.remain_cost!==''&&r.remain_cost!=null?+r.remain_cost:ru*price;
+      return {id:bid(),r:rs.id,bu,au,ru,price,bc:r2(bc),ac:r2(ac),rc:r2(rc),ot,otc,src:r.taskrsrc_id}; });
+    a.exp=(I.pc.get(tid)||[]).map(r=>{ const bc=+r.target_cost||0, ac=+r.act_cost||0; return {id:bid(),name:r.cost_name||'Expense',bc,ac,rc:r.remain_cost!==''&&r.remain_cost!=null?+r.remain_cost:Math.max(0,bc-ac),src:r.cost_item_id}; });
+    const m=(I.memo.get(tid)||[])[0]; a.note=m?memoText(m.task_memo):''; a.src.note=a.note; a.src.memo=m?m.memo_id:null; });
+}
+// Cost roll-ups
+function bCostOf(a){ let bc=0,ac=0,rc=0,bu=0,au=0,ru=0; (a.asg||[]).forEach(x=>{ bc+=+x.bc||0; ac+=+x.ac||0; rc+=+x.rc||0; bu+=+x.bu||0; au+=+x.au||0; ru+=+x.ru||0; }); (a.exp||[]).forEach(x=>{ bc+=+x.bc||0; ac+=+x.ac||0; rc+=+x.rc||0; }); return {bc,ac,rc,eac:ac+rc,bu,au,ru}; }
+function bCostTot(acts){ const t={bc:0,ac:0,rc:0,eac:0,n:0}; acts.forEach(a=>{ if(!(a.asg&&a.asg.length)&&!(a.exp&&a.exp.length)) return; const c=bCostOf(a); t.bc+=c.bc; t.ac+=c.ac; t.rc+=c.rc; t.eac+=c.eac; t.n++; }); return t; }
+let moneyF=null; const money=v=>{ if(v==null||!isFinite(v)) return ''; if(!moneyF) moneyF=new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}); return moneyF.format(v); };
+const moneyK=v=>{ if(v==null||!isFinite(v)) return '—'; const a=Math.abs(v); return (v<0?'−':'')+(a>=1e6?'$'+(a/1e6).toFixed(a>=1e7?1:2)+'m':a>=1e4?'$'+Math.round(a/1e3)+'k':money(a)); };
+function bResText(a){ const L=a.asg||[]; if(!L.length) return (a.exp&&a.exp.length)?`${a.exp.length} expense${a.exp.length===1?'':'s'}`:''; return L.map(x=>{ const r=(B.st.rsrcs||[]).find(r=>r.id===x.r); return r?r.short:'?'; }).join(', '); }
+// Keep assignment actuals and remaining in step with the activity's progress during an update, until someone edits them by hand.
+function updRsAuto(st,res){
+  const u=st.upd; if(!u) return;
+  st.acts.forEach(a=>{ const f=u.f0[a.id]; if(!f) return; const s=bStatus(a), r=res.R.get(a.id); if(!r) return;
+    const rem0=f[2]==='ip'?f[4]:f[2]==='ns'?bDur(a)||f[4]||0:0, frac=s==='cp'?0:s==='ns'?1:rem0>0?r.rem/rem0:(r.rem>0?1:0);
+    (a.asg||[]).forEach(x=>{ if(x.man||!x.u0) return; const [au0,ru0,ac0,rc0]=x.u0; if(s==='ns'&&f[2]==='ns'){ x.au=au0; x.ru=ru0; x.ac=ac0; x.rc=rc0; return; }
+      x.ru=Math.round(ru0*frac*10)/10; x.au=Math.round((au0+Math.max(0,ru0-x.ru))*10)/10; x.rc=r2(rc0*frac); x.ac=r2(ac0+Math.max(0,rc0-x.rc)); });
+    (a.exp||[]).forEach(x=>{ if(x.man||!x.u0) return; const [ac0,rc0]=x.u0; x.rc=r2(rc0*frac); x.ac=r2(ac0+Math.max(0,rc0-x.rc)); }); });
+}
+/* ---- dialogs: activity resources & costs, resource dictionary ---- */
+function bAsgOpen(id){ const el=document.getElementById('bDlg'); el.dataset.act=id; el.dataset.kind='asg'; el.hidden=false; bRenderRsDialog(); }
+function bRenderRsDialog(){
+  const el=document.getElementById('bDlg'), st=B.st, kind=el.dataset.kind; if(el.hidden||!st) return false; st.rsrcs=st.rsrcs||[]; el.classList.toggle('wide',kind==='asg'||kind==='rsrc');
+  if(kind==='asg'){ const a=st.acts.find(x=>x.id===el.dataset.act); if(!a){ el.hidden=true; return true; } const c=bCostOf(a), up=!!st.upd;
+    const num=(i,f,v,w)=>`<input class="tvi" style="width:${w||66}px" data-asg="${i}" data-asf="${f}" value="${v==null?'':Math.round(v*100)/100}" inputmode="decimal">`;
+    const enm=(i,f,v,w)=>`<input class="tvi" style="width:${w||84}px" data-exp="${i}" data-exf="${f}" value="${v==null?'':Math.round(v*100)/100}" inputmode="decimal">`;
+    el.innerHTML=`<div class="cph"><strong>Resources &amp; costs · ${esc(a.code)}</strong><span class="sp"></span><button class="fx" data-bd="close" aria-label="Close">×</button></div>
+      <div class="muted" style="font-size:13px;margin:-4px 0 10px">${esc(a.name)}${up?' · actuals and remaining follow this activity’s progress until you change them here':''}</div>
+      <div class="rs-t"><table class="rst"><thead><tr><th>Resource</th><th class="r">Budget units</th><th class="r">Actual units</th><th class="r">Remaining units</th><th class="r">Price / unit</th><th class="r">Budget cost</th><th class="r">Actual cost</th><th class="r">Remaining cost</th><th class="r">At completion</th><th></th></tr></thead><tbody>
+      ${(a.asg||[]).map((x,i)=>`<tr><td><select data-asg="${i}" data-asf="r">${st.rsrcs.map(r=>`<option value="${r.id}"${r.id===x.r?' selected':''}>${esc(r.short)} · ${esc(r.name)}</option>`).join('')}</select></td><td class="r">${num(i,'bu',x.bu)}</td><td class="r">${num(i,'au',x.au)}</td><td class="r">${num(i,'ru',x.ru)}</td><td class="r">${num(i,'price',x.price,64)}</td><td class="r">${num(i,'bc',x.bc,84)}</td><td class="r">${num(i,'ac',x.ac,84)}</td><td class="r">${num(i,'rc',x.rc,84)}</td><td class="r">${money(x.ac+x.rc)}</td><td><button class="link danger" data-asdel="${i}" aria-label="Remove assignment">Remove</button></td></tr>`).join('')||'<tr><td colspan="10" class="muted">No resources assigned.</td></tr>'}
+      </tbody></table></div>
+      <div class="bcr" style="margin:8px 0 14px"><button class="btn sm" data-rsa="addasg" ${st.rsrcs.length?'':'disabled'}>+ Assign resource</button><button class="btn sm ghost" data-rsa="dict">Resource dictionary…</button>${st.rsrcs.length?'':'<span class="muted" style="font-size:12.5px">Add a resource to the dictionary first.</span>'}</div>
+      <div class="rs-t"><table class="rst"><thead><tr><th>Expense</th><th class="r">Budget cost</th><th class="r">Actual cost</th><th class="r">Remaining cost</th><th class="r">At completion</th><th></th></tr></thead><tbody>
+      ${(a.exp||[]).map((x,i)=>`<tr><td><input data-exp="${i}" data-exf="name" value="${esc(x.name)}" class="rs-n"></td><td class="r">${enm(i,'bc',x.bc)}</td><td class="r">${enm(i,'ac',x.ac)}</td><td class="r">${enm(i,'rc',x.rc)}</td><td class="r">${money(x.ac+x.rc)}</td><td><button class="link danger" data-exdel="${i}">Remove</button></td></tr>`).join('')||'<tr><td colspan="6" class="muted">No expenses.</td></tr>'}
+      </tbody></table></div>
+      <div class="bcr" style="margin:8px 0 14px"><button class="btn sm" data-rsa="addexp">+ Add expense</button></div>
+      <div class="rs-sum"><span>Budget <b>${money(c.bc)||'$0'}</b></span><span>Actual <b>${money(c.ac)||'$0'}</b></span><span>Remaining <b>${money(c.rc)||'$0'}</b></span><span>At completion <b>${money(c.eac)||'$0'}</b> <em class="${dCls(Math.round(c.eac-c.bc))}">${c.bc?(c.eac-c.bc===0?'on budget':(c.eac>c.bc?'+':'−')+money(Math.abs(c.eac-c.bc))+' vs budget'):''}</em></span></div>
+      <label class="exf" style="margin-top:12px"><span>Notes</span><textarea rows="3" data-anote="1" placeholder="Notebook text carried to and from P6">${esc(a.note||'')}</textarea></label>`;
+    return true; }
+  if(kind==='rsrc'){ const used=new Map(); st.acts.forEach(a=>(a.asg||[]).forEach(x=>used.set(x.r,(used.get(x.r)||0)+1)));
+    el.innerHTML=`<div class="cph"><strong>Resources</strong><span class="sp"></span><button class="btn sm" data-rsa="addrs">Add resource</button><button class="fx" data-bd="close" aria-label="Close">×</button></div>
+      <div class="rs-t"><table class="rst"><thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Unit</th><th class="r">Price / unit</th><th class="r">Used on</th><th></th></tr></thead><tbody>
+      ${st.rsrcs.map((r,i)=>`<tr><td><input class="rs-s" data-rs="${i}" data-rsf="short" value="${esc(r.short)}"></td><td><input class="rs-n" data-rs="${i}" data-rsf="name" value="${esc(r.name)}"></td><td><select data-rs="${i}" data-rsf="type">${RS_TYPES.map(([k,l])=>`<option value="${k}"${r.type===k?' selected':''}>${l}</option>`).join('')}</select></td><td><input class="tvi" style="width:56px;text-align:left" data-rs="${i}" data-rsf="unit" value="${esc(r.unit||'h')}"></td><td class="r"><input class="tvi" style="width:74px" data-rs="${i}" data-rsf="price" value="${r.price||0}"></td><td class="r">${used.get(r.id)||0}</td><td>${used.get(r.id)?'':`<button class="link danger" data-rsdel="${i}">Delete</button>`}</td></tr>`).join('')||'<tr><td colspan="7" class="muted">No resources yet.</td></tr>'}
+      </tbody></table></div>
+      <p class="muted" style="font-size:12.5px;margin:8px 0 0">Price per unit sets the cost of new assignments and of units you change. Costs already in the schedule are kept as they are.</p>`;
+    return true; }
+  return false;
+}
+function bWireRs(){
+  const dl=document.getElementById('bDlg');
+  dl.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const st=B.st, a=st.acts.find(x=>x.id===dl.dataset.act); st.rsrcs=st.rsrcs||[];
+    const v=b.dataset.rsa;
+    if(v==='dict'){ dl.dataset.kind='rsrc'; bRenderRsDialog(); return; }
+    if(v==='addrs'){ bPush(); let n=st.rsrcs.length+1; while(st.rsrcs.some(r=>r.short==='RES-'+n)) n++; st.rsrcs.push({id:bid(),short:'RES-'+n,name:'New resource',type:'RT_Labor',unit:'h',price:0,src:{}}); bChanged(); bRenderRsDialog(); return; }
+    if(b.dataset.rsdel!=null){ bPush(); st.rsrcs.splice(+b.dataset.rsdel,1); bChanged(); bRenderRsDialog(); return; }
+    if(!a) return;
+    if(v==='addasg'){ bPush(); const r=st.rsrcs[0], bu=bDur(a)*8||8; a.asg=a.asg||[]; a.asg.push({id:bid(),r:r.id,bu,au:0,ru:bu,price:r.price||0,bc:r2(bu*(r.price||0)),ac:0,rc:r2(bu*(r.price||0)),ot:0,otc:0,man:true}); bChanged(); bRenderRsDialog(); }
+    else if(v==='addexp'){ bPush(); a.exp=a.exp||[]; a.exp.push({id:bid(),name:'Expense',bc:0,ac:0,rc:0,man:true}); bChanged(); bRenderRsDialog(); }
+    else if(b.dataset.asdel!=null){ bPush(); a.asg.splice(+b.dataset.asdel,1); bChanged(); bRenderRsDialog(); }
+    else if(b.dataset.exdel!=null){ bPush(); a.exp.splice(+b.dataset.exdel,1); bChanged(); bRenderRsDialog(); } });
+  dl.addEventListener('change',e=>{ const t=e.target, st=B.st, a=st.acts.find(x=>x.id===dl.dataset.act);
+    if(t.dataset.rs!=null){ const r=st.rsrcs[+t.dataset.rs], f=t.dataset.rsf; bPush(); if(f==='price') r.price=Math.max(0,parseFloat(t.value)||0); else if(f==='short'){ const v=t.value.trim(); if(v&&!st.rsrcs.some(x=>x!==r&&x.short===v)) r.short=v; } else r[f]=t.value.trim()||r[f]; bChanged(); bRenderRsDialog(); return; }
+    if(!a) return;
+    if(t.dataset.anote){ bPush(); a.note=t.value.replace(/\s+$/,''); bChanged(); return; }
+    if(t.dataset.asg!=null){ const x=a.asg[+t.dataset.asg], f=t.dataset.asf; bPush(); x.man=true;
+      if(f==='r'){ x.r=t.value; const r=st.rsrcs.find(q=>q.id===t.value); if(r&&r.price&&!x.price){ x.price=r.price; x.bc=r2(x.bu*x.price); x.ac=r2(x.au*x.price); x.rc=r2(x.ru*x.price); } }
+      else { const n=Math.max(0,parseFloat(t.value)||0); x[f]=n;
+        if(f==='price'){ x.bc=r2(x.bu*n); x.ac=r2(x.au*n); x.rc=r2(x.ru*n); }
+        else if(['bu','au','ru'].includes(f)&&x.price){ x[{bu:'bc',au:'ac',ru:'rc'}[f]]=r2(n*x.price); }
+        if(f==='bu'&&bStatus(a)==='ns'){ x.ru=n; if(x.price) x.rc=r2(n*x.price); } }
+      bChanged(); bRenderRsDialog(); return; }
+    if(t.dataset.exp!=null){ const x=a.exp[+t.dataset.exp], f=t.dataset.exf; bPush(); x.man=true; if(f==='name') x.name=t.value.trim()||'Expense'; else { x[f]=Math.max(0,parseFloat(t.value)||0); if(f==='bc'&&bStatus(a)==='ns') x.rc=x[f]; } bChanged(); bRenderRsDialog(); } });
+}
+/* ---- write an update back into the original XER tables, keeping everything the editor doesn't touch ---- */
+function updPatch(st,res,src){
+  const H=8*HR, E=17*HR, T=d=>d==null?'':fx(d*DAY+H), TE=d=>d==null?'':fx(d*DAY+E), FE=d=>d==null?'':st.finMsAm?T(d+1):TE(d);
+  const out=src.map(f=>{ const C={}; Object.entries(f.tables).forEach(([k,rows])=>{ if(Array.isArray(rows)) C[k]=rows.map(r=>({...r})); }); return {name:f.name,T:C}; });
+  const byName=new Map(out.map(o=>[o.name,o])), tb=(o,k)=>o.T[k]||(o.T[k]=[]);
+  const mx=(rows,k)=>rows.reduce((m,r)=>Math.max(m,+r[k]||0),0);
+  const gen=(o,k,f)=>{ const key='_n_'+k+f; if(o[key]==null) o[key]=mx(tb(o,k),f); return ++o[key]; };
+  let gTask=Math.max(0,...out.map(o=>mx(tb(o,'TASK'),'task_id')));
+  const projF=new Map();
+  st.projects.forEach(p=>{ let o=p.src&&byName.get(p.src.f); if(!o) o=out.find(o=>(o.T.PROJECT||[]).some(r=>r.proj_short_name===p.short)); if(!o) return;
+    const pr=(o.T.PROJECT||[]).find(r=>p.src&&String(r.proj_id)===String(p.src.pid))||(o.T.PROJECT||[]).find(r=>r.proj_short_name===p.short)||(o.T.PROJECT||[])[0];
+    const pid=pr?pr.proj_id:''; let root=p.srcWbs; if(root==null||!(o.T.PROJWBS||[]).some(w=>String(w.wbs_id)===String(root))){ const rw=(o.T.PROJWBS||[]).find(w=>w.proj_node_flag==='Y'&&String(w.proj_id)===String(pid)); root=rw?rw.wbs_id:''; }
+    projF.set(p.id,{o,pid,root}); });
+  // data date
+  out.forEach(o=>(o.T.PROJECT||[]).forEach(r=>{ r.last_recalc_date=fx(st.dd*DAY); if('next_data_date' in r) r.next_data_date=fx(st.dd*DAY); }));
+  // task ids
+  const tidOf=new Map(), keep=new Map(out.map(o=>[o.name,new Set()]));
+  st.acts.forEach(a=>{ const P=projF.get(a.proj); if(!P) return; const same=a.src&&a.src.f===P.o.name&&(P.o.T.TASK||[]).some(r=>String(r.task_id)===String(a.src.t));
+    const tid=same?a.src.t:String(++gTask); tidOf.set(a.id,{o:P.o,tid:String(tid),pid:P.pid,P}); keep.get(P.o.name).add(String(tid)); });
+  // calendars and WBS
+  const calId=(o,cal)=>{ const C=tb(o,'CALENDAR'); if(cal&&cal.src!=null&&C.some(r=>String(r.clndr_id)===String(cal.src))) return cal.src; if(!cal) return (C[0]||{}).clndr_id||'';
+    const ex=C.find(r=>r.clndr_name===cal.name); if(ex) return ex.clndr_id; const id=gen(o,'CALENDAR','clndr_id'); C.push({clndr_id:id,default_flag:'N',clndr_name:cal.name,day_hr_cnt:+cal.hrs||8,week_hr_cnt:(+cal.hrs||8)*(cal.work||[]).filter(Boolean).length}); return id; };
+  const wbsId=(o,P,wid)=>{ if(!wid) return P.root; const w=st.wbs.find(x=>x.id===wid); if(!w) return P.root; const W=tb(o,'PROJWBS');
+    let row=w.src!=null&&W.find(r=>String(r.wbs_id)===String(w.src));
+    if(row){ if(w.name!==w.name0) row.wbs_name=w.name; if(w.code!==w.code0) row.wbs_short_name=w.code; return row.wbs_id; }
+    const par=wbsId(o,P,w.parent), id=gen(o,'PROJWBS','wbs_id'); W.push({wbs_id:id,proj_id:P.pid,seq_num:w.seq||0,proj_node_flag:'N',wbs_short_name:w.code,wbs_name:w.name,parent_wbs_id:par}); w.src=id; w.name0=w.name; w.code0=w.code; return id; };
+  const calHrs=new Map(st.cals.map(c=>[c.id,+c.hrs||8])), byId=new Map(st.acts.map(a=>[a.id,a]));
+  // TASK rows
+  const deleted=new Map(out.map(o=>[o.name,new Set()]));
+  out.forEach(o=>{ o.T.TASK=(o.T.TASK||[]).filter(r=>{ if(r.task_type==='TT_WBS'||keep.get(o.name).has(String(r.task_id))) return true; deleted.get(o.name).add(String(r.task_id)); return false; }); });
+  st.acts.forEach(a=>{ const I=tidOf.get(a.id); if(!I) return; const r=res.R.get(a.id); if(!r) return; const o=I.o, hrs=calHrs.get(a.cal)||8, s=bStatus(a), fin=a.type==='finish', ms=a.type!=='task'||r.dur===0;
+    let row=(o.T.TASK||[]).find(x=>String(x.task_id)===I.tid); const isNew=!row; if(isNew){ row={task_id:I.tid,proj_id:I.pid}; o.T.TASK.push(row); }
+    const es=ms?(fin?FE(r.ef):T(r.es)):T(r.rs!=null&&s==='ip'?r.rs:r.es), ef=ms?(fin?FE(r.ef):T(r.es)):TE(r.ef), ls=ms?(fin?FE(r.lf):T(r.ls)):T(r.ls), lf=ms?(fin?FE(r.lf):T(r.ls)):TE(r.lf);
+    const cal=st.cals.find(c=>c.id===a.cal);
+    Object.assign(row,{wbs_id:wbsId(o,I.P,a.wbs),clndr_id:calId(o,cal),task_code:a.code,task_name:a.name,task_type:a.type==='start'?'TT_Mile':a.type==='finish'?'TT_FinMile':(row.task_type&&!/Mile/.test(row.task_type)?row.task_type:'TT_Task'),
+      target_drtn_hr_cnt:r.dur*hrs,driving_path_flag:r.tf!=null&&r.tf<=0?'Y':'N'});
+    const c0=a.src&&a.src.cstr; if(!(c0&&!isNew&&c0[0]===a.cstr&&c0[1]===a.cdate)) Object.assign(row,{cstr_type:CSTR_P6[a.cstr]||'',cstr_date:a.cstr&&a.cdate!=null?(a.cstr.startsWith('F')||a.cstr==='MFO'?TE(a.cdate):T(a.cdate)):''});
+    if(s==='cp') Object.assign(row,{status_code:'TK_Complete',phys_complete_pct:100,act_start_date:T(a.as),act_end_date:ms?(fin?FE(a.af):T(a.af)):TE(a.af),early_start_date:'',early_end_date:'',late_start_date:'',late_end_date:'',remain_drtn_hr_cnt:0,total_float_hr_cnt:'',free_float_hr_cnt:''});
+    else if(s==='ip') Object.assign(row,{status_code:'TK_Active',phys_complete_pct:a.pct!=null&&a.pct!==''?+a.pct:Math.round((1-(r.rem/(r.dur||1)))*100),act_start_date:T(a.as),act_end_date:'',early_start_date:es,early_end_date:ef,late_start_date:ls,late_end_date:lf,remain_drtn_hr_cnt:r.rem*hrs,total_float_hr_cnt:r.tf==null?'':r.tf*hrs,free_float_hr_cnt:r.ff==null?'':r.ff*hrs});
+    else Object.assign(row,{status_code:'TK_NotStart',phys_complete_pct:0,act_start_date:'',act_end_date:'',early_start_date:es,early_end_date:ef,late_start_date:ls,late_end_date:lf,remain_drtn_hr_cnt:r.dur*hrs,total_float_hr_cnt:r.tf==null?'':r.tf*hrs,free_float_hr_cnt:r.ff==null?'':r.ff*hrs,target_start_date:es,target_end_date:ef});
+    if(isNew&&s!=='ns'){ row.target_start_date=T(a.as); row.target_end_date=s==='cp'?TE(a.af):ef; }
+    if('restart_date' in row||'reend_date' in row){ row.restart_date=s==='cp'?'':es; row.reend_date=s==='cp'?'':ef; }
+    if(!isNew&&!row.duration_type) row.duration_type='DT_FixedDUR2'; if(isNew){ row.duration_type='DT_FixedDUR2'; row.complete_pct_type='CP_Phys'; } });
+  // cascade deletes into every task-keyed table
+  const allDel=new Set(); deleted.forEach(set=>set.forEach(t=>allDel.add(t)));
+  out.forEach(o=>{ const del=deleted.get(o.name); Object.keys(o.T).forEach(k=>{ if(k==='TASK') return; const rows=o.T[k]; if(!rows.length) return;
+      if(k==='TASKPRED') o.T[k]=rows.filter(r=>!del.has(String(r.task_id))&&!allDel.has(String(r.pred_task_id)));
+      else if(k==='UDFVALUE'){ const tt=new Set((o.T.UDFTYPE||[]).filter(u=>u.table_name==='TASK').map(u=>String(u.udf_type_id))); o.T[k]=rows.filter(r=>!(tt.has(String(r.udf_type_id))&&del.has(String(r.fk_id)))); }
+      else if('task_id' in rows[0]) o.T[k]=rows.filter(r=>!del.has(String(r.task_id))); }); });
+  // relationships: rebuild for our activities, reusing the original rows where the link is unchanged
+  out.forEach(o=>{ const old=new Map((o.T.TASKPRED||[]).map(r=>[`${r.task_id}|${r.pred_task_id}|${r.pred_type}`,r])), mine=new Set([...tidOf.values()].filter(I=>I.o===o).map(I=>I.tid)), rows=(o.T.TASKPRED||[]).filter(r=>!mine.has(String(r.task_id)));
+    st.acts.forEach(a=>{ const I=tidOf.get(a.id); if(!I||I.o!==o) return; const hrs=calHrs.get(a.cal)||8;
+      (res.preds.get(a.id)||[]).forEach(rel=>{ const Pq=tidOf.get(rel.p); if(!Pq) return; const type='PR_'+(rel.t||'FS'), k=`${I.tid}|${Pq.tid}|${type}`, ex=old.get(k);
+        const row=ex||{task_pred_id:gen(o,'TASKPRED','task_pred_id'),task_id:I.tid,pred_task_id:Pq.tid,proj_id:I.pid,pred_proj_id:Pq.pid,pred_type:type};
+        row.lag_hr_cnt=Math.round(+rel.lag||0)*hrs; rows.push(row); }); });
+    o.T.TASKPRED=rows; });
+  // resources
+  const rsId=(o,rs)=>{ if(rs.src&&rs.src[o.name]!=null) { const row=(o.T.RSRC||[]).find(r=>String(r.rsrc_id)===String(rs.src[o.name])); if(row){ if(rs.name!==rs.name0) row.rsrc_name=rs.name; row.rsrc_short_name=rs.short; } else tb(o,'RSRC').push({rsrc_id:rs.src[o.name],rsrc_short_name:rs.short,rsrc_name:rs.name,rsrc_type:rs.type}); return rs.src[o.name]; }
+    const ex=(o.T.RSRC||[]).find(r=>r.rsrc_short_name===rs.short); if(ex){ rs.src[o.name]=ex.rsrc_id; return ex.rsrc_id; }
+    const anyId=Object.values(rs.src||{})[0], used=(o.T.RSRC||[]).map(r=>String(r.rsrc_id)).concat((o.T.TASKRSRC||[]).map(r=>String(r.rsrc_id)));
+    const id=anyId!=null&&!used.includes(String(anyId))?anyId:used.reduce((m,v)=>Math.max(m,+v||0),0)+1;
+    tb(o,'RSRC').push({rsrc_id:id,rsrc_short_name:rs.short,rsrc_name:rs.name,rsrc_type:rs.type}); rs.src=rs.src||{}; rs.src[o.name]=id; return id; };
+  out.forEach(o=>{ const mine=new Map([...tidOf.entries()].filter(([,I])=>I.o===o).map(([id,I])=>[I.tid,id])), oldTr=new Map((o.T.TASKRSRC||[]).map(r=>[String(r.taskrsrc_id),r])), oldPc=new Map((o.T.PROJCOST||[]).map(r=>[String(r.cost_item_id),r]));
+    const tr=(o.T.TASKRSRC||[]).filter(r=>!mine.has(String(r.task_id))), pc=(o.T.PROJCOST||[]).filter(r=>!mine.has(String(r.task_id)));
+    mine.forEach((aid,tid)=>{ const a=byId.get(aid), I=tidOf.get(aid), r=res.R.get(aid), s=bStatus(a), hrs=calHrs.get(a.cal)||8; if(!r) return;
+      const rs0=s==='cp'?'':T(r.rs!=null&&s==='ip'?r.rs:r.es), re0=s==='cp'?'':TE(r.ef);
+      (a.asg||[]).forEach(x=>{ const rs=(st.rsrcs||[]).find(q=>q.id===x.r); if(!rs) return; let row=x.src!=null&&oldTr.get(String(x.src)); if(row&&String(row.task_id)!==tid) row=null;
+        if(!row){ row={taskrsrc_id:gen(o,'TASKRSRC','taskrsrc_id'),task_id:tid,proj_id:I.pid,rsrc_type:rs.type,target_start_date:T(a.as!=null?a.as:r.es),target_end_date:TE(r.ef)}; x.src=row.taskrsrc_id; }
+        const ot=Math.min(+x.ot||0,+x.au||0), otc=Math.min(+x.otc||0,+x.ac||0);
+        Object.assign(row,{rsrc_id:rsId(o,rs),target_qty:+x.bu||0,remain_qty:+x.ru||0,act_reg_qty:r2((+x.au||0)-ot),act_ot_qty:ot,cost_per_qty:+x.price||0,target_cost:r2(x.bc),remain_cost:r2(x.rc),act_reg_cost:r2((+x.ac||0)-otc),act_ot_cost:otc,
+          act_start_date:s!=='ns'?T(a.as):'',act_end_date:s==='cp'?TE(a.af):'',restart_date:rs0,reend_date:re0});
+        if(r.rem>0&&s!=='cp'&&'remain_qty_per_hr' in row) row.remain_qty_per_hr=r2((+x.ru||0)/(r.rem*hrs));
+        tr.push(row); });
+      (a.exp||[]).forEach(x=>{ let row=x.src!=null&&oldPc.get(String(x.src)); if(row&&String(row.task_id)!==tid) row=null;
+        if(!row){ row={cost_item_id:gen(o,'PROJCOST','cost_item_id'),task_id:tid,proj_id:I.pid,cost_load_type:'CL_Uniform',auto_compute_act_flag:'N'}; x.src=row.cost_item_id; }
+        Object.assign(row,{cost_name:x.name,target_cost:r2(x.bc),act_cost:r2(x.ac),remain_cost:r2(x.rc)}); pc.push(row); }); });
+    o.T.TASKRSRC=tr; o.T.PROJCOST=pc; });
+  // activity codes, chainage and notes — only where they changed
+  const chS=S.tld.src==='udf'?S.tld.udfS:null, chE=S.tld.src==='udf'?(S.tld.udfE||S.tld.udfS):null;
+  st.acts.forEach(a=>{ const I=tidOf.get(a.id); if(!I) return; const o=I.o, isNew=!(a.src&&a.src.f===o.name&&String(a.src.t)===I.tid);
+    if(isNew||JSON.stringify(a.codes||{})!==a.src.codes){ o.T.TASKACTV=(o.T.TASKACTV||[]).filter(r=>String(r.task_id)!==I.tid);
+      Object.entries(a.codes||{}).forEach(([tn,v])=>{ if(v==null||v==='') return; const TY=tb(o,'ACTVTYPE'), CO=tb(o,'ACTVCODE'); let ty=TY.find(t=>t.actv_code_type===tn);
+        if(!ty){ ty={actv_code_type_id:gen(o,'ACTVTYPE','actv_code_type_id'),actv_code_type:tn,seq_num:TY.length+1,actv_short_len:20,proj_id:'',actv_code_type_scope:'AS_Global'}; TY.push(ty); }
+        let co=CO.find(c=>String(c.actv_code_type_id)===String(ty.actv_code_type_id)&&(c.short_name||c.actv_code_name)===v);
+        if(!co){ const def=(st.codeTypes.find(t=>t.name===tn)||{values:[]}).values.find(x=>x.short===v); co={actv_code_id:gen(o,'ACTVCODE','actv_code_id'),parent_actv_code_id:'',actv_code_type_id:ty.actv_code_type_id,actv_code_name:def&&def.name||v,short_name:v,seq_num:CO.length+1,color:''}; CO.push(co); }
+        tb(o,'TASKACTV').push({task_id:I.tid,actv_code_type_id:ty.actv_code_type_id,actv_code_id:co.actv_code_id,proj_id:I.pid}); }); }
+    const ch=a.src&&!isNew?a.src.ch:[null,null];
+    [[0,chS,a.ch0],[1,chE,a.ch1]].forEach(([i,lab,v])=>{ if(!lab||(v??null)===(ch[i]??null)) return; const UT=tb(o,'UDFTYPE'); let ut=UT.find(u=>u.table_name==='TASK'&&(u.udf_type_label||u.udf_type_name)===lab);
+      if(!ut){ ut={udf_type_id:gen(o,'UDFTYPE','udf_type_id'),table_name:'TASK',udf_type_name:'user_field_'+(UT.length+900),udf_type_label:lab,logical_data_type:'FT_FLOAT_2_DECIMALS'}; UT.push(ut); }
+      const UV=tb(o,'UDFVALUE'); o.T.UDFVALUE=UV.filter(r=>!(String(r.udf_type_id)===String(ut.udf_type_id)&&String(r.fk_id)===I.tid)); if(v!=null&&v!=='') o.T.UDFVALUE.push({udf_type_id:ut.udf_type_id,fk_id:I.tid,proj_id:I.pid,udf_date:'',udf_number:v,udf_text:''}); });
+    const n0=a.src&&!isNew?a.src.note||'':'', n1=a.note||'';
+    if(n1!==n0||(isNew&&n1)){ const TM=tb(o,'TASKMEMO'); let row=a.src&&!isNew&&a.src.memo!=null&&TM.find(m=>String(m.memo_id)===String(a.src.memo));
+      if(!n1){ if(row) o.T.TASKMEMO=TM.filter(m=>m!==row); }
+      else if(row) row.task_memo=memoHtml(n1);
+      else { const MT=tb(o,'MEMOTYPE'); let mt=MT[0]; if(!mt){ mt={memo_type_id:gen(o,'MEMOTYPE','memo_type_id'),seq_num:1,eps_flag:'N',proj_flag:'N',wbs_flag:'N',task_flag:'Y',memo_type:'Notes'}; MT.push(mt); }
+        TM.push({memo_id:gen(o,'TASKMEMO','memo_id'),task_id:I.tid,memo_type_id:mt.memo_type_id,proj_id:I.pid,task_memo:memoHtml(n1)}); } } });
+  return out.map(o=>({name:o.name,tables:o.T}));
+}
+/* ---- sample data: crews with rates, materials expenses and a few notebook notes ---- */
+function spEnrich(T,defs){
+  const H=c=>[...String(c)].reduce((h,ch)=>(h*31+ch.charCodeAt(0))>>>0,7), tasks=new Map((T.TASK||[]).map(t=>[String(t.task_id),t]));
+  const used=new Set((T.TASKRSRC||[]).map(r=>String(r.rsrc_id)));
+  T.RSRC=[...used].map(id=>{ const d=defs[id]||['R'+id,'Resource '+id]; return {rsrc_id:id,rsrc_short_name:d[0]+'-CREW',rsrc_name:d[1]+' crew',rsrc_type:'RT_Labor',unit_id:''}; });
+  const price=id=>80+(+id%7)*9;
+  T.RSRCRATE=[...used].map((id,i)=>({rsrc_rate_id:+id*10+1,rsrc_id:id,cost_per_qty:price(id),start_date:'2025-01-01 00:00'}));
+  const prog=t=>t.status_code==='TK_Complete'?1:t.status_code==='TK_Active'?Math.min(.99,(+t.phys_complete_pct||0)/100):0;
+  (T.TASKRSRC||[]).forEach(r=>{ const t=tasks.get(String(r.task_id)); if(!t) return; const q=+r.target_qty||0, p=price(r.rsrc_id), k=prog(t), au=Math.round(q*k), ru=q-au;
+    Object.assign(r,{rsrc_type:'RT_Labor',cost_per_qty:p,remain_qty:ru,act_reg_qty:au,act_ot_qty:0,target_cost:q*p,remain_cost:ru*p,act_reg_cost:au*p,act_ot_cost:0,
+      target_start_date:t.target_start_date,target_end_date:t.target_end_date,act_start_date:t.act_start_date||'',act_end_date:t.act_end_date||'',restart_date:t.status_code==='TK_Complete'?'':t.early_start_date,reend_date:t.status_code==='TK_Complete'?'':t.early_end_date}); });
+  T.PROJCOST=[]; T.TASKMEMO=[]; T.MEMOTYPE=[{memo_type_id:1,seq_num:1,eps_flag:'N',proj_flag:'N',wbs_flag:'N',task_flag:'Y',memo_type:'Notes'}];
+  const NOTES=['Access permit needed two weeks before start.','Night possession required for the critical works.','Long-lead materials ordered; confirm delivery slot with the supplier.','Hold point: client sign-off before the next stage.'];
+  (T.TASK||[]).forEach(t=>{ const h=H(t.task_code), d=(+t.target_drtn_hr_cnt||0)/8, k=prog(t); if(t.task_type!=='TT_Task'||!d) return;
+    if(h%3===0){ const bc=Math.round(d*(1200+h%9*150)/100)*100, ac=Math.round(bc*k); T.PROJCOST.push({cost_item_id:+t.task_id*10+3,acct_id:'',proj_id:t.proj_id,task_id:t.task_id,cost_type_id:'',cost_name:'Materials & plant',target_cost:bc,act_cost:ac,remain_cost:bc-ac,cost_load_type:'CL_Uniform',auto_compute_act_flag:'N'}); }
+    if(h%7===0) T.TASKMEMO.push({memo_id:+t.task_id*10+7,task_id:t.task_id,memo_type_id:1,proj_id:t.proj_id,task_memo:memoHtml(NOTES[h%NOTES.length])}); });
+  return T;
 }
 
 /* ---------- editor state ---------- */
@@ -2648,7 +2879,7 @@ function bBlank(){
 function bLoad(){ try{ const s=localStorage.getItem('pacer.builder'); if(s){ B.st=JSON.parse(s); B.res=bCompute(B.st); } }catch(_){ B.st=null; } }
 function bSave(){ clearTimeout(B.saveT); B.saveT=setTimeout(()=>{ try{ localStorage.setItem('pacer.builder',JSON.stringify(B.st)); }catch(_){ bToastMsg('This schedule is too large to keep in browser storage. Use Save file to keep a copy.'); } },400); }
 function bPush(){ B.undo.push(JSON.stringify(B.st)); if(B.undo.length>60) B.undo.shift(); B.redo=[]; }
-function bChanged(opts={}){ B.res=bCompute(B.st); bSave(); bRenderAll(); if(B.st.sync){ clearTimeout(B.syncT); B.syncT=setTimeout(bSyncWorkbench,900); } }
+function bChanged(opts={}){ B.res=bCompute(B.st); if(B.st.upd) updRsAuto(B.st,B.res); bSave(); bRenderAll(); if(B.st.sync){ clearTimeout(B.syncT); B.syncT=setTimeout(bSyncWorkbench,900); } }
 function bSyncWorkbench(){ if(!B.st||!B.res) return; S.files=S.files.filter(f=>!f.builder&&!f.sample).map(f=>({...f,role:f.error?f.role:'off'})).concat(bToFiles()); rebuild(false); }
 function bToastMsg(t){ B.toast=t; const el=document.getElementById('bToast'); if(el){ el.textContent=t; el.hidden=!t; clearTimeout(el._t); if(t) el._t=setTimeout(()=>{ el.hidden=true; },6000); } }
 const bAct=id=>B.st.acts.find(a=>a.id===id);
@@ -2684,7 +2915,7 @@ function bRowsBuild(){
   const kids=new Map(); st.wbs.forEach(w=>kids.set(w.id,[])); st.wbs.forEach(w=>{ if(w.parent&&kids.has(w.parent)) kids.get(w.parent).push(w.id); });
   const actsUnder=id=>{ const out=st.acts.filter(a=>a.wbs===id); (kids.get(id)||[]).forEach(k=>out.push(...actsUnder(k))); return out; };
   B.sum=new Map();
-  const sm=list=>{ let s=Infinity,f=-Infinity,tf=Infinity,bs=Infinity,bf=-Infinity; list.forEach(a=>{ const r=B.res.R.get(a.id); if(!r) return; s=Math.min(s,r.es); f=Math.max(f,r.ef); if(r.tf!=null) tf=Math.min(tf,r.tf); const b=st.baseline&&st.baseline.R[a.id]; if(b){ bs=Math.min(bs,b.es); bf=Math.max(bf,b.ef); } }); return {s,f,tf:tf===Infinity?null:tf,bs,bf,n:list.length}; };
+  const sm=list=>{ let s=Infinity,f=-Infinity,tf=Infinity,bs=Infinity,bf=-Infinity; list.forEach(a=>{ const r=B.res.R.get(a.id); if(!r) return; s=Math.min(s,r.es); f=Math.max(f,r.ef); if(r.tf!=null) tf=Math.min(tf,r.tf); const b=st.baseline&&st.baseline.R[a.id]; if(b){ bs=Math.min(bs,b.es); bf=Math.max(bf,b.ef); } }); return {s,f,tf:tf===Infinity?null:tf,bs,bf,n:list.length,cost:bCostTot(list)}; };
   st.wbs.forEach(w=>B.sum.set(w.id,sm(actsUnder(w.id))));
   st.projects.forEach(p=>B.sum.set(p.id,sm(st.acts.filter(a=>a.proj===p.id))));
 }
@@ -2696,8 +2927,10 @@ function bCols(){
     {k:'preds',l:'Predecessors',w:180},{k:'succs',l:'Successors',w:150,ro:1},{k:'tf',l:'Total float',w:72,r:1,ro:1},{k:'ff',l:'Free float',w:70,r:1,ro:1},
     {k:'cal',l:'Calendar',w:120,opts:cals},{k:'cstr',l:'Constraint',w:130,opts:CSTR},{k:'cdate',l:'Constraint date',w:100,r:1,date:1},
     {k:'as',l:'Actual start',w:96,r:1,date:1},{k:'af',l:'Actual finish',w:96,r:1,date:1},{k:'rem',l:'Remaining (d)',w:86,r:1,num:1},{k:'pct',l:'% complete',w:76,r:1,num:1},
+    {k:'res',l:'Resources',w:150,ro:1,dlg:1},{k:'bcost',l:'Budget cost',w:96,r:1,ro:1,dlg:1},{k:'acost',l:'Actual cost',w:96,r:1,ro:1,dlg:1},{k:'rcost',l:'Remaining cost',w:100,r:1,ro:1,dlg:1},{k:'eac',l:'At completion',w:100,r:1,ro:1,dlg:1},
+    {k:'note',l:'Notes',w:200},
     {k:'ch0',l:'Chainage from',w:90,r:1,num:1},{k:'ch1',l:'Chainage to',w:86,r:1,num:1}];
-  if(B.st.upd){ const pk=['as','af','rem','pct','dur','type'], pc=pk.map(k=>cols.find(c=>c.k===k)); pk.forEach(k=>cols.splice(cols.findIndex(c=>c.k===k),1)); cols.splice(cols.findIndex(c=>c.k==='finish')+1,0,...pc); }
+  if(B.st.upd){ const pk=['as','af','rem','pct','dur','type','res','acost','rcost','eac'], pc=pk.map(k=>cols.find(c=>c.k===k)); pk.forEach(k=>cols.splice(cols.findIndex(c=>c.k===k),1)); cols.splice(cols.findIndex(c=>c.k==='finish')+1,0,...pc); }
   B.st.codeTypes.forEach(t=>cols.push({k:'code:'+t.name,l:t.name,w:120,opts:[['','—']].concat(t.values.map(v=>[v.short,v.name&&v.name!==v.short?`${v.short} · ${v.name}`:v.short]))}));
   return cols;
 }
@@ -2707,6 +2940,7 @@ function bCellText(row,c){
     if(c.k==='code') return row.t==='p'?row.p.short:row.w.code; if(c.k==='name') return row.t==='p'?row.p.name:row.w.name;
     if(c.k==='start') return isFinite(sm.s)?fmtDay(sm.s):''; if(c.k==='finish') return isFinite(sm.f)?fmtDay(sm.f):'';
     if(c.k==='tf') return sm.tf==null?'':String(sm.tf); if(c.k==='dur'&&isFinite(sm.s)) return String(Math.max(0,sm.f-sm.s+1))+'c';
+    if(sm.cost&&sm.cost.n&&['bcost','acost','rcost','eac'].includes(c.k)) return money(sm.cost[{bcost:'bc',acost:'ac',rcost:'rc',eac:'eac'}[c.k]]);
     return ''; }
   const a=row.a, r=B.res.R.get(a.id);
   switch(c.k){
@@ -2719,6 +2953,8 @@ function bCellText(row,c){
     case 'cdate': return fmtDay(a.cdate); case 'as': return fmtDay(a.as); case 'af': return fmtDay(a.af);
     case 'rem': return r&&r.status==='ip'?String(r.rem):a.rem!=null?String(a.rem):''; case 'pct': return a.pct!=null&&a.pct!==''?a.pct+'%':r&&r.status==='cp'?'100%':'';
     case 'ch0': return a.ch0==null?'':String(a.ch0); case 'ch1': return a.ch1==null?'':String(a.ch1);
+    case 'res': return bResText(a); case 'note': return (a.note||'').replace(/\s+/g,' ');
+    case 'bcost': case 'acost': case 'rcost': case 'eac': { if(!(a.asg&&a.asg.length)&&!(a.exp&&a.exp.length)) return ''; const k=bCostOf(a); return money(k[{bcost:'bc',acost:'ac',rcost:'rc',eac:'eac'}[c.k]]); }
   }
   if(c.k.startsWith('code:')) return (a.codes||{})[c.k.slice(5)]||'';
   return '';
@@ -2746,6 +2982,7 @@ function bCommit(row,c,val){
   else if(c0==='as'||c0==='af'){ if(!val){ bPush(); a[c0]=null; if(c0==='as') a.af=null; } else { const d=parseDay(val); if(d==null) return bToastMsg('Type a date like 2026-11-03 or 3 Nov 26.'); if(d>=st.dd+1&&c0==='af') return bToastMsg('An actual finish must be on or before the data date.'); if(d>st.dd&&c0==='as') return bToastMsg('An actual start must be on or before the data date.'); bPush(); a[c0]=d; if(c0==='af'&&a.as==null) a.as=r?Math.min(r.es,d):d; if(c0==='af'){ a.rem=null; a.pct=100; } } }
   else if(c0==='rem'){ const n=val===''?null:Math.round(+val); if(n!=null&&(!isFinite(n)||n<0)) return; bPush(); a.rem=n; if(n!=null&&a.as==null) a.as=Math.min(r?r.es:st.dd,st.dd); }
   else if(c0==='pct'){ const n=val===''?null:Math.max(0,Math.min(100,Math.round(parseFloat(val)))); bPush(); a.pct=n; if(n!=null&&n>0&&a.as==null) a.as=Math.min(r?r.es:st.dd,st.dd); if(n===100&&a.af==null){ a.af=Math.min(st.dd,r?Math.max(r.ef,a.as):st.dd); } if(n!=null&&n<100){ a.af=null; a.rem=Math.max(1,Math.round(bDur(a)*(1-n/100))); } }
+  else if(c0==='note'){ bPush(); a.note=val; }
   else if(c0==='ch0'||c0==='ch1'){ const n=val===''?null:parseFloat(val); bPush(); a[c0]=isFinite(n)?n:null; }
   else if(c0.startsWith('code:')){ bPush(); a.codes=a.codes||{}; if(val) a.codes[c0.slice(5)]=val; else delete a.codes[c0.slice(5)]; }
   bChanged();
@@ -2771,7 +3008,7 @@ function bShell(){
         <input type="file" id="bOpen2" accept=".json,application/json" hidden></div>
       <div class="btr"><div class="sg"><button data-ba="act">+ Activity</button><button data-ba="ms">+ Milestone</button><button data-ba="wbs">+ WBS</button><button data-ba="proj">+ Project</button></div>
         <div class="sg"><button data-ba="up" title="Move up (Alt+↑)">↑</button><button data-ba="down" title="Move down (Alt+↓)">↓</button><button data-ba="out" title="Outdent WBS (Alt+←)">⇤</button><button data-ba="in" title="Indent WBS (Alt+→)">⇥</button><button data-ba="link" title="Link to the activity above (FS)">Link ↑</button><button data-ba="del" title="Delete row (Ctrl+Delete)">Delete</button></div>
-        <div class="sg"><button data-ba="cals">Calendars</button><button data-ba="codes">Codes</button></div>
+        <div class="sg"><button data-ba="cals">Calendars</button><button data-ba="codes">Codes</button><button data-ba="rsrc" title="Resource dictionary">Resources</button><button data-ba="asg" title="Resources, costs and notes for the selected activity">Costs &amp; notes</button></div>
         <button class="btn sm bai-btn" data-ba="ai">✦ AI build</button>
         <span class="bsp"></span>
         <label class="tg"><input type="checkbox" id="bLinks" checked> Links</label>
@@ -2787,7 +3024,7 @@ function bShell(){
     <div class="btoast" id="bToast" hidden></div>
     <div class="colpanel card bdlg" id="bDlg" hidden></div>
     <div class="note">Type predecessors as <code>A1010</code>, <code>A1010SS+5</code>, <code>A1020FF-2</code> or <code>PRJ-02:B2000</code> for another project. Typing a start date on an unstarted activity adds a "Start on or after" constraint. On the Gantt, drag a bar to move it, drag its right end to change duration, and drag from the dot to another bar to link them. Enter edits, Tab moves right, Ctrl+Z undoes.</div>`;
-  bWireShell(); updWireBar();
+  bWireShell(); updWireBar(); bWireRs();
 }
 function bRenderAll(){
   if(!B.st||document.getElementById('buildWrap').hidden||!document.getElementById('bGrid')) return;
@@ -2803,9 +3040,11 @@ function bRenderAll(){
     <span><b class="acc">${res.crit}</b> critical</span>
     ${res.loops.length?`<span class="late"><b>Loop in logic:</b> ${esc(res.loops.slice(0,8).join(', '))}${res.loops.length>8?'…':''}. These activities were not scheduled.</span>`:''}
     ${res.openEnds.length?`<span title="${esc(res.openEnds.map(o=>o.code+' '+o.why).join('\n'))}"><b>${res.openEnds.length}</b> open ends</span>`:''}
+    ${(()=>{ const t=bCostTot(st.acts); return t.n?`<span>Budget <b>${moneyK(t.bc)}</b> · actual <b>${moneyK(t.ac)}</b> · at completion <b>${moneyK(t.eac)}</b>${t.bc?` <em class="${dCls(Math.round(t.eac-t.bc))}">${t.eac===t.bc?'on budget':(t.eac>t.bc?'+':'−')+moneyK(Math.abs(t.eac-t.bc))+' vs budget'}</em>`:''}</span>`:''; })()}
     <span>${st.baseline?`Baseline captured ${fmtL(st.baseline.at)}`:'No baseline yet'}</span>
     <span>${st.sync?'<span class="pill">Live in Workbench</span>':''}</span>`;
   updRenderBar(); bRenderGrid(); bDrawGantt();
+  const dl=document.getElementById('bDlg'); if(dl&&!dl.hidden&&['asg','rsrc'].includes(dl.dataset.kind)&&!dl.contains(document.activeElement)) bRenderRsDialog();
 }
 function bRenderGrid(){
   const cols=bCols(), head=document.getElementById('bGHead'), body=document.getElementById('bGBody'), rowsEl=document.getElementById('bGRows'), sp=document.getElementById('bGSp');
@@ -2921,7 +3160,7 @@ function bUndo(){ if(!B.undo.length) return; B.redo.push(JSON.stringify(B.st)); 
 function bRedo(){ if(!B.redo.length) return; B.undo.push(JSON.stringify(B.st)); B.st=JSON.parse(B.redo.pop()); B.edit=null; bChanged(); }
 function bCapture(){ const st=B.st; bPush(); st.baseline={at:Date.now(),dd:st.dd,R:bSnapshot(st,B.res),acts:JSON.parse(JSON.stringify(st.acts)),rels:JSON.parse(JSON.stringify(st.rels)),projects:JSON.parse(JSON.stringify(st.projects)),wbs:JSON.parse(JSON.stringify(st.wbs)),cals:JSON.parse(JSON.stringify(st.cals))}; bChanged(); bToastMsg('Baseline captured. Grey bars now show it, and variance appears across the Workbench once you use the schedule there.'); }
 function bUse(){ const st=B.st; if(B.res.loops.length) return bToastMsg('Fix the loop in the logic first.'); st.sync=true; bSave(); S.files=S.files.filter(f=>!f.builder&&!f.sample).map(f=>({...f,role:f.error?f.role:'off'})).concat(bToFiles()); rebuild(true); bRenderAll(); bToastMsg(st.upd?'Previewing the update in every tab. Nothing is saved until you choose Save as Update.':'This schedule now drives every tab. Edits here update the Workbench automatically.'); }
-function bStartEdit(selectAll,initial){ const row=bSelRow(); if(!row) return; const c=bCols().find(x=>x.k===B.sel.c); if(!c||c.ro) return; if(row.t!=='a'&&!['code','name'].includes(c.k)) return; if(row.t==='a'&&B.res.R.get(row.a.id)&&false) return;
+function bStartEdit(selectAll,initial){ const row=bSelRow(); if(!row) return; const c=bCols().find(x=>x.k===B.sel.c); if(c&&c.dlg){ if(row.t==='a') bAsgOpen(row.a.id); return; } if(!c||c.ro) return; if(row.t!=='a'&&!['code','name'].includes(c.k)) return; if(row.t==='a'&&B.res.R.get(row.a.id)&&false) return;
   B.edit={r:B.sel.r,c:c.k,val:initial!=null?initial:bEditValue(row,c),fresh:true,sel:!!selectAll&&initial==null}; bRenderGrid(); }
 function bFinishEdit(save,move){ const e=B.edit; if(!e) return; B.edit=null; const row=B.rows[e.r], c=bCols().find(x=>x.k===e.c); if(save&&row&&c&&String(e.val)!==String(bEditValue(row,c))) bCommit(row,c,e.val); else bRenderGrid();
   if(move){ const cols=bCols().map(x=>x.k); if(move==='down') B.sel.r=Math.min(B.rows.length-1,B.sel.r+1); if(move==='right'){ const i=cols.indexOf(B.sel.c); B.sel.c=cols[Math.min(cols.length-1,i+1)]; } if(move==='left'){ const i=cols.indexOf(B.sel.c); B.sel.c=cols[Math.max(0,i-1)]; } bScrollIntoView(B.sel.r); bRenderGrid(); bDrawGantt(); }
@@ -2933,7 +3172,7 @@ function bXerText(){ return bToXer(B.st,B.res,'live').map(f=>f.text).join('').re
 function bCsv(){ const cols=bCols().filter(c=>c.k!=='succs'), q=v=>`"${String(v??'').replace(/"/g,'""')}"`; const lines=[['Project','WBS'].concat(cols.map(c=>c.l)).map(q).join(',')];
   B.rows.forEach(row=>{ if(row.t!=='a') return; const p=B.st.projects.find(x=>x.id===row.a.proj), w=B.st.wbs.find(x=>x.id===row.a.wbs); lines.push([p?p.short:'',w?w.code:''].concat(cols.map(c=>bCellText(row,c))).map(q).join(',')); }); return lines.join('\n'); }
 function bDialog(kind){ const el=document.getElementById('bDlg'); if(!el.hidden&&el.dataset.kind===kind){ el.hidden=true; return; } el.dataset.kind=kind; el.hidden=false; bRenderDialog(); }
-function bRenderDialog(){ const el=document.getElementById('bDlg'), st=B.st, kind=el.dataset.kind; if(el.hidden) return;
+function bRenderDialog(){ const el=document.getElementById('bDlg'), st=B.st, kind=el.dataset.kind; if(el.hidden) return; el.classList.toggle('wide',['asg','rsrc'].includes(kind)); if(bRenderRsDialog()) return;
   const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   if(kind==='cals') el.innerHTML=`<div class="cph"><strong>Calendars</strong><span class="sp"></span><button class="btn sm" data-bd="addcal">Add calendar</button><button class="fx" data-bd="close" aria-label="Close">×</button></div>
     <div class="bcals">${st.cals.map(c=>`<div class="bcal"><div class="bcr"><input data-calf="name" data-cal="${c.id}" value="${esc(c.name)}" aria-label="Calendar name"><label class="bdef"><input type="radio" name="bdefc" data-caldef="${c.id}" ${st.defCal===c.id?'checked':''}> Default</label><button class="link" data-caldel="${c.id}">Delete</button></div>
@@ -2954,7 +3193,7 @@ function bWireShell(){
   document.getElementById('bLinks').addEventListener('change',e=>{ B.links=e.target.checked; bDrawGantt(); });
   host.querySelector('.btool').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const a=b.dataset.ba, z=b.dataset.bz;
     if(z){ if(z==='fit') bFit(); else { const W=document.getElementById('bGantt').clientWidth, mid=B.t0+(B.offX+W/2)/B.ppd; B.ppd=Math.max(0.15,Math.min(60,B.ppd*(z==='in'?1.6:1/1.6))); B.offX=(mid-B.t0)*B.ppd-W/2; bDrawGantt(); } return; }
-    ({undo:bUndo,redo:bRedo,act:()=>bAddAct('act'),ms:()=>bAddAct('ms'),wbs:bAddWbs,proj:bAddProj,up:()=>bMove(-1),down:()=>bMove(1),out:()=>bIndent(-1),in:()=>bIndent(1),link:bLinkUp,del:bDelete,cals:()=>bDialog('cals'),codes:()=>bDialog('codes'),base:bCapture,use:bUse,ai:baOpen}[a]||(()=>{}))(); });
+    ({undo:bUndo,redo:bRedo,act:()=>bAddAct('act'),ms:()=>bAddAct('ms'),wbs:bAddWbs,proj:bAddProj,up:()=>bMove(-1),down:()=>bMove(1),out:()=>bIndent(-1),in:()=>bIndent(1),link:bLinkUp,del:bDelete,cals:()=>bDialog('cals'),codes:()=>bDialog('codes'),rsrc:()=>bDialog('rsrc'),asg:()=>{ const row=bSelRow(); if(row&&row.t==='a') bAsgOpen(row.a.id); else bToastMsg('Select an activity first.'); },base:bCapture,use:bUse,ai:baOpen}[a]||(()=>{}))(); });
   document.getElementById('bMenu').addEventListener('change',async e=>{ const v=e.target.value; e.target.value='';
     if(v==='new'){ bPush(); const keep=B.undo; B.st=bBlank(); B.undo=keep; B.t0=0; bChanged(); bToastMsg('New blank schedule. Ctrl+Z brings back the previous one.'); }
     else if(v==='model'){ if(!M||!M.live.acts.size) return bToastMsg('Load an XER in Files first.'); bPush(); const keep=B.undo; bImportModel(); B.undo=keep; }
@@ -3024,7 +3263,7 @@ function bWireShell(){
     if(t.dataset.code!=null){ const ty=st.codeTypes[+t.dataset.code]; bPush(); if(t.dataset.codef==='name'){ const old=ty.name; ty.name=t.value.trim()||old; st.acts.forEach(a=>{ if(a.codes&&a.codes[old]!=null){ a.codes[ty.name]=a.codes[old]; if(old!==ty.name) delete a.codes[old]; } }); } else ty.values=t.value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{ const [s,...rest]=l.split(','); return {short:s.trim(),name:rest.join(',').trim()||s.trim()}; }); bChanged(); } });
   new ResizeObserver(()=>requestAnimationFrame(()=>{ if(!B.st||!document.getElementById('bGrid')) return; bRenderGrid(); bDrawGantt(); })).observe(document.getElementById('bWrapIn'));
 }
-function bModelState(){ const st=bFromSet(M.live,M.dd);
+function bModelState(){ const st=bFromSet(M.live,M.dd,S.files.filter(f=>!f.error&&f.role==='live'));
   if(M.base.acts.size){ const bs=bFromSet(M.base,M.bdd), bres=bCompute(bs), psh=new Map(st.projects.map(p=>[p.id,p.short])), byCode=new Map(st.acts.map(a=>[psh.get(a.proj)+'|'+a.code,a.id])), R={};
     bs.acts.forEach(a=>{ const id=byCode.get((bs.projects.find(p=>p.id===a.proj)||{}).short+'|'+a.code); const r=bres.R.get(a.id); if(id&&r) R[id]={es:r.es,ef:r.ef,ls:r.ls,lf:r.lf,tf:r.tf,ff:r.ff,dur:r.dur}; });
     const keep=new Set(Object.keys(R)); st.baseline={at:M.bdd||Date.now(),dd:dayOf(M.bdd||Date.now()),R,acts:st.acts.filter(a=>keep.has(a.id)).map(a=>({...a,as:null,af:null,rem:null,pct:null})),rels:st.rels.filter(r=>keep.has(r.p)&&keep.has(r.s)),projects:st.projects,wbs:st.wbs,cals:st.cals}; }
@@ -5238,7 +5477,7 @@ function spFiles(key,ppKey,opt){
       txt+=tbl('TASKACTV',['task_id','actv_code_type_id','actv_code_id','proj_id'],tav);
       if(udf.length) txt+=tbl('UDFVALUE',['udf_type_id','fk_id','proj_id','udf_date','udf_number','udf_text'],udf);
       txt+='%E\n';
-      const T=parseXER(txt), name=L?`${P.short}_UP${opt.up||'09'}_${dl.getUTCDate()}${MON[dl.getUTCMonth()]}${String(dl.getUTCFullYear()).slice(2)}.xer`:`${P.short}_Baseline_BL01.xer`;
+      const T=spEnrich(parseXER(txt),Object.fromEntries(D.ctr.map((c,i)=>[600+i,c]))), name=L?`${P.short}_UP${opt.up||'09'}_${dl.getUTCDate()}${MON[dl.getUTCMonth()]}${String(dl.getUTCFullYear()).slice(2)}.xer`:`${P.short}_Baseline_BL01.xer`;
       out.push({id:uid(),name,role:L?'live':'baseline',tables:T,info:fileInfo(T)});
     });
   }
@@ -5352,7 +5591,8 @@ function updStats(){
   const deleted=Object.keys(u.p0).filter(id=>!ids.has(id)).length;
   const fin=B.res.finish, mv=fin!=null&&u.prevFinish!=null?fin-u.prevFinish:null;
   const bl=st.baseline?Object.values(st.baseline.R).reduce((m,x)=>Math.max(m,x.ef),-Infinity):null, vb=fin!=null&&bl!=null&&isFinite(bl)?fin-bl:null;
-  return {due,done,needs,comp,started,added,deleted,fin,mv,vb,crit:B.res.crit,loops:B.res.loops.length};
+  const c=bCostTot(st.acts);
+  return {due,done,needs,comp,started,added,deleted,fin,mv,vb,crit:B.res.crit,loops:B.res.loops.length,cost:c.n||u.costs?{spent:c.ac-(u.ac0||0),eac:c.eac,dEac:c.eac-(u.eac0||0),bc:c.bc}:null};
 }
 
 async function updStart(pid){
@@ -5378,9 +5618,11 @@ async function updStart(pid){
 }
 function updBegin(p,per,n,newDD,plan){
   const st=bModelState(), res0=bCompute(st), f0={}, p0={};
-  st.acts.forEach(a=>{ const r=res0.R.get(a.id); if(r) f0[a.id]=[r.status==='ip'?r.rs:r.es,a.type==='start'?r.es:r.ef,r.status,r.es]; p0[a.id]=updProg(a); });
+  st.acts.forEach(a=>{ const r=res0.R.get(a.id); if(r) f0[a.id]=[r.status==='ip'?r.rs:r.es,a.type==='start'?r.es:r.ef,r.status,r.es,r.rem]; p0[a.id]=updProg(a);
+    (a.asg||[]).forEach(x=>{ x.u0=[x.au,x.ru,x.ac,x.rc]; x.man=false; }); (a.exp||[]).forEach(x=>{ x.u0=[x.ac,x.rc]; x.man=false; }); });
+  const c0=bCostTot(st.acts);
   st.upd={pid:p.id,perId:per.id,perLabel:per.label,projName:p.name,prevDD:st.dd,n,baseRefs:(per.files||[]).filter(f=>f.role==='baseline').map(f=>({h:f.h,name:f.name,role:f.role})),
-    liveNames:(per.files||[]).filter(f=>f.role==='live').map(f=>f.name),f0,p0,prevFinish:res0.finish,view:'due',startedAt:Date.now()};
+    liveNames:(per.files||[]).filter(f=>f.role==='live').map(f=>f.name),liveRefs:(per.files||[]).filter(f=>f.role==='live').map(f=>({h:f.h,name:f.name,role:f.role})),ac0:c0.ac,eac0:c0.eac,costs:c0.n>0,f0,p0,prevFinish:res0.finish,view:'due',startedAt:Date.now()};
   st.name=`${p.name} · Update ${updPad(n)}`; st.dd=newDD; st.sync=false;
   st.finMsAm=[...M.live.acts.values()].some(a=>a.type==='TT_FinMile'&&a.f!=null&&(a.f%DAY)<=8*HR); // keep the source files' finish-milestone time convention
   const k=plan?updPlanned(st):0;
@@ -5413,6 +5655,7 @@ function updRenderBar(){
     <button class="btn sm" data-ua="plan" title="Progress every activity you haven’t touched as the last update forecast, up to the data date" ${s.needs?'':'disabled'}>Status the rest as planned</button>
     <span class="bu-s"><span><b>${s.done}</b> of ${s.due} statused${s.needs?` · <span class="amber">${s.needs} to do</span>`:''}</span><span><b>${s.comp}</b> finished · <b>${s.started}</b> started</span>
       <span>Finish <b>${fin}</b>${s.mv!=null?` <em class="${dCls(s.mv)}">${s.mv===0?'no change':dS(s.mv)+' vs last update'}</em>`:''}${s.vb!=null?` <em class="${dCls(s.vb)}">${dS(s.vb)} vs baseline</em>`:''}</span>
+      ${s.cost?`<span>Spent this period <b>${moneyK(s.cost.spent)}</b> · at completion <b>${moneyK(s.cost.eac)}</b>${Math.round(s.cost.dEac)?` <em class="${dCls(Math.round(s.cost.dEac))}">${s.cost.dEac>0?'+':'−'}${moneyK(Math.abs(s.cost.dEac))} vs last update</em>`:''}</span>`:''}
       ${s.added||s.deleted?`<span>${s.added?`<b>${s.added}</b> added`:''}${s.added&&s.deleted?' · ':''}${s.deleted?`<b>${s.deleted}</b> deleted`:''}</span>`:''}</span>
     <span class="bsp"></span><button class="btn sm ghost" data-ua="discard">Discard</button><button class="btn sm primary" data-ua="save">Save as Update ${updPad(u.n)}</button>`;
 }
@@ -5444,12 +5687,13 @@ function updSave(){
   if(bad.length) return bToastMsg(`Actual dates must be on or before the data date: ${bad.slice(0,6).join(', ')}${bad.length>6?'…':''}.`);
   perDialog(`Save Update ${updPad(u.n)}`,`<label class="pfl"><span>Period name</span><input id="udLab" maxlength="80" value="${esc(`Update ${updPad(u.n)} · ${fmtL(dd)}`)}"></label>
     <div class="pdg"><div><div class="sl">Data date</div><b>${fmtL(dd)}</b></div><div><div class="sl">Forecast finish</div><b>${s.fin!=null?fmtL(s.fin*DAY):'—'}</b> ${s.mv!=null?`<span class="${dCls(s.mv)}">${s.mv===0?'no change':dS(s.mv)}</span>`:''}</div>
-      <div><div class="sl">This period</div><b>${s.comp}</b> finished · <b>${s.started}</b> started</div><div><div class="sl">Programme changes</div>${s.added||s.deleted?`<b>${s.added}</b> added · <b>${s.deleted}</b> deleted`:'none added or deleted'}</div></div>
+      <div><div class="sl">This period</div><b>${s.comp}</b> finished · <b>${s.started}</b> started</div><div><div class="sl">Programme changes</div>${s.added||s.deleted?`<b>${s.added}</b> added · <b>${s.deleted}</b> deleted`:'none added or deleted'}</div>
+      ${s.cost?`<div><div class="sl">Spent this period</div><b>${moneyK(s.cost.spent)}</b></div><div><div class="sl">Cost at completion</div><b>${moneyK(s.cost.eac)}</b> ${Math.round(s.cost.dEac)?`<span class="${dCls(Math.round(s.cost.dEac))}">${s.cost.dEac>0?'+':'−'}${moneyK(Math.abs(s.cost.dEac))}</span>`:''}</div>`:''}</div>
     ${s.needs?`<p class="pwarn">${s.needs} activit${s.needs===1?'y was':'ies were'} due this period with no progress entered. ${s.needs===1?'It moves':'They move'} to the new data date.</p>`:''}
     ${newer.length?`<p class="pwarn">${esc(newer[newer.length-1].label)} was saved after the update you started from. Saving still adds this as a new period.</p>`:''}
     ${later.length&&!newer.length?`<p class="pwarn">A period with this data date or later already exists.</p>`:''}
     <label class="pfl" style="margin-top:12px"><span>Notes (optional)</span><textarea id="udNotes" rows="2" maxlength="600" placeholder="e.g. Piling restarted after the utility diversion"></textarea></label>
-    <p class="muted" style="margin:10px 0 0">The workbench writes the new live XER${st.projects.length>1?'s':''} and keeps this project’s baseline as it is. Resources, costs and other P6 data the editor doesn’t show aren’t carried into the new file.</p>`,'Save update',async d=>{
+    <p class="muted" style="margin:10px 0 0">The new live XER${st.projects.length>1?'s are':' is'} written from last period’s file${st.projects.length>1?'s':''}: progress, dates, logic, resources, costs and notes are updated, and everything else in P6 (calendars, cost accounts, roles, steps, user fields and the rest) is kept as it was. The baseline is unchanged.</p>`,'Save update',async d=>{
     const label=d.querySelector('#udLab').value.trim()||`Update ${updPad(u.n)}`, notes=d.querySelector('#udNotes').value.trim();
     setTimeout(()=>updCommit(label,notes),0); });
 }
@@ -5459,7 +5703,11 @@ async function updCommit(label,notes){
     if(PER.pid!==u.pid){ perPick(u.pid); }
     if(!PER.periods.length){ const list=await PER.store.listPeriods(u.pid); PER.periods=list.sort((a,b)=>(a.dd||0)-(b.dd||0)||(a.savedAt||0)-(b.savedAt||0)); }
     const base=await perGetFiles(u.pid,{id:u.perId,files:u.baseRefs});
-    const live=bToXer(st,B.res,'live').map(f=>{ const short=f.name.replace(/_Live\.xer$/,''), T=parseXER(f.text); return {id:uid(),name:`${short}_UP${updPad(u.n)}_${updDdTag(st.dd)}.xer`,role:'live',tables:T,info:fileInfo(T)}; });
+    const nm=n=>{ const b=n.replace(/\.xer$/i,''), m=/^(.*?)_UP\d+_[^_]*$/i.exec(b); return `${m?m[1]:b}_UP${updPad(u.n)}_${updDdTag(st.dd)}.xer`; };
+    const srcLive=u.liveRefs&&u.liveRefs.length?await perGetFiles(u.pid,{id:u.perId,files:u.liveRefs}):[];
+    const patched=srcLive.length?updPatch(st,B.res,srcLive):[], covered=new Set(st.projects.filter(p=>patched.some(f=>(f.tables.PROJECT||[]).some(r=>r.proj_short_name===p.short))).map(p=>p.short));
+    const extra=bToXer(st,B.res,'live').filter(f=>!covered.has(f.name.replace(/_Live\.xer$/,''))).map(f=>({name:f.name.replace(/_Live\.xer$/,'.xer'),tables:parseXER(f.text)}));
+    const live=patched.concat(extra).map(f=>({id:uid(),name:nm(f.name),role:'live',tables:f.tables,info:fileInfo(f.tables)}));
     const files=live.concat(base.map(f=>({...f,role:'baseline'})));
     const id=await perSavePeriod(u.pid,files,{label,notes:notes||`Updated in the workbench from ${u.perLabel}`});
     S.files=files.map(f=>({...f,period:id})); PER.loaded={pid:u.pid,id,label}; saved={id,label};

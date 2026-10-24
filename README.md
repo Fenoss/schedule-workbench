@@ -94,7 +94,9 @@ Only signed-in, approved users can call the function. Edge functions have a time
 - **Updating a live schedule in the app:** choose **Update** on a project, then **Update it here** (also on the Periods tab and the header menu).
   - Set the new data date, then enter actual start and finish, % complete and remaining durations. **Due this period** lists the activities that need statusing. **Status the rest as planned** progresses anything untouched as the last update forecast.
   - You can also change durations, logic and constraints, and add or delete activities. The CPM engine reschedules as you go, and the bar shows the finish movement against the last update and the baseline.
-  - **Save as Update NN** writes new live XERs, keeps the project's baseline, and saves them straight away as the next period. Resources, costs and other P6 data the editor doesn't show aren't carried into the new file.
+  - **Costs & notes** (or double-click a resource or cost cell) shows each activity's resource assignments (budget, actual and remaining units and costs), expenses and notebook text. **Resources** opens the resource dictionary. During an update, actuals and remaining follow each activity's progress until you change them by hand.
+  - **Save as Update NN** writes the new live XERs from last period's files: progress, dates, logic, resources, costs and notes are updated, and everything else in P6 (calendars, cost accounts, roles, steps, user fields and so on) is kept as it was. The baseline is unchanged, and it saves straight away as the next period.
+  - The editor reads P6 calendar work weeks and holidays from the XER, so rescheduling uses the real calendars.
 - **Periods tab:**
   - Create a project, load the period's XER files, then choose **Save current as period**.
   - **Import past updates** turns a batch of monthly XERs into periods against the loaded baseline.
