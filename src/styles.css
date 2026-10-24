@@ -1255,6 +1255,55 @@ button.rk-hc:hover{outline:2px solid var(--ink);outline-offset:-2px}
 .rk-cfga{position:sticky;bottom:0;background:var(--surface);padding:10px 0;border-top:1px solid var(--line)}
 .mcard.rk-cfgm{width:min(1080px,100%)}
 
+
+/* ===== Risk AI ===== */
+body.no-ai .aionly{display:none!important}
+.aibtn.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.rk-aip{z-index:21}
+.rk-aitag{font-size:9.5px;font-weight:800;letter-spacing:.05em;padding:1px 5px;border-radius:4px;margin-left:6px;vertical-align:2px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 18%,transparent),color-mix(in srgb,#9B5DE5 18%,transparent));color:var(--accentText)}
+.rk-aibar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.rk-aibar .muted{font-size:12px}
+.rk-aibtn svg{color:var(--accent)}
+.rk-aibox{border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));background:color-mix(in srgb,var(--accent) 5%,var(--surface));border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.rk-aibox.err{flex-direction:row;align-items:center;justify-content:space-between;color:var(--late)}
+.rk-aibox>.aithink{font-size:13px}
+.rk-aibh{display:flex;align-items:center;gap:8px}.rk-aibh svg{color:var(--accent)}
+.rk-aidiff{width:100%;border-collapse:collapse;font-size:13px}
+.rk-aidiff th,.rk-aidiff td{text-align:left;padding:5px 8px;border-top:1px solid var(--grid);vertical-align:top}
+.rk-aidiff thead th{border-top:0;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+.rk-aidiff tbody th{font-weight:600;color:var(--ink2);white-space:nowrap;width:1%}
+.rk-aidiff td:last-child{font-weight:600}
+.rk-aiwhy{margin:0;font-size:13px;color:var(--ink2)}ul.rk-aiwhy{padding-left:18px}
+.rk-aic{border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:4px;max-width:100%}
+.rk-aich{display:flex;align-items:baseline;gap:8px;font-size:13px}
+.rk-aid{display:flex;align-items:center;gap:8px;padding:6px 2px;border-top:1px solid var(--grid);font-size:13px;cursor:pointer}
+.rk-aid.done{opacity:.6}
+.rk-aidt{flex:1;min-width:0;display:flex;flex-direction:column}.rk-aidt .muted{font-size:12px}
+.rk-aid .num{font-size:12px;white-space:nowrap}
+.mcard.rk-idm{width:min(1040px,100%)}
+.rk-idm .mh h2,.rk-idm .mh h2 svg{display:inline-flex;align-items:center;gap:8px}.rk-idm .mh h2 svg{color:var(--accent);width:22px;height:22px}
+.rk-idm .mcard>*+*{margin-top:12px}
+.rk-idm .pfl{margin-bottom:12px}.rk-idm .pfl select{height:40px;border:1px solid var(--line);border-radius:6px;padding:0 8px;background:var(--surface);font-size:15px}
+.rk-idm .tg{font-weight:400;color:var(--ink)}
+.rk-iddrop{padding:14px}
+.rk-iddocs{display:flex;flex-wrap:wrap;gap:6px}
+.rk-iddoc{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:2px 4px 2px 10px;font-size:12.5px;font-weight:600}.rk-iddoc.bad{border-color:var(--late);color:var(--late)}.rk-iddoc .fx{width:22px;height:22px}
+.rk-idcats{display:flex;flex-wrap:wrap;gap:6px}.rk-ccb.on{background:var(--ink);color:var(--surface);border-style:solid;border-color:var(--ink)}
+.rk-idsum{margin:0;padding:10px 12px;background:var(--surface2);border-radius:6px;font-size:14px}
+.rk-idbar{display:flex;align-items:center;gap:8px}
+.rk-idl{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.rk-idc{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.rk-idc.on{border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}.rk-idc.done{opacity:.55}
+.rk-idck{padding-top:8px}.rk-idck input{width:16px;height:16px;accent-color:var(--accent)}
+.rk-idb{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.rk-idt{display:flex;align-items:center;gap:8px}
+.rk-idti{flex:1;min-width:0;height:34px;border:1px solid transparent;border-radius:5px;padding:0 6px;font-weight:700;font-size:15px;background:none}.rk-idti:hover,.rk-idti:focus{border-color:var(--line);background:var(--surface)}
+.rk-idm2{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2)}
+.rk-idm2 select{height:28px;border:1px solid var(--line);border-radius:5px;background:var(--surface);font-size:12.5px;max-width:280px}
+.rk-idw{margin:0;font-size:13.5px}
+.rk-idb details{font-size:13px}.rk-idb summary{cursor:pointer;color:var(--accentText);font-weight:600}.rk-idb details p{margin:6px 0}
+.rk-bqt td{vertical-align:middle}.rk-bqt tbody tr{cursor:default}
+.rk-bql{display:flex;flex-wrap:wrap;gap:4px}
+
 @media print{
   .top,.navs,.side,#auth,.ptoast,.btn,.plink,.pbusy,.selbar,.note,.aipanel,#userMenu,#ctxMenu,.perbar .ctl,.pmsel select,.setup{display:none!important}
   body{background:#fff} .main{display:block!important;padding:0!important} .card{box-shadow:none!important;break-inside:avoid} .dpanel,.prog,.pitem{break-inside:avoid}

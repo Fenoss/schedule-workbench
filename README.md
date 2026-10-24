@@ -128,6 +128,12 @@ Click the logo to switch between the Schedule Workbench and the Risk Workbench. 
   - Qualitative: probability × the highest impact across cost, schedule and the other dimensions, scored for inherent, current and target.
   - Quantitative: probability, a three-point cost and schedule estimate, a distribution and the schedule activities affected, with an optional post-response estimate. These are kept ready for Monte Carlo.
 - **Responses.** Each risk has a strategy, response owner, plan, trigger, fallback, contingency and tracked actions. The Responses tab lists every action with its due date and status.
+- **AI.** Everything AI suggests is shown for review first; nothing is saved until you add or apply it, and AI-made risks carry an AI tag.
+  - *Ask AI* opens a chat about the register in view and, if one is open, the schedule from the Schedule Workbench. It can look up risks, trace schedule logic and test delays. It can also draft new risks and propose changes to existing ones, which you tick and add or apply. Quick prompts cover a board summary, finding missing risks, quantifying gaps, reviewing register quality, strengthening responses and checking schedule exposure.
+  - *Identify risks* works from a brief, uploaded documents (PDF, Excel, CSV, text, XER or images), the open schedule and the existing register. It returns scored and quantified risks with responses, placed in the right register (interface risks above both projects). It links them to parent risks where they fit and flags any that look like duplicates.
+  - In the risk editor, AI can improve the wording into cause → event → effect, score the risk, estimate the probability with three-point cost and days, or suggest responses and actions.
+  - *Quantify with AI* on the Register tab estimates every live risk that doesn't have an estimate yet, calibrated against the risks that do.
+  - These features use the same AI connection as the Schedule Workbench, so a company admin's AI switch turns them off too.
 - **Exports.** Excel (register, assessment, responses and actions) and Print / PDF.
 
 The database part is `supabase/risks.sql`, which is also included at the end of `schema.sql`.

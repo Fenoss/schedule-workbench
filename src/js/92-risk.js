@@ -121,15 +121,15 @@ async function rkLoadCfg(){ let c=null; try{ if(PER.store&&PER.store.getRiskCfg)
   RK.cfg=c&&typeof c==='object'?c:null; }
 async function rkSaveCfg(cfg){ if(!PER.store||!PER.store.setRiskCfg) throw new Error('Sign in to save settings.'); await PER.store.setRiskCfg(cfg); if(PER.mode==='local'){ try{ localStorage.setItem('pacer.rkcfg',JSON.stringify(cfg)); }catch(_){} } RK.cfg=cfg; }
 function rkSubscribe(){
-  if(RK.un){ try{ RK.un(); }catch(_){} RK.un=null; } RK.risks=[]; RK.loaded=false;
+  if(RK.un){ try{ RK.un(); }catch(_){} RK.un=null; } RK.risks=[]; RK.loaded=false; RK._refs={};
   if(typeof PER==='undefined'||!PER.store||!PER.store.watchRisks){ rkRender(); return; }
   RK.un=PER.store.watchRisks(list=>{ RK.schemaOld=false; RK.loaded=true; RK.risks=list.map(r=>Object.assign({status:'open',ref:'',parentId:null,programmeId:null,projectId:null},r,{d:r.d||{}})); rkRender(); },
     e=>{ RK.loaded=true; if(/risks|schema cache|does not exist|42P01|PGRST20/i.test((e&&(e.message||e.code))||'')){ RK.schemaOld=true; rkRender(); } else perToast(perErr(e),'err'); });
   rkLoadCfg().then(()=>rkRender());
 }
-function rkNextRef(sc){ const pre=rkScopeCode(sc)+'-R'; let n=0; RK.risks.forEach(r=>{ if(String(r.ref).startsWith(pre)){ const k=parseInt(String(r.ref).slice(pre.length),10); if(k>n) n=k; } }); return pre+String(n+1).padStart(3,'0'); }
+function rkNextRef(sc){ const pre=rkScopeCode(sc)+'-R'; let n=(RK._refs||{})[pre]||0; RK.risks.forEach(r=>{ if(String(r.ref).startsWith(pre)){ const k=parseInt(String(r.ref).slice(pre.length),10); if(k>n) n=k; } }); return pre+String(n+1).padStart(3,'0'); }
 function rkSnap(r){ return {at:Date.now(),by:typeof userName==='function'?userName():'',cur:rkCurScore(r),tgt:rkQS(r,'tgt'),ev:Math.round(rkEV(r,false,'cost')),evt:Math.round(rkEV(r,false,'time')*10)/10,st:r.status}; }
-async function rkCreate(r){ r=Object.assign({status:'open',parentId:null,programmeId:null,projectId:null},r); delete r.id; delete r.createdAt; delete r.updatedAt; r.d=Object.assign({},r.d||{}); if(!r.ref) r.ref=rkNextRef(rkScopeOf(r)); if(!r.d.raised) r.d.raised=rkToday();
+async function rkCreate(r){ r=Object.assign({status:'open',parentId:null,programmeId:null,projectId:null},r); delete r.id; delete r.createdAt; delete r.updatedAt; r.d=Object.assign({},r.d||{}); if(!r.ref) r.ref=rkNextRef(rkScopeOf(r)); { const m=/^(.*-R)(\d+)$/.exec(r.ref); if(m){ RK._refs=RK._refs||{}; RK._refs[m[1]]=Math.max(RK._refs[m[1]]||0,+m[2]); } } if(!r.d.raised) r.d.raised=rkToday();
   if(!r.d.review) r.d.review=rkToday()+rkCfg().review*DAY; r.d.hist=(r.d.hist||[]).concat([rkSnap(r)]); return PER.store.createRisk(r); }
 async function rkUpdate(r,prev){ const d=Object.assign({},r.d); const s=rkSnap(r), h=(d.hist||[]).slice(-49), last=h[h.length-1];
   if(!last||last.cur!==s.cur||last.tgt!==s.tgt||last.ev!==s.ev||last.evt!==s.evt||last.st!==s.st||d._reviewed){ h.push(s); } delete d._reviewed; d.hist=h;

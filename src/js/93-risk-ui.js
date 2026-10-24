@@ -12,7 +12,7 @@ function rkApp(app,o){ o=o||{}; app=app==='risk'?'risk':'schedule'; RK.app=app; 
   document.body.classList.toggle('app-risk',app==='risk'); rkBrand();
   document.getElementById('rkNav').hidden=app!=='risk'; document.getElementById('rkScopeW').hidden=app!=='risk'; document.getElementById('riskWrap').hidden=app!=='risk';
   if(app==='risk'){ if(S.tab==='admin') setTab('port'); if(typeof aiPanel==='function'&&!document.getElementById('aiWrap').hidden) aiPanel(false); hideDrawer&&hideDrawer(); rkRender(); window.scrollTo(0,0); }
-  else { redraw(); } }
+  else { if(typeof rkAiPanel==='function'&&RKAI.open) rkAiPanel(false); redraw(); } }
 function rkAppMenu(){ const m=document.getElementById('appMenu'); const it=(k,t,d,ic)=>`<button class="appi${RK.app===k?' cur':''}" data-app="${k}" role="menuitemradio" aria-checked="${RK.app===k}"><span class="appic">${ic}</span><span><b>${t}</b><span class="muted">${d}</span></span>${RK.app===k?'<span class="appok" aria-hidden="true">✓</span>':''}</button>`;
   m.innerHTML=`<div class="cxm-h">Switch workbench</div>${it('schedule','Schedule Workbench','P6 schedules, updates, quality and reporting',(document.querySelector('.top .brand')||{})._slogo||LOGO)}${it('risk','Risk Workbench','Risk registers, interfaces and responses',RLOGO)}`; }
 function wireRk(){
@@ -66,6 +66,7 @@ function rkRender(){
   el.innerHTML=rkHeadHtml()+(RK.risks.length?body:rkEmptyHtml());
   if(aid){ const n=document.getElementById(aid); if(n&&n!==document.body){ n.focus(); try{ if(apos!=null) n.setSelectionRange(apos,apos); }catch(_){} } }
   if(Math.abs(window.scrollY-sy)>2) window.scrollTo(0,sy);
+  if(RKAI.open) rkAiCtx();
 }
 function rkHeadHtml(){ const sc=RK.scope, ed=rkCanEdit();
   const sub={over:'Exposure, hot spots and what needs attention',reg:'Every risk in this register',tree:'Parent and child risks across portfolio, programme and project',ifc:'Risks that sit between projects',resp:'Response actions and who owns them'}[RK.tab];
@@ -73,10 +74,11 @@ function rkHeadHtml(){ const sc=RK.scope, ed=rkCanEdit();
     <div class="ph-c">${sc.lv!=='project'?`<label class="tg" title="Show risks from the programme and project registers below this one"><input type="checkbox" data-rkf="roll" ${RK.roll?'checked':''}> Include lower registers</label>`:''}
       ${RK.risks.length?'<button class="btn sm ghost" data-rk="xls" title="Download this register as an Excel workbook">Excel</button><button class="btn sm ghost" data-rk="print">Print / PDF</button>':''}
       ${rkAdmin()?'<button class="btn sm ghost" data-rk="cfg" title="Columns, scoring matrix and how registers line up">Configure</button>':''}
+      <button class="btn sm aibtn aionly${RKAI.open?' on':''}" data-rk="ai" aria-expanded="${RKAI.open}" aria-controls="rkAiWrap">${AISPARK}<span>Ask AI</span></button>${ed?`<button class="btn sm aionly" data-rk="identify" title="Identify risks from the schedule, documents and a brief">${AISPARK} Identify risks</button>`:''}
       ${ed?`<button class="btn sm primary" data-rk="new">New risk</button>`:''}</div></div>`; }
 function rkEmptyHtml(){ const ed=rkCanEdit();
   return `<div class="card pempty big"><h3>Start your risk registers</h3><p class="muted">Each programme and project has its own register, and the portfolio has one above them. Risks can be escalated to a parent at a higher level, shared between projects as interface risks, and scored both qualitatively and with three-point estimates.</p>
-    <div class="prow">${ed?`<button class="btn primary" data-rk="new">Add the first risk</button>${(typeof PER!=='undefined'&&PER.mode==='supa'&&PER.site&&PER.site.samples===false)?'':'<button class="btn" data-rk="sample">Load sample risks</button>'}`:''}${rkAdmin()?'<button class="btn" data-rk="cfg">Configure registers</button>':''}</div>
+    <div class="prow">${ed?`<button class="btn primary aionly" data-rk="identify">${AISPARK} Identify risks with AI</button><button class="btn" data-rk="new">Add the first risk</button>${(typeof PER!=='undefined'&&PER.mode==='supa'&&PER.site&&PER.site.samples===false)?'':'<button class="btn" data-rk="sample">Load sample risks</button>'}`:''}${rkAdmin()?'<button class="btn" data-rk="cfg">Configure registers</button>':''}</div>
     ${ed?'':'<p class="muted">You have view-only access, so ask a contributor or admin to add risks.</p>'}</div>`; }
 function rkVis(){ return RK.risks.filter(r=>rkIn(r,RK.scope,RK.roll)); }
 
@@ -123,7 +125,8 @@ function rkChildRegs(){ const sc=RK.scope, out=[];
   if(sc.lv==='portfolio'){ out.push({sc:{lv:'portfolio'},roll:false,name:'Portfolio register',sub:'risks owned at portfolio level'}); (PER.programmes||[]).forEach(g=>out.push({sc:{lv:'programme',id:g.id},roll:true,name:g.name,sub:(n=>`Programme register and its ${n} project register${n===1?'':'s'}`)(PER.projects.filter(p=>p.programmeId===g.id).length)})); }
   else if(sc.lv==='programme'){ const g=rkProg(sc.id); out.push({sc:{lv:'programme',id:sc.id},roll:false,name:(g?g.name:'Programme')+' register',sub:'risks owned at programme level'}); PER.projects.filter(p=>p.programmeId===sc.id).forEach(p=>out.push({sc:{lv:'project',id:p.id},roll:false,name:p.name,sub:'Project register'+(p.code?' · '+p.code:'')})); }
   return out; }
-function rkTitleCell(r){ const k=rkKids(r).length, ifc=rkIsIfc(r); return `<span class="rk-tt">${r.d.type==='opp'?'<span class="rk-opp" title="Opportunity">Opp</span>':''}${esc(r.title)}</span>${k||ifc||r.parentId?`<span class="rk-tags">${r.parentId?`<span class="rk-tag up" title="Has a parent risk">↑ ${esc((rkById(r.parentId)||{}).ref||'parent')}</span>`:''}${k?`<span class="rk-tag" title="Child risks">${k} child${k===1?'':'ren'}</span>`:''}${ifc?'<span class="rk-tag ifc" title="Interface risk">Interface</span>':''}</span>`:''}`; }
+function rkTitleCell(r){ const k=rkKids(r).length, ifc=rkIsIfc(r); const ai=r.d.ai&&(r.d.ai.src||r.d.ai.assisted||r.d.ai.edited);
+  return `<span class="rk-tt">${r.d.type==='opp'?'<span class="rk-opp" title="Opportunity">Opp</span>':''}${esc(r.title)}${ai?`<span class="rk-aitag" title="${r.d.ai.src?'Identified with AI':'Updated with AI help'}">AI</span>`:''}</span>${k||ifc||r.parentId?`<span class="rk-tags">${r.parentId?`<span class="rk-tag up" title="Has a parent risk">↑ ${esc((rkById(r.parentId)||{}).ref||'parent')}</span>`:''}${k?`<span class="rk-tag" title="Child risks">${k} child${k===1?'':'ren'}</span>`:''}${ifc?'<span class="rk-tag ifc" title="Interface risk">Interface</span>':''}</span>`:''}`; }
 
 /* ---- Register ---- */
 function rkCell(r,k){ const d=r.d||{}, c=rkCfg();
@@ -201,7 +204,7 @@ function rkRegHtml(){ const V=rkVis(), c=rkCfg(), f=RK.f, cols=rkRegCols(), defs
     <label class="ctl"><span>Group</span><select data-rkf="group"><option value="">None</option>${[['scope','Register'],['cat','Category'],['owner','Owner'],['status','Status'],['parent','Parent risk']].map(([v,l])=>`<option value="${v}"${RK.group===v?' selected':''}>${l}</option>`).join('')}</select></label>
     <label class="tg"><input type="checkbox" data-rkf="ifc" ${f.ifc?'checked':''}> Interface risks only</label>
     ${RK.cell?`<span class="rk-pf">${esc(RQ_L[RK.cell.k])} P${RK.cell.p} × I${RK.cell.i}<button class="fx" data-rk="cellx" aria-label="Clear matrix filter">×</button></span>`:''}
-    <span class="sp"></span><span class="muted">${R.length} of ${V.length}</span></div>`;
+    <span class="sp"></span>${rkCanEdit()&&V.some(r=>rkLive(r)&&!(r.d.qt||{}).fromKids&&rkQt(r).cost==null&&rkQt(r).time==null)?`<button class="btn sm aionly" data-rk="bq" title="Propose three-point estimates for live risks without one">${AISPARK} Quantify with AI</button>`:''}<span class="muted">${R.length} of ${V.length}</span></div>`;
   const th=cols.map(k=>`<th class="${RCOL[k]&&RCOL[k].num?'num':''}" style="min-width:${(RCOL[k]||{w:120}).w}px"><button class="rk-sort" data-rksort="${esc(k)}">${esc(defs[k])}${RK.sort.k===k?(RK.sort.d>0?' ▲':' ▼'):''}</button></th>`).join('');
   const row=r=>`<tr data-rid="${esc(r.id)}" class="${rkLive(r)?'':'rk-dead'}">${cols.map(k=>`<td class="${RCOL[k]&&RCOL[k].num?'num':''} rk-c-${k.replace(':','_')}">${rkCell(r,k)}</td>`).join('')}</tr>`;
   let body='';
@@ -279,6 +282,7 @@ function rkClick(e){
   const t=e.target;
   if(t.closest('select,input,textarea,label.tg')) return;
   const b=t.closest('[data-rk]'); if(b){ const k=b.dataset.rk;
+    if(k==='ai'){ rkAiPanel(); return; } if(k==='identify'){ rkIdOpen(); return; } if(k==='bq'){ rkBqOpen(); return; }
     if(k==='new') rkNew({}); else if(k==='newifc') rkNew({ifc:true}); else if(k==='cfg') rkCfgOpen(); else if(k==='sample') rkSample(); else if(k==='xls') rkExport(); else if(k==='print') repPrint(rkScopeName(RK.scope)+' risk register');
     else if(k==='cellx'){ RK.cell=null; rkRender(); } else if(k==='pairx'){ RK.ifcPair=null; rkRender(); } else if(k==='signin'){ if(!document.getElementById('auth')) authStart(); } return; }
   const h=t.closest('[data-heat]'); if(h){ const [k,p,i]=h.dataset.heat.split(':'); RK.cell={k,p:+p,i:+i}; RK.f.st='live'; rkGo('reg'); return; }

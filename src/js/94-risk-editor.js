@@ -5,7 +5,7 @@ function rkOpen(r,tab,isNew){ const b=rkBlank(rkScopeOf(r)), x=rkClone(r); x.d=O
   RQ.forEach(k=>{ x.d.q[k]=Object.assign({p:0,i:{}},x.d.q[k]||{}); }); x.d.qt.cost=Object.assign({min:'',ml:'',max:''},x.d.qt.cost||{}); x.d.qt.time=Object.assign({min:'',ml:'',max:''},x.d.qt.time||{});
   x.d.qt.post=Object.assign({p:'',cost:{min:'',ml:'',max:''},time:{min:'',ml:'',max:''}},x.d.qt.post||{}); x.d.actions=(x.d.actions||[]).map(a=>Object.assign({id:'a'+Math.random().toString(36).slice(2,8),t:'',owner:'',due:null,status:'todo',cost:''},a));
   RK.ed={r:x,orig:JSON.stringify(x),isNew:!!isNew||!r.id}; RK.edTab=tab||'det'; rkEdRender(true); }
-function rkEdClose(force){ const sh=document.getElementById('rkSheet'); if(!sh) return; RK.ed=null; sh.classList.remove('in'); const sc=document.getElementById('rkScrim'); if(sc) sc.remove(); setTimeout(()=>{ if(!RK.ed) sh.remove(); },200); }
+function rkEdClose(force){ const sh=document.getElementById('rkSheet'); if(!sh) return; if(RK.ed&&RK.ed.ai&&RK.ed.ai.ctl) try{ RK.ed.ai.ctl.abort(); }catch(_){} RK.ed=null; sh.classList.remove('in'); const sc=document.getElementById('rkScrim'); if(sc) sc.remove(); setTimeout(()=>{ if(!RK.ed) sh.remove(); },200); }
 const rkDirty=()=>RK.ed&&JSON.stringify(RK.ed.r)!==RK.ed.orig;
 function rkEdRender(first){
   let sh=document.getElementById('rkSheet');
@@ -35,7 +35,7 @@ function rkRegOpts(){ const o=[['portfolio:','Portfolio register']]; (PER.progra
 function rkEdDet(r){ const c=rkCfg(), d=r.d, owners=[...new Set(RK.risks.flatMap(x=>[x.d.owner,(x.d.resp||{}).owner,...rkActs(x).map(a=>a.owner)]).filter(Boolean))].sort();
   const cats=[['','Choose…']].concat([...new Set(c.cats.concat(d.cat?[d.cat]:[]))].map(x=>[x,x]));
   const fv=f=>(d.f||{})[f.id];
-  return `<datalist id="rkOwners">${owners.map(o=>`<option value="${esc(o)}">`).join('')}</datalist>
+  return `<div class="rk-aibar">${rkEdAiBtn('word')}</div>${rkEdAiBox('word')}<datalist id="rkOwners">${owners.map(o=>`<option value="${esc(o)}">`).join('')}</datalist>
     ${rkIn_('title',r.title,{l:'Risk title',req:1,ph:'Short name, e.g. Late possession for depot track connection'})}
     <div class="rk-g4">${rkSel_('d.type',d.type,[['threat','Threat'],['opp','Opportunity']],{l:'Type'})}${rkSel_('status',r.status,Object.entries(RST),{l:'Status'})}${rkSel_('d.cat',d.cat,cats,{l:'Category'})}${rkIn_('d.owner',d.owner,{l:'Risk owner',list:'rkOwners',ph:'Name or role'})}</div>
     ${rkSel_('_reg',r.level+':'+(r.level==='programme'?r.programmeId:r.level==='project'?r.projectId:''),rkRegOpts(),{l:'Register',hint:'Which register owns this risk. Move it up or down as it is escalated or delegated.'})}
@@ -54,14 +54,14 @@ function rkEdAss(r){ const c=rkCfg(), q=r.d.q, prev=[0].concat(c.prob.map(x=>x.m
     c.dims.map(dm=>`<tr><th>${esc(dm.l)} impact</th>${RQ.map(k=>`<td><select data-e="d.q.${k}.i.${dm.id}" data-t="number" aria-label="${RQ_L[k]} ${esc(dm.l)} impact">${rkImpOpts(dm).map(([v,l])=>`<option value="${v}"${+((q[k].i||{})[dm.id]||0)===v?' selected':''}>${esc(l)}</option>`).join('')}</select></td>`).join('')}</tr>`).join('')+
     `<tr class="rk-sc"><th>Score</th>${RQ.map(k=>`<td>${rkChip(rkQS(r,k))}</td>`).join('')}</tr>`;
   const qt=rkQt(r), sug=qt.p||qt.cost!=null||qt.time!=null;
-  return `<p class="muted">Score each stage on the ${c.prob.length}×5 matrix. The score is probability × the highest impact; the rating bands are set by your admin.</p>
+  return `<div class="rk-aibar">${rkEdAiBtn('score')}</div>${rkEdAiBox('score')}<p class="muted">Score each stage on the ${c.prob.length}×5 matrix. The score is probability × the highest impact; the rating bands are set by your admin.</p>
     <div class="rk-ass"><div class="ptw rk-assw"><table class="ptab rk-asst"><thead><tr><th></th>${RQ.map(k=>`<th title="${esc(RQ_S[k])}">${RQ_L[k]}<div class="muted rk-ths">${esc(RQ_S[k])}</div></th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>
     <div class="rk-assm">${rkHeat([],'cur',{sm:1,mark})}<div class="rk-mkl"><span><b class="rk-mk pre">I</b> Inherent</span><span><b class="rk-mk cur">C</b> Current</span><span><b class="rk-mk tgt">T</b> Target</span></div></div></div>
     <div class="adm-acts">${sug?'<button type="button" class="btn sm" data-rke="suggest" title="Set the current probability and cost and schedule impacts from the three-point estimate">Suggest current from estimate</button>':''}<button type="button" class="btn sm ghost" data-rke="copyq">Copy inherent to current</button></div>`; }
 function rkEdQt(r){ const q=r.d.qt, n=rkKids(r).filter(rkLive).length, c=rkCfg(), cur=c.cur||'$';
   const tri=(p,l,u)=>`<div class="rk-tri"><span class="rk-tril">${l}</span>${['min','ml','max'].map(k=>`<label class="pfl"><span>${({min:'Minimum',ml:'Most likely',max:'Maximum'})[k]}${u?' ('+u+')':''}</span><input data-e="${p}.${k}" type="number" data-t="number" step="any" value="${esc(rkGet(r,p+'.'+k)??'')}"></label>`).join('')}</div>`;
   const ev=(post)=>`<div id="rkEv${post?1:0}">${rkEvHtml(r,post)}</div>`;
-  return `${n?`<label class="tg rk-roll"><input type="checkbox" data-e="d.qt.fromKids" data-t="bool" ${q.fromKids?'checked':''}> Roll up exposure from its ${n} live child risk${n===1?'':'s'} (${rkMoney(rkKids(r).filter(rkLive).reduce((s,k)=>s+rkEV(k,false,'cost'),0))}, ${rkDays(rkKids(r).filter(rkLive).reduce((s,k)=>s+rkEV(k,false,'time'),0))})</label>`:''}
+  return `<div class="rk-aibar">${rkEdAiBtn('quant')}<span class="muted">${rkAiSchedOpen()?'Uses the open schedule: '+esc(rkAiSchedName()):'Open the project’s schedule in the Schedule Workbench to let AI use its activities.'}</span></div>${rkEdAiBox('quant')}${n?`<label class="tg rk-roll"><input type="checkbox" data-e="d.qt.fromKids" data-t="bool" ${q.fromKids?'checked':''}> Roll up exposure from its ${n} live child risk${n===1?'':'s'} (${rkMoney(rkKids(r).filter(rkLive).reduce((s,k)=>s+rkEV(k,false,'cost'),0))}, ${rkDays(rkKids(r).filter(rkLive).reduce((s,k)=>s+rkEV(k,false,'time'),0))})</label>`:''}
     ${q.fromKids&&n?'<p class="muted">This parent takes its exposure from its children, so totals count each estimate once. Untick to give it an estimate of its own.</p>':`
     <div class="rk-g3">${rkIn_('d.qt.p',q.p,{l:'Probability of occurring (%)',t:'number',min:0,step:'any'})}${rkSel_('d.qt.dist',q.dist||'tri',Object.entries(RDIST),{l:'Distribution',hint:'Used by Monte Carlo'})}${rkIn_('d.qt.acts',q.acts,{l:'Schedule activities affected',ph:'e.g. DP150, DP160',hint:'Activity IDs, to place the delay in the schedule later'})}</div>
     <h4 class="rk-h4">Current estimate (if it happens)</h4>${tri('d.qt.cost','Cost',cur)}${tri('d.qt.time','Schedule','days')}${ev(false)}
@@ -72,7 +72,7 @@ function rkEvHtml(r,post){ const x=rkQt(r,post); return `<div class="rk-evs"><di
 function rkEdRendered(){ const r=RK.ed&&RK.ed.r; if(!r) return; [0,1].forEach(i=>{ const el=document.getElementById('rkEv'+i); if(el) el.innerHTML=rkEvHtml(r,!!i); }); }
 function rkEdResp(r){ const p=r.d.resp, S=RSTRAT[r.d.type==='opp'?'opp':'threat'];
   const hint={avoid:'Change the plan so the risk can’t happen',reduce:'Lower the probability or impact',transfer:'Pass it to a party better placed to manage it (contract, insurance)',accept:'Take it on, with contingency and a fallback',exploit:'Make sure the opportunity happens',enhance:'Raise its probability or benefit',share:'Partner with a party who can help realise it'}[p.strat]||'';
-  return `<div class="pfl"><span>Response strategy</span><div class="sg rk-strat" role="group" aria-label="Response strategy">${S.map(([k,l])=>`<button type="button" data-rkstrat="${k}" class="${p.strat===k?'on':''}">${l}</button>`).join('')}</div>${hint?`<small class="muted">${hint}</small>`:''}</div>
+  return `<div class="rk-aibar">${rkEdAiBtn('resp')}</div>${rkEdAiBox('resp')}<div class="pfl"><span>Response strategy</span><div class="sg rk-strat" role="group" aria-label="Response strategy">${S.map(([k,l])=>`<button type="button" data-rkstrat="${k}" class="${p.strat===k?'on':''}">${l}</button>`).join('')}</div>${hint?`<small class="muted">${hint}</small>`:''}</div>
     <div class="rk-g3">${rkIn_('d.resp.owner',p.owner,{l:'Response owner',list:'rkOwners'})}${rkIn_('d.resp.cont',p.cont,{l:`Contingency held (${rkCfg().cur||'$'})`,t:'number',step:'any'})}${rkIn_('d.resp.contd',p.contd,{l:'Schedule contingency (days)',t:'number',step:'any'})}</div>
     ${rkIn_('d.resp.plan',p.plan,{l:'Response plan',ta:1,rows:3})}
     <div class="rk-g2">${rkIn_('d.resp.trigger',p.trigger,{l:'Trigger / early warning',ta:1,rows:2})}${rkIn_('d.resp.fallback',p.fallback,{l:'Fallback plan',ta:1,rows:2,hint:'What you do if it happens anyway'})}</div>
@@ -112,6 +112,7 @@ async function rkEdClick(e){ const t=e.target, E=RK.ed; if(!E) return; const r=E
   const st=t.closest('[data-rkstrat]'); if(st){ r.d.resp.strat=r.d.resp.strat===st.dataset.rkstrat?'':st.dataset.rkstrat; rkEdRender(); return; }
   const ad=t.closest('[data-rkadel]'); if(ad){ r.d.actions.splice(+ad.dataset.rkadel,1); rkEdRender(); return; }
   const go=t.closest('[data-rkgo]'); if(go){ const x=rkById(go.dataset.rkgo); if(x){ if(rkDirty()&&!confirmIn(go,'Unsaved changes — click again to leave')) return; rkOpen(x,'links'); } return; }
+  const ai=t.closest('[data-rkedai]'); if(ai){ const m=ai.dataset.rkedai; if(m==='stop'){ if(E.ai&&E.ai.ctl) E.ai.ctl.abort(); } else if(m==='x'){ E.ai=null; rkEdRender(); } else if(m==='apply') rkEdAiApply(false); else if(m==='applyq') rkEdAiApply(true); else rkEdAiRun(m); return; }
   const b=t.closest('[data-rke]'); if(!b) return; const k=b.dataset.rke;
   if(k==='close'){ if(b.classList.contains('fx')) rkEdAsk(); else if(!rkDirty()||confirmIn(b,'Discard changes?')) rkEdClose(); return; }
   if(k==='addact'){ r.d.actions.push({id:'a'+Math.random().toString(36).slice(2,8),t:'',owner:r.d.resp.owner||r.d.owner||'',due:rkToday()+14*DAY,status:'todo',cost:''}); rkEdRender(); const ins=document.querySelectorAll('#rkSheet [data-ai$=".t"]'); if(ins.length) ins[ins.length-1].focus(); return; }
